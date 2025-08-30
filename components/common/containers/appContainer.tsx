@@ -1,5 +1,5 @@
 "use client";
-import React, { JSX, ReactNode } from "react";
+import React, { JSX} from "react";
 import Navbar from "@/components/layout/navbar/navbar";
 
 function AppContainer({

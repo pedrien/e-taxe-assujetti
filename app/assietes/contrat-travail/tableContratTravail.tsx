@@ -94,8 +94,12 @@ const TableContraTravail = () => {
                   <th>#</th>
                   <th>Agent</th>
                   <th>Personne morale</th>
-                  <th>Montant de l'indemnité</th>
-                  <th>Date de l'indemnité</th>
+                  <th>
+                    {"Montant de l'indemnité"}
+                  </th>
+                  <th>
+                    {"Date de l'indemnité"}
+                  </th>
                   <th>Statut</th>
                   <th>Action</th>
                 </tr>

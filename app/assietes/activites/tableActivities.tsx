@@ -91,7 +91,9 @@ const TableActivities = () => {
               <thead>
                 <tr>
                   <th>#</th>
-                  <th>Type d'activité</th>
+                  <th>
+                    {"Type d'activité"}
+                  </th>
                   <th>Dimension</th>
                   <th>Activité principale</th>
                   <th>Nature</th>

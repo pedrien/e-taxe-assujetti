@@ -96,7 +96,9 @@ const TableContratBail = () => {
                   <th>Bailleur</th>
                   <th>Locataire</th>
                   <th>Loyer</th>
-                  <th>Date d'entrée</th>
+                  <th>
+                    {"Date d'entrée"}
+                  </th>
                   <th>Date de sortie</th>
                   <th>Action</th>
                 </tr>

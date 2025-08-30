@@ -1,10 +1,8 @@
 import React from "react";
-import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Plus, ArrowRight } from "lucide-react";
 import TableImmobiliers from "./tableImmobiliers";
-import { Select } from "@/components/ui/select";
+
 
 const BlockDash = () => {
   return (
