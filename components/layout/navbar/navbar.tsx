@@ -41,7 +41,7 @@ const Navbar = () => {
               </li>
               <li className="relative group">
                 <Link
-                  href={"/"}
+                  href={"#"}
                   className="py-[8px] px-[14px] rounded-full flex text-white duration-300 font-medium text-sm opacity-90 items-center gap-1 hover:opacity-100"
                 >
                   Assiètes
