@@ -29,11 +29,11 @@ const Navbar = () => {
             </Link>
           </div>
           <div className="block-links">
-            <ul className="flex items-center gap-2 rounded-full bg-[#ffffff0a] p-[5px] mt-[10px] mb-[8px]">
+            <ul className="flex items-center gap-2 rounded-full bg-[#ffffff0f] p-[5px] mt-[10px] mb-[8px]">
               <li className="relative">
                 <Link
                   href={"/"}
-                  className="py-[8px] px-[14px] bg-[#30a8e033] rounded-full flex text-primaryColor relative duration-300 font-medium text-sm opacity-90 items-center gap-1 hover:opacity-100"
+                  className="py-[8px] px-[14px] bg-primaryColor rounded-full flex text-white relative duration-300 font-medium text-sm opacity-90 items-center gap-1 hover:opacity-100"
                 >
                   Dashboard
                   

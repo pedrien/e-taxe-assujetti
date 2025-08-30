@@ -41,7 +41,7 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
-  --color-blueDarken: #07192b;
+  --color-blueDarken: #082440;
   --color-bgFond:#f5f7f9;
   --color-bgGray: var(--bgGray);
   --color-bgCard: #fff;
@@ -50,6 +50,7 @@
   --color-colorMuted: var(--colorMuted);
   --color-borderInput: var(--borderInput);
   --color-borderTr: var(--borderTr);
+  /* #113151 */
 }
 
 :root {
