@@ -17,7 +17,7 @@ const Navbar = () => {
   const { user, payerId, logout } = useNextAuth();
 
   return (
-    <div className="nav bg-blueDarken border-b border-[#ffffff19] sticky top-0 z-50">
+    <div className="nav bg-blueDarken  sticky top-0 z-50">
       <div className="barreEtat absolute top-0 flex justify-center w-full">
         <div className="contentBarre w-[50%] flex">
           <div className="barre w-[Calc(100%/3)] h-[2px] bg-[#007ef9]"></div>
@@ -25,7 +25,7 @@ const Navbar = () => {
             <div className="barre w-[Calc(100%/3)] h-[2px] bg-[#d40212]"></div>
         </div>
       </div>
-      <div className="container-fluid px-3 lg:px-3 2xl:px-6">
+      <div className="container-fluid px-3 lg:px-3 2xl:px-6 max-w-[1600px] mx-auto">
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center lg:gap-14">
             <Link href={"/"}>
@@ -40,14 +40,14 @@ const Navbar = () => {
             </Link>
           </div>
           <div className="block-links">
-            <ul className="flex items-center gap-2 rounded-full bg-[#ffffff0f] p-[5px] mt-[10px] mb-[8px]">
+            <ul className="flex items-center gap-2 rounded-full">
               <li className="relative">
                 <Link
                   href={"/"}
-                  className="py-[8px] px-[14px] bg-primaryColor rounded-full flex text-white relative duration-300 font-medium text-sm opacity-90 items-center gap-1 hover:opacity-100"
+                  className="py-[22px] px-[18px] rounded-full flex text-primaryColor relative duration-300 font-medium text-sm opacity-90 items-center gap-1 hover:opacity-100"
                 >
                   Dashboard
-                  
+                  <div className="line absolute w-full h-1 bg-primaryColor rounded-2xl left-0 bottom-0"></div>
                 </Link>
               </li>
               <li className="relative group">
