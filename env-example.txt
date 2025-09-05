@@ -1,0 +1,11 @@
+# Configuration NextAuth + Keycloak
+# Copiez ce contenu dans votre fichier .env.local
+
+NEXTAUTH_SECRET=1xYY4tCL8scMZJhy7kcgfUwzq9pj2fG4
+NEXTAUTH_URL=http://localhost:3000
+KEYCLOAK_ISSUER=https://auth.etaxrdc.com/realms/etax-systems
+KEYCLOAK_CLIENT_ID=etaxe-client
+KEYCLOAK_CLIENT_SECRET=your-client-secret-here
+KEYCLOAK_PUBLIC_KEY=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEApp1uKU3a41jRXZmWyWRIIQrIzhBjQmtGSpbpzEpSzcIhwBA6pEQm2z1emr+ytaEvdPx3PxR3rlB59ieNKbeaeTmY1RIF5/0GVbowDBBGQDk3izM6ekPx9hPhnljvYLgiFchdjijb2ZThJmFh7Z3UB5CfCJ41TaoWd63kKLoHB30LHUliQw6yUiytIy/b3URDwBIZeIprkcyQTFXobOP3Kob8o8ti8ZJg/p5rCBb/RoF/HXiBch/CWGASq8e2/7sAzHnIeMzKtkJwnCfkiNBf6ykyW7i8EhM7dhb6MkKZKD0eOpYPiXPZyFWPBsTrCNcK57Ymb1XFckaryx+basnPvQIDAQAB
+
+# IMPORTANT: Remplissez KEYCLOAK_CLIENT_SECRET avec la vraie valeur depuis Keycloak

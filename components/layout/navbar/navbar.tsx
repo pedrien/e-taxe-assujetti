@@ -1,10 +1,21 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ChevronDown } from "lucide-react";
-import { Bell, Search, Sun, ArrowDown } from "lucide-react";
+import { Bell, Search, Sun, ArrowDown, LogOut } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
+import { useNextAuth } from "@/app/contexts/auth/useNextAuth";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const Navbar = () => {
+  const { user, payerId, logout } = useNextAuth();
+
   return (
     <div className="nav bg-blueDarken border-b border-[#ffffff19] sticky top-0 z-50">
       <div className="barreEtat absolute top-0 flex justify-center w-full">
@@ -130,18 +141,40 @@ const Navbar = () => {
             >
               <Bell size={22}></Bell>
             </Link>
-            <div className="block-avatar flex items-center gap-1 p-[5px] bg-[#ffffff1c] text-white rounded-full">
-              <Avatar className="w-[32px] h-[32px]">
-                <AvatarImage
-                  src="https://github.com/shadcn.png"
-                  alt="@shadcn"
-                />
-                <AvatarFallback className="bg-bgCard text-colorTitle text-sm font-medium">
-                  CN
-                </AvatarFallback>
-              </Avatar>
-              <ChevronDown size={22} />
-            </div>
+            <DropdownMenu>
+              <DropdownMenuTrigger className="block-avatar flex items-center gap-1 p-[5px] bg-[#ffffff1c] text-white rounded-full hover:bg-[#ffffff2c] transition-colors">
+                <Avatar className="w-[32px] h-[32px]">
+                  <AvatarImage
+                    src="https://github.com/shadcn.png"
+                    alt={user?.name || "User"}
+                  />
+                  <AvatarFallback className="bg-bgCard text-colorTitle text-sm font-medium">
+                    {user?.name ? user.name.substring(0, 2).toUpperCase() : "U"}
+                  </AvatarFallback>
+                </Avatar>
+                <ChevronDown size={22} />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuLabel>
+                  <div className="flex flex-col space-y-1">
+                    <p className="text-sm font-medium leading-none">
+                      {user?.name || "Utilisateur"}
+                    </p>
+                    <p className="text-xs leading-none text-muted-foreground">
+                      {user?.email}
+                    </p>
+                    <p className="text-xs leading-none text-muted-foreground">
+                      Payer ID: {payerId}
+                    </p>
+                  </div>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={logout} className="cursor-pointer">
+                  <LogOut className="mr-2 h-4 w-4" />
+                  <span>Se déconnecter</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
       </div>
