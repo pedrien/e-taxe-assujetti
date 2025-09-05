@@ -18,10 +18,10 @@ const BlockDash = () => {
     <>
       <div className="banner-home lg:pt-[60px] lg:pb-[150px] bg-blueDarken">
         <div className="container-fluid px-3 lg:px-3 2xl:px-6 max-w-[1600px] mx-auto">
-          <h1 className="text-white lg:text-[32px] font-medium">
+          <h1 className="text-white lg:text-[34px] font-medium">
             Salut, Pedrien !
           </h1>
-          <p className="text-white opacity-80 text-sm">
+          <p className="text-white opacity-80 text-sm lg:text-[16px]">
             Lorem, ipsum dolor sit amet consectetur adipisicing elit. Quo illo
             velit fuga.
           </p>
