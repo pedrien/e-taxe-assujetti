@@ -10,7 +10,7 @@ const CardCompte = () => {
         <h2 className="font-semibold text-colorTitle text-start">
           Montant dûs
         </h2>
-        <Button className="bg-[#2c9bd029] text-primaryColor text-xs h-auto py-2 shadow-none cursor-pointer hover:bg-primaryColor hover:text-white rounded-lg">
+        <Button className="bg-bgFond text-colorTitle text-xs h-auto py-2 shadow-none cursor-pointer  rounded-lg">
           Payer
         </Button>
       </div>

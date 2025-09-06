@@ -14,7 +14,7 @@ const Navbar = () => {
             <div className="barre w-[Calc(100%/3)] h-[2px] bg-[#d40212]"></div>
         </div>
       </div>
-      <div className="container-fluid px-3 lg:px-3 2xl:px-6 max-w-[1600px] mx-auto">
+      <div className="container-fluid px-3 lg:px-6 xl:px-6 max-w-[1600px] mx-auto">
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center lg:gap-14">
             <Link href={"/"}>
@@ -33,7 +33,7 @@ const Navbar = () => {
               <li className="relative">
                 <Link
                   href={"/"}
-                  className="py-[22px] px-[18px] rounded-full flex text-primaryColor relative duration-300 font-medium text-sm opacity-90 items-center gap-1 hover:opacity-100"
+                  className="py-[22px] px-[18px] rounded-full flex text-white relative duration-300 font-medium text-sm opacity-90 items-center gap-1 hover:opacity-100"
                 >
                   Dashboard
                   <div className="line absolute w-full h-1 bg-primaryColor rounded-2xl left-0 bottom-0"></div>
@@ -112,7 +112,7 @@ const Navbar = () => {
           </div>
           <div className="flex justify-end items-center lg:gap-4">
             <div className="toggle-theme cursor-pointer">
-              <div className="content-toggle-theme w-[40px] bg-[#ffffff1c] rounded-full h-[22px] flex items-center rounde-full">
+              <div className="content-toggle-theme w-[50px] bg-[#ffffff1c] rounded-full p-[4px] flex items-center rounde-full">
                 <div className="bubble-icon rounded-full bg-white w-[18px] h-[18px] flex items-center justify-center">
                   <Sun size={14} />
                 </div>

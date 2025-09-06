@@ -16,13 +16,13 @@ const BlockDash = () => {
             <div className="flex justify-center">
               <ul className="bg-bgCard p-[5px] rounded-full flex">
                 <li>
-                  <Link href={"#"} className="inline-flex text-sm py-[8px] px-[12px] text- font-medium bg-bgFond rounded-full">Mes immobiliers</Link>
+                  <Link href={"/assietes/immobiliers"} className="inline-flex text-sm py-[8px] px-[12px] text-white font-medium bg-[#07192b] rounded-full">Mes immobiliers</Link>
                 </li>
                 <li>
-                  <Link href={"#"} className="inline-flex text-sm py-[8px] px-[12px] text-colorMuted">Mes unités locatives</Link>
+                  <Link href={"/assietes/immobiliers/unites-locatives"} className="inline-flex text-sm py-[8px] px-[12px] text-colorMuted hover:text-colorTitle">Mes unités locatives</Link>
                 </li>
                 <li>
-                  <Link href={"#"} className="inline-flex text-sm py-[8px] px-[12px] text-colorMuted">Mes contrats de bails</Link>
+                  <Link href={"#"} className="inline-flex text-sm py-[8px] px-[12px] text-colorMuted hover:text-colorTitle">Mes contrats de bails</Link>
                 </li>
               </ul>
             </div>
