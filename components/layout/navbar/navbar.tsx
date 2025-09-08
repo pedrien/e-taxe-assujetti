@@ -3,6 +3,7 @@ import { ChevronDown } from "lucide-react";
 import { Bell, Search, Sun, ArrowDown, LogOut } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
+<<<<<<< HEAD
 import { useNextAuth } from "@/app/contexts/auth/useNextAuth";
 import {
   DropdownMenu,
@@ -16,8 +17,27 @@ import {
 const Navbar = () => {
   const { user, payerId, logout } = useNextAuth();
 
+=======
+import { useEffect, useState } from "react";
+
+const Navbar = () => {
+  const [scrolled, setScrolled] = useState(false);
+  useEffect(() => {
+    const handleScroll = () => {
+      const offset = window.scrollY;
+      setScrolled(offset > 40); // Active à partir de 50px
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+>>>>>>> origin/UI
   return (
-    <div className="nav bg-blueDarken  sticky top-0 z-50">
+    <div className={`nav ${
+      scrolled
+        ? "sticky top-0  backdrop-blur-[8px] bg-blueDarken/90"
+        : "bg-blueDarken relative"
+    } z-50`}>
       <div className="barreEtat absolute top-0 flex justify-center w-full">
         <div className="contentBarre w-[50%] flex">
           <div className="barre w-[Calc(100%/3)] h-[2px] bg-[#007ef9]"></div>
@@ -25,7 +45,7 @@ const Navbar = () => {
             <div className="barre w-[Calc(100%/3)] h-[2px] bg-[#d40212]"></div>
         </div>
       </div>
-      <div className="container-fluid px-3 lg:px-3 2xl:px-6 max-w-[1600px] mx-auto">
+      <div className="container-fluid px-3 lg:px-6 xl:px-6 max-w-[1600px] mx-auto">
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center lg:gap-14">
             <Link href={"/"}>
@@ -44,10 +64,10 @@ const Navbar = () => {
               <li className="relative">
                 <Link
                   href={"/"}
-                  className="py-[22px] px-[18px] rounded-full flex text-primaryColor relative duration-300 font-medium text-sm opacity-90 items-center gap-1 hover:opacity-100"
+                  className="py-[22px] px-[18px] rounded-full flex text-white relative duration-300 font-medium text-sm opacity-90 items-center gap-1 hover:opacity-100"
                 >
                   Dashboard
-                  <div className="line absolute w-full h-1 bg-primaryColor rounded-2xl left-0 bottom-0"></div>
+                  <div className="line absolute w-1/2 h-1 bg-primaryColor rounded-2xl left-1/2 -translate-x-1/2 bottom-0"></div>
                 </Link>
               </li>
               <li className="relative group">
@@ -58,7 +78,7 @@ const Navbar = () => {
                   Assiètes
                   <ArrowDown size={16}></ArrowDown>
                 </Link>
-                <div className="drop-block absolute top-[100%] bg-bgCard left-0 w-[220px] p-[18px] rounded-[12px] opacity-0 duration-300 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto">
+                <div className="drop-block shadow-[var(--boxShadowCard)!important] absolute top-[100%] bg-bgCard left-0 w-[220px] p-[18px] rounded-[12px] opacity-0 duration-300 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto">
                   <ul className="flex flex-col gap-2">
                     <li>
                       <Link
@@ -81,17 +101,10 @@ const Navbar = () => {
                         href={"/assietes/activites"}
                         className="text-sm text-colorTitle font-medium hover:text-primaryColor duration-300"
                       >
-                        Activités commerciales
+                        Activités économiques
                       </Link>
                     </li>
-                    <li>
-                      <Link
-                        href={"/assietes/contrat-bail"}
-                        className="text-sm text-colorTitle font-medium hover:text-primaryColor duration-300"
-                      >
-                        Contrats de bail
-                      </Link>
-                    </li>
+                   
                     <li>
                       <Link
                         href={"/assietes/contrat-travail"}
@@ -123,7 +136,7 @@ const Navbar = () => {
           </div>
           <div className="flex justify-end items-center lg:gap-4">
             <div className="toggle-theme cursor-pointer">
-              <div className="content-toggle-theme w-[40px] bg-[#ffffff1c] rounded-full h-[22px] flex items-center rounde-full">
+              <div className="content-toggle-theme w-[50px] bg-[#ffffff2a] rounded-full p-[4px] flex items-center rounde-full">
                 <div className="bubble-icon rounded-full bg-white w-[18px] h-[18px] flex items-center justify-center">
                   <Sun size={14} />
                 </div>
@@ -141,6 +154,7 @@ const Navbar = () => {
             >
               <Bell size={22}></Bell>
             </Link>
+<<<<<<< HEAD
             <DropdownMenu>
               <DropdownMenuTrigger className="block-avatar flex items-center gap-1 p-[5px] bg-[#ffffff1c] text-white rounded-full hover:bg-[#ffffff2c] transition-colors">
                 <Avatar className="w-[32px] h-[32px]">
@@ -175,6 +189,20 @@ const Navbar = () => {
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
+=======
+            <div className="block-avatar flex items-center gap-1 p-[5px] bg-[#ffffff2a] text-white rounded-full">
+              <Avatar className="w-[32px] h-[32px]">
+                <AvatarImage
+                  src="https://github.com/shadcn.png"
+                  alt="@shadcn"
+                />
+                <AvatarFallback className="bg-bgCard text-colorTitle text-sm font-medium">
+                  CN
+                </AvatarFallback>
+              </Avatar>
+              <ChevronDown size={22} />
+            </div>
+>>>>>>> origin/UI
           </div>
         </div>
       </div>

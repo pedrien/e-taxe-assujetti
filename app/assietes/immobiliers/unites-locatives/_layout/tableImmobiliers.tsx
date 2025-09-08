@@ -90,7 +90,7 @@ const TableImmobiliers = () => {
       return (
         <Button
           onClick={() => handleAppurer(tabKey)}
-          className="bg-primaryColor hover:bg-primaryColor/90 text-white text-xs h-auto py-2 px-4"
+          className="bg-primaryColor hover:bg-primaryColor/90 rounded-lg text-white text-xs h-auto py-2 px-4"
         >
           Appurer ({checkedItems[tabKey].length})
         </Button>
@@ -113,7 +113,7 @@ const TableImmobiliers = () => {
         allIds.length > 0 && checkedItems[tabKey].length === allIds.length;
       return (
         <Checkbox
-          className="shadow-none data-[state=checked]:bg-primaryColor data-[state=checked]:border-primaryColor"
+          className="shadow-none data-[state=checked]:bg-[#494be3] data-[state=checked]:border-[#494be3]"
           checked={allSelected}
           onCheckedChange={(checked) =>
             handleSelectAll(tabKey, allIds, checked as boolean)
@@ -124,7 +124,7 @@ const TableImmobiliers = () => {
     const itemId = itemIdsOrOne as string;
     return (
       <Checkbox
-        className="shadow-none data-[state=checked]:bg-primaryColor data-[state=checked]:border-primaryColor"
+        className="shadow-none data-[state=checked]:bg-[#494be3] data-[state=checked]:border-[#494be3]"
         checked={checkedItems[tabKey].includes(itemId)}
         onCheckedChange={(checked) =>
           handleCheckboxChange(tabKey, itemId, checked as boolean)
@@ -222,7 +222,7 @@ const TableImmobiliers = () => {
               <TabsList className="flex flex-col w-full h-auto p-0 lg:bg-transparent lg:items-start gap-2">
                 <TabsTrigger
                   value="ident"
-                  className="w-full justify-start data-[state=active]:bg-[#2d9dd129] data-[state=active]:text-[#2d9dd1] data-[state=active]:shadow-none text-colorMuted hover:text-colorTitle cursor-pointer"
+                  className="w-full justify-start data-[state=active]:bg-[#494be314] data-[state=active]:text-[#494be3] data-[state=active]:shadow-none text-colorMuted hover:text-colorTitle cursor-pointer"
                 >
                   <div className="flex items-center justify-between w-full">
                     Indetifiés
@@ -231,7 +231,7 @@ const TableImmobiliers = () => {
                 </TabsTrigger>
                 <TabsTrigger
                   value="decl"
-                  className="w-full justify-start data-[state=active]:bg-[#2d9dd129] data-[state=active]:text-[#2d9dd1] data-[state=active]:shadow-none text-colorMuted hover:text-colorTitle cursor-pointer"
+                  className="w-full justify-start data-[state=active]:bg-[#494be314] data-[state=active]:text-[#494be3] data-[state=active]:shadow-none text-colorMuted hover:text-colorTitle cursor-pointer"
                 >
                   <div className="flex items-center justify-between w-full">
                     Declarés
@@ -240,7 +240,7 @@ const TableImmobiliers = () => {
                 </TabsTrigger>
                 <TabsTrigger
                   value="pay"
-                  className="w-full justify-start data-[state=active]:bg-[#2d9dd129] data-[state=active]:text-[#2d9dd1] data-[state=active]:shadow-none text-colorMuted hover:text-colorTitle cursor-pointer"
+                  className="w-full justify-start data-[state=active]:bg-[#494be314] data-[state=active]:text-[#494be3] data-[state=active]:shadow-none text-colorMuted hover:text-colorTitle cursor-pointer"
                 >
                   <div className="flex items-center justify-between w-full">
                     Payés
@@ -249,7 +249,7 @@ const TableImmobiliers = () => {
                 </TabsTrigger>
                 <TabsTrigger
                   value="app"
-                  className="w-full justify-start data-[state=active]:bg-[#2d9dd129] data-[state=active]:text-[#2d9dd1] data-[state=active]:shadow-none text-colorMuted hover:text-colorTitle cursor-pointer"
+                  className="w-full justify-start data-[state=active]:bg-[#494be314] data-[state=active]:text-[#494be3] data-[state=active]:shadow-none text-colorMuted hover:text-colorTitle cursor-pointer"
                 >
                   <div className="flex items-center justify-between w-full">
                     Appurés
@@ -258,7 +258,7 @@ const TableImmobiliers = () => {
                 </TabsTrigger>
                 <TabsTrigger
                   value="imp"
-                  className="w-full justify-start data-[state=active]:bg-[#2d9dd129] data-[state=active]:text-[#2d9dd1] data-[state=active]:shadow-none text-colorMuted hover:text-colorTitle cursor-pointer"
+                  className="w-full justify-start data-[state=active]:bg-[#494be314] data-[state=active]:text-[#494be3] data-[state=active]:shadow-none text-colorMuted hover:text-colorTitle cursor-pointer"
                 >
                   <div className="flex items-center justify-between w-full">
                     Imprimés des valeurs
@@ -267,7 +267,7 @@ const TableImmobiliers = () => {
                 </TabsTrigger>
                 <TabsTrigger
                   value="dd"
-                  className="w-full justify-start data-[state=active]:bg-[#2d9dd129] data-[state=active]:text-[#2d9dd1] data-[state=active]:shadow-none text-colorMuted hover:text-colorTitle cursor-pointer"
+                  className="w-full justify-start data-[state=active]:bg-[#494be314] data-[state=active]:text-[#494be3] data-[state=active]:shadow-none text-colorMuted hover:text-colorTitle cursor-pointer"
                 >
                   <div className="flex items-center justify-between w-full">
                     Défauts en déclaration
@@ -276,7 +276,7 @@ const TableImmobiliers = () => {
                 </TabsTrigger>
                 <TabsTrigger
                   value="dp"
-                  className="w-full justify-start data-[state=active]:bg-[#2d9dd129] data-[state=active]:text-[#2d9dd1] data-[state=active]:shadow-none text-colorMuted hover:text-colorTitle cursor-pointer"
+                  className="w-full justify-start data-[state=active]:bg-[#494be314] data-[state=active]:text-[#494be3] data-[state=active]:shadow-none text-colorMuted hover:text-colorTitle cursor-pointer"
                 >
                   <div className="flex items-center justify-between w-full">
                     Défauts de paiement
@@ -285,7 +285,7 @@ const TableImmobiliers = () => {
                 </TabsTrigger>
                 <TabsTrigger
                   value="fpc"
-                  className="w-full justify-start data-[state=active]:bg-[#2d9dd129] data-[state=active]:text-[#2d9dd1] data-[state=active]:shadow-none text-colorMuted hover:text-colorTitle cursor-pointer"
+                  className="w-full justify-start data-[state=active]:bg-[#494be314] data-[state=active]:text-[#494be3] data-[state=active]:shadow-none text-colorMuted hover:text-colorTitle cursor-pointer"
                 >
                   <div className="flex items-center justify-between w-full">
                     FPC
@@ -294,7 +294,7 @@ const TableImmobiliers = () => {
                 </TabsTrigger>
                 <TabsTrigger
                   value="amr"
-                  className="w-full justify-start data-[state=active]:bg-[#2d9dd129] data-[state=active]:text-[#2d9dd1] data-[state=active]:shadow-none text-colorMuted hover:text-colorTitle cursor-pointer"
+                  className="w-full justify-start data-[state=active]:bg-[#494be314] data-[state=active]:text-[#494be3] data-[state=active]:shadow-none text-colorMuted hover:text-colorTitle cursor-pointer"
                 >
                   <div className="flex items-center justify-between w-full">
                     AMR
@@ -303,7 +303,7 @@ const TableImmobiliers = () => {
                 </TabsTrigger>
                 <TabsTrigger
                   value="pour"
-                  className="w-full justify-start data-[state=active]:bg-[#2d9dd129] data-[state=active]:text-[#2d9dd1] data-[state=active]:shadow-none text-colorMuted hover:text-colorTitle cursor-pointer"
+                  className="w-full justify-start data-[state=active]:bg-[#494be314] data-[state=active]:text-[#494be3] data-[state=active]:shadow-none text-colorMuted hover:text-colorTitle cursor-pointer"
                 >
                   <div className="flex items-center justify-between w-full">
                     Poursuites
@@ -312,7 +312,7 @@ const TableImmobiliers = () => {
                 </TabsTrigger>
                 <TabsTrigger
                   value="cc"
-                  className="w-full justify-start data-[state=active]:bg-[#2d9dd129] data-[state=active]:text-[#2d9dd1] data-[state=active]:shadow-none text-colorMuted hover:text-colorTitle cursor-pointer"
+                  className="w-full justify-start data-[state=active]:bg-[#494be314] data-[state=active]:text-[#494be3] data-[state=active]:shadow-none text-colorMuted hover:text-colorTitle cursor-pointer"
                 >
                   <div className="flex items-center justify-between w-full">
                     Contrainte et commandement
@@ -321,7 +321,7 @@ const TableImmobiliers = () => {
                 </TabsTrigger>
                 <TabsTrigger
                   value="adt"
-                  className="w-full justify-start data-[state=active]:bg-[#2d9dd129] data-[state=active]:text-[#2d9dd1] data-[state=active]:shadow-none text-colorMuted hover:text-colorTitle cursor-pointer"
+                  className="w-full justify-start data-[state=active]:bg-[#494be314] data-[state=active]:text-[#494be3] data-[state=active]:shadow-none text-colorMuted hover:text-colorTitle cursor-pointer"
                 >
                   <div className="flex items-center justify-between w-full">
                     ATD
@@ -330,7 +330,7 @@ const TableImmobiliers = () => {
                 </TabsTrigger>
                 <TabsTrigger
                   value="con"
-                  className="w-full justify-start data-[state=active]:bg-[#2d9dd129] data-[state=active]:text-[#2d9dd1] data-[state=active]:shadow-none text-colorMuted hover:text-colorTitle cursor-pointer"
+                  className="w-full justify-start data-[state=active]:bg-[#494be314] data-[state=active]:text-[#494be3] data-[state=active]:shadow-none text-colorMuted hover:text-colorTitle cursor-pointer"
                 >
                   <div className="flex items-center justify-between w-full">
                     Contentieux
@@ -339,7 +339,7 @@ const TableImmobiliers = () => {
                 </TabsTrigger>
                 <TabsTrigger
                   value="recl"
-                  className="w-full justify-start data-[state=active]:bg-[#2d9dd129] data-[state=active]:text-[#2d9dd1] data-[state=active]:shadow-none text-colorMuted hover:text-colorTitle cursor-pointer"
+                  className="w-full justify-start data-[state=active]:bg-[#494be314] data-[state=active]:text-[#494be3] data-[state=active]:shadow-none text-colorMuted hover:text-colorTitle cursor-pointer"
                 >
                   <div className="flex items-center justify-between w-full">
                     reclamations
@@ -351,6 +351,17 @@ const TableImmobiliers = () => {
           </div>
           <div className="col-span-12 lg:col-span-9">
             <TabsContent value="ident">
+              <h5 className="text-colorTitle font-semibold text-[18px] mb-1">
+                Mes Unités Locatives
+              </h5>
+              <p className="text-colorMuted text-sm mb-6 ">
+                Regroupe tous les biens immobiliers que vous avez mis ou
+                prévoyez mettre en location (appartements, maisons, bureaux,
+                immeubles, etc.) et générant des revenus soumis à l'
+                <span className="text-colorTitle font-medium">
+                  Impôt sur les Revenus Locatifs (IRL)
+                </span>
+              </p>
               <Card className="rounded-[24px] shadow-[var(--boxShadowCard)!important] border-0 bg-bgCard lg:p-[18px]">
                 <div className="grid grid-cols-12 gap-3 items-center">
                   <div className="col-span-12 lg:col-span-5">
@@ -442,8 +453,8 @@ const TableImmobiliers = () => {
                             <span>{row.snb}</span>
                           </td>
                           <td>
-                            <div className="flex items-center gap-2">
-                              <Button className="cursor-pointer shadow-none bg-transparent  text-primaryColor  hover:bg-primaryColor hover:text-white text-xs h-auto py-2">
+                            <div className="flex items-center gap-3">
+                              <Button className="cursor-pointer shadow-none bg-transparent  text-[#494be3]  hover:bg-transparent hover:text-[#494be3] text-xs h-auto p-0">
                                 Déclarer
                               </Button>
                               <DropdownMenu>
@@ -478,6 +489,17 @@ const TableImmobiliers = () => {
               </Card>
             </TabsContent>
             <TabsContent value="decl">
+              <h5 className="text-colorTitle font-semibold text-[18px] mb-1">
+                Mes Unités Locatives
+              </h5>
+              <p className="text-colorMuted text-sm mb-6 ">
+                Regroupe tous les biens immobiliers que vous avez mis ou
+                prévoyez mettre en location (appartements, maisons, bureaux,
+                immeubles, etc.) et générant des revenus soumis à l'
+                <span className="text-colorTitle font-medium">
+                  Impôt sur les Revenus Locatifs (IRL)
+                </span>
+              </p>
               <Card className="rounded-[24px] shadow-[var(--boxShadowCard)!important] border-0 bg-bgCard lg:p-[18px]">
                 <div className="grid grid-cols-12 gap-3 items-center">
                   <div className="col-span-12 lg:col-span-5">
@@ -574,7 +596,7 @@ const TableImmobiliers = () => {
                           </td>
                           <td>
                             <div className="flex items-center gap-2">
-                              <Button className="cursor-pointer shadow-none bg-transparent  text-primaryColor  hover:bg-primaryColor hover:text-white text-xs h-auto py-2">
+                              <Button className="cursor-pointer shadow-none bg-transparent  text-[#5f61e6]  hover:bg-transparent hover:text-[#494be3] text-md h-auto p-0">
                                 Payer
                               </Button>
                               <DropdownMenu>
@@ -609,6 +631,17 @@ const TableImmobiliers = () => {
               </Card>
             </TabsContent>
             <TabsContent value="pay">
+              <h5 className="text-colorTitle font-semibold text-[18px] mb-1">
+                Mes Unités Locatives
+              </h5>
+              <p className="text-colorMuted text-sm mb-6 ">
+                Regroupe tous les biens immobiliers que vous avez mis ou
+                prévoyez mettre en location (appartements, maisons, bureaux,
+                immeubles, etc.) et générant des revenus soumis à l'
+                <span className="text-colorTitle font-medium">
+                  Impôt sur les Revenus Locatifs (IRL)
+                </span>
+              </p>
               <Card className="rounded-[24px] shadow-[var(--boxShadowCard)!important] border-0 bg-bgCard lg:p-[18px]">
                 <div className="grid grid-cols-12 gap-3 items-center">
                   <div className="col-span-12 lg:col-span-5">
@@ -709,7 +742,7 @@ const TableImmobiliers = () => {
                           </td>
                           <td>
                             <div className="flex items-center gap-2">
-                              <Button className="cursor-pointer shadow-none bg-transparent  text-primaryColor  hover:bg-primaryColor hover:text-white text-xs h-auto py-2">
+                              <Button className="cursor-pointer shadow-none bg-transparent  text-[#5f61e6]  hover:bg-transparent hover:text-[#494be3] text-md h-auto p-0">
                                 Reçu
                               </Button>
                               <DropdownMenu>
@@ -744,6 +777,17 @@ const TableImmobiliers = () => {
               </Card>
             </TabsContent>
             <TabsContent value="app">
+              <h5 className="text-colorTitle font-semibold text-[18px] mb-1">
+                Mes Unités Locatives
+              </h5>
+              <p className="text-colorMuted text-sm mb-6 ">
+                Regroupe tous les biens immobiliers que vous avez mis ou
+                prévoyez mettre en location (appartements, maisons, bureaux,
+                immeubles, etc.) et générant des revenus soumis à l'
+                <span className="text-colorTitle font-medium">
+                  Impôt sur les Revenus Locatifs (IRL)
+                </span>
+              </p>
               <Card className="rounded-[24px] shadow-[var(--boxShadowCard)!important] border-0 bg-bgCard lg:p-[18px]">
                 <div className="grid grid-cols-12 gap-3 items-center">
                   <div className="col-span-12 lg:col-span-5">
@@ -833,7 +877,7 @@ const TableImmobiliers = () => {
                         </td>
                         <td>
                           <div className="flex items-center gap-2">
-                            <Button className="cursor-pointer shadow-none bg-transparent  text-primaryColor  hover:bg-primaryColor hover:text-white text-xs h-auto py-2">
+                            <Button className="cursor-pointer shadow-none bg-transparent  text-[#5f61e6]  hover:bg-transparent hover:text-[#494be3] text-md h-auto p-0">
                               Valider
                             </Button>
                             <DropdownMenu>
@@ -865,6 +909,17 @@ const TableImmobiliers = () => {
               </Card>
             </TabsContent>
             <TabsContent value="imp">
+              <h5 className="text-colorTitle font-semibold text-[18px] mb-1">
+                Mes Unités Locatives
+              </h5>
+              <p className="text-colorMuted text-sm mb-6 ">
+                Regroupe tous les biens immobiliers que vous avez mis ou
+                prévoyez mettre en location (appartements, maisons, bureaux,
+                immeubles, etc.) et générant des revenus soumis à l'
+                <span className="text-colorTitle font-medium">
+                  Impôt sur les Revenus Locatifs (IRL)
+                </span>
+              </p>
               <Card className="rounded-[24px] shadow-[var(--boxShadowCard)!important] border-0 bg-bgCard lg:p-[18px]">
                 <div className="grid grid-cols-12 gap-3 items-center">
                   <div className="col-span-12 lg:col-span-5">
@@ -958,7 +1013,7 @@ const TableImmobiliers = () => {
                         </td>
                         <td>
                           <div className="flex items-center gap-2">
-                            <Button className="cursor-pointer shadow-none bg-transparent  text-primaryColor  hover:bg-primaryColor hover:text-white text-xs h-auto py-2">
+                            <Button className="cursor-pointer shadow-none bg-transparent  text-[#5f61e6]  hover:bg-transparent hover:text-[#494be3] text-md h-auto p-0">
                               Imprimer
                             </Button>
                             <DropdownMenu>
@@ -990,6 +1045,17 @@ const TableImmobiliers = () => {
               </Card>
             </TabsContent>
             <TabsContent value="dd">
+              <h5 className="text-colorTitle font-semibold text-[18px] mb-1">
+                Mes Unités Locatives
+              </h5>
+              <p className="text-colorMuted text-sm mb-6 ">
+                Regroupe tous les biens immobiliers que vous avez mis ou
+                prévoyez mettre en location (appartements, maisons, bureaux,
+                immeubles, etc.) et générant des revenus soumis à l'
+                <span className="text-colorTitle font-medium">
+                  Impôt sur les Revenus Locatifs (IRL)
+                </span>
+              </p>
               <Card className="rounded-[24px] shadow-[var(--boxShadowCard)!important] border-0 bg-bgCard lg:p-[18px]">
                 <div className="grid grid-cols-12 gap-3 items-center">
                   <div className="col-span-12 lg:col-span-5">
@@ -1083,7 +1149,7 @@ const TableImmobiliers = () => {
                         </td>
                         <td>
                           <div className="flex items-center gap-2">
-                            <Button className="cursor-pointer shadow-none bg-transparent  text-primaryColor  hover:bg-primaryColor hover:text-white text-xs h-auto py-2">
+                            <Button className="cursor-pointer shadow-none bg-transparent  text-[#5f61e6]  hover:bg-transparent hover:text-[#494be3] text-md h-auto p-0">
                               Corriger
                             </Button>
                             <DropdownMenu>
@@ -1115,6 +1181,17 @@ const TableImmobiliers = () => {
               </Card>
             </TabsContent>
             <TabsContent value="dp">
+              <h5 className="text-colorTitle font-semibold text-[18px] mb-1">
+                Mes Unités Locatives
+              </h5>
+              <p className="text-colorMuted text-sm mb-6 ">
+                Regroupe tous les biens immobiliers que vous avez mis ou
+                prévoyez mettre en location (appartements, maisons, bureaux,
+                immeubles, etc.) et générant des revenus soumis à l'
+                <span className="text-colorTitle font-medium">
+                  Impôt sur les Revenus Locatifs (IRL)
+                </span>
+              </p>
               <Card className="rounded-[24px] shadow-[var(--boxShadowCard)!important] border-0 bg-bgCard lg:p-[18px]">
                 <div className="grid grid-cols-12 gap-3 items-center">
                   <div className="col-span-12 lg:col-span-5">
@@ -1208,7 +1285,7 @@ const TableImmobiliers = () => {
                         </td>
                         <td>
                           <div className="flex items-center gap-2">
-                            <Button className="cursor-pointer shadow-none bg-transparent  text-primaryColor  hover:bg-primaryColor hover:text-white text-xs h-auto py-2">
+                            <Button className="cursor-pointer shadow-none bg-transparent  text-[#5f61e6]  hover:bg-transparent hover:text-[#494be3] text-md h-auto p-0">
                               Payer
                             </Button>
                             <DropdownMenu>
@@ -1240,6 +1317,17 @@ const TableImmobiliers = () => {
               </Card>
             </TabsContent>
             <TabsContent value="fpc">
+              <h5 className="text-colorTitle font-semibold text-[18px] mb-1">
+                Mes Unités Locatives
+              </h5>
+              <p className="text-colorMuted text-sm mb-6 ">
+                Regroupe tous les biens immobiliers que vous avez mis ou
+                prévoyez mettre en location (appartements, maisons, bureaux,
+                immeubles, etc.) et générant des revenus soumis à l'
+                <span className="text-colorTitle font-medium">
+                  Impôt sur les Revenus Locatifs (IRL)
+                </span>
+              </p>
               <Card className="rounded-[24px] shadow-[var(--boxShadowCard)!important] border-0 bg-bgCard lg:p-[18px]">
                 <div className="grid grid-cols-12 gap-3 items-center">
                   <div className="col-span-12 lg:col-span-5">
@@ -1333,7 +1421,7 @@ const TableImmobiliers = () => {
                         </td>
                         <td>
                           <div className="flex items-center gap-2">
-                            <Button className="cursor-pointer shadow-none bg-transparent  text-primaryColor  hover:bg-primaryColor hover:text-white text-xs h-auto py-2">
+                            <Button className="cursor-pointer shadow-none bg-transparent  text-[#5f61e6]  hover:bg-transparent hover:text-[#494be3] text-md h-auto p-0">
                               Traiter
                             </Button>
                             <DropdownMenu>
@@ -1365,6 +1453,17 @@ const TableImmobiliers = () => {
               </Card>
             </TabsContent>
             <TabsContent value="amr">
+              <h5 className="text-colorTitle font-semibold text-[18px] mb-1">
+                Mes Unités Locatives
+              </h5>
+              <p className="text-colorMuted text-sm mb-6 ">
+                Regroupe tous les biens immobiliers que vous avez mis ou
+                prévoyez mettre en location (appartements, maisons, bureaux,
+                immeubles, etc.) et générant des revenus soumis à l'
+                <span className="text-colorTitle font-medium">
+                  Impôt sur les Revenus Locatifs (IRL)
+                </span>
+              </p>
               <Card className="rounded-[24px] shadow-[var(--boxShadowCard)!important] border-0 bg-bgCard lg:p-[18px]">
                 <div className="grid grid-cols-12 gap-3 items-center">
                   <div className="col-span-12 lg:col-span-5">
@@ -1458,7 +1557,7 @@ const TableImmobiliers = () => {
                         </td>
                         <td>
                           <div className="flex items-center gap-2">
-                            <Button className="cursor-pointer shadow-none bg-transparent  text-primaryColor  hover:bg-primaryColor hover:text-white text-xs h-auto py-2">
+                            <Button className="cursor-pointer shadow-none bg-transparent  text-[#5f61e6]  hover:bg-transparent hover:text-[#494be3] text-md h-auto p-0">
                               Traiter
                             </Button>
                             <DropdownMenu>
@@ -1490,6 +1589,17 @@ const TableImmobiliers = () => {
               </Card>
             </TabsContent>
             <TabsContent value="pour">
+              <h5 className="text-colorTitle font-semibold text-[18px] mb-1">
+                Mes Unités Locatives
+              </h5>
+              <p className="text-colorMuted text-sm mb-6 ">
+                Regroupe tous les biens immobiliers que vous avez mis ou
+                prévoyez mettre en location (appartements, maisons, bureaux,
+                immeubles, etc.) et générant des revenus soumis à l'
+                <span className="text-colorTitle font-medium">
+                  Impôt sur les Revenus Locatifs (IRL)
+                </span>
+              </p>
               <Card className="rounded-[24px] shadow-[var(--boxShadowCard)!important] border-0 bg-bgCard lg:p-[18px]">
                 <div className="grid grid-cols-12 gap-3 items-center">
                   <div className="col-span-12 lg:col-span-5">
@@ -1583,7 +1693,7 @@ const TableImmobiliers = () => {
                         </td>
                         <td>
                           <div className="flex items-center gap-2">
-                            <Button className="cursor-pointer shadow-none bg-transparent  text-primaryColor  hover:bg-primaryColor hover:text-white text-xs h-auto py-2">
+                            <Button className="cursor-pointer shadow-none bg-transparent  text-[#5f61e6]  hover:bg-transparent hover:text-[#494be3] text-md h-auto p-0">
                               Traiter
                             </Button>
                             <DropdownMenu>
@@ -1615,6 +1725,17 @@ const TableImmobiliers = () => {
               </Card>
             </TabsContent>
             <TabsContent value="cc">
+              <h5 className="text-colorTitle font-semibold text-[18px] mb-1">
+                Mes Unités Locatives
+              </h5>
+              <p className="text-colorMuted text-sm mb-6 ">
+                Regroupe tous les biens immobiliers que vous avez mis ou
+                prévoyez mettre en location (appartements, maisons, bureaux,
+                immeubles, etc.) et générant des revenus soumis à l'
+                <span className="text-colorTitle font-medium">
+                  Impôt sur les Revenus Locatifs (IRL)
+                </span>
+              </p>
               <Card className="rounded-[24px] shadow-[var(--boxShadowCard)!important] border-0 bg-bgCard lg:p-[18px]">
                 <div className="grid grid-cols-12 gap-3 items-center">
                   <div className="col-span-12 lg:col-span-5">
@@ -1708,7 +1829,7 @@ const TableImmobiliers = () => {
                         </td>
                         <td>
                           <div className="flex items-center gap-2">
-                            <Button className="cursor-pointer shadow-none bg-transparent  text-primaryColor  hover:bg-primaryColor hover:text-white text-xs h-auto py-2">
+                            <Button className="cursor-pointer shadow-none bg-transparent  text-[#5f61e6]  hover:bg-transparent hover:text-[#494be3] text-md h-auto p-0">
                               Traiter
                             </Button>
                             <DropdownMenu>
@@ -1740,6 +1861,17 @@ const TableImmobiliers = () => {
               </Card>
             </TabsContent>
             <TabsContent value="adt">
+              <h5 className="text-colorTitle font-semibold text-[18px] mb-1">
+                Mes Unités Locatives
+              </h5>
+              <p className="text-colorMuted text-sm mb-6 ">
+                Regroupe tous les biens immobiliers que vous avez mis ou
+                prévoyez mettre en location (appartements, maisons, bureaux,
+                immeubles, etc.) et générant des revenus soumis à l'
+                <span className="text-colorTitle font-medium">
+                  Impôt sur les Revenus Locatifs (IRL)
+                </span>
+              </p>
               <Card className="rounded-[24px] shadow-[var(--boxShadowCard)!important] border-0 bg-bgCard lg:p-[18px]">
                 <div className="grid grid-cols-12 gap-3 items-center">
                   <div className="col-span-12 lg:col-span-5">
@@ -1833,7 +1965,7 @@ const TableImmobiliers = () => {
                         </td>
                         <td>
                           <div className="flex items-center gap-2">
-                            <Button className="cursor-pointer shadow-none bg-transparent  text-primaryColor  hover:bg-primaryColor hover:text-white text-xs h-auto py-2">
+                            <Button className="cursor-pointer shadow-none bg-transparent  text-[#5f61e6]  hover:bg-transparent hover:text-[#494be3] text-md h-auto p-0">
                               Traiter
                             </Button>
                             <DropdownMenu>
@@ -1865,6 +1997,17 @@ const TableImmobiliers = () => {
               </Card>
             </TabsContent>
             <TabsContent value="con">
+              <h5 className="text-colorTitle font-semibold text-[18px] mb-1">
+                Mes Unités Locatives
+              </h5>
+              <p className="text-colorMuted text-sm mb-6 ">
+                Regroupe tous les biens immobiliers que vous avez mis ou
+                prévoyez mettre en location (appartements, maisons, bureaux,
+                immeubles, etc.) et générant des revenus soumis à l'
+                <span className="text-colorTitle font-medium">
+                  Impôt sur les Revenus Locatifs (IRL)
+                </span>
+              </p>
               <Card className="rounded-[24px] shadow-[var(--boxShadowCard)!important] border-0 bg-bgCard lg:p-[18px]">
                 <div className="grid grid-cols-12 gap-3 items-center">
                   <div className="col-span-12 lg:col-span-5">
@@ -1958,7 +2101,7 @@ const TableImmobiliers = () => {
                         </td>
                         <td>
                           <div className="flex items-center gap-2">
-                            <Button className="cursor-pointer shadow-none bg-transparent  text-primaryColor  hover:bg-primaryColor hover:text-white text-xs h-auto py-2">
+                            <Button className="cursor-pointer shadow-none bg-transparent  text-[#5f61e6]  hover:bg-transparent hover:text-[#494be3] text-md h-auto p-0">
                               Traiter
                             </Button>
                             <DropdownMenu>
@@ -1990,6 +2133,17 @@ const TableImmobiliers = () => {
               </Card>
             </TabsContent>
             <TabsContent value="recl">
+              <h5 className="text-colorTitle font-semibold text-[18px] mb-1">
+                Mes Unités Locatives
+              </h5>
+              <p className="text-colorMuted text-sm mb-6 ">
+                Regroupe tous les biens immobiliers que vous avez mis ou
+                prévoyez mettre en location (appartements, maisons, bureaux,
+                immeubles, etc.) et générant des revenus soumis à l'
+                <span className="text-colorTitle font-medium">
+                  Impôt sur les Revenus Locatifs (IRL)
+                </span>
+              </p>
               <Card className="rounded-[24px] shadow-[var(--boxShadowCard)!important] border-0 bg-bgCard lg:p-[18px]">
                 <div className="grid grid-cols-12 gap-3 items-center">
                   <div className="col-span-12 lg:col-span-5">
@@ -2083,7 +2237,7 @@ const TableImmobiliers = () => {
                         </td>
                         <td>
                           <div className="flex items-center gap-2">
-                            <Button className="cursor-pointer shadow-none bg-transparent  text-primaryColor  hover:bg-primaryColor hover:text-white text-xs h-auto py-2">
+                            <Button className="cursor-pointer shadow-none bg-transparent  text-[#5f61e6]  hover:bg-transparent hover:text-[#494be3] text-md h-auto p-0">
                               Traiter
                             </Button>
                             <DropdownMenu>

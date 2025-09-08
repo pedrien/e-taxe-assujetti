@@ -1,4 +1,4 @@
-import Container from "./container";
+import Container from "./_layout/container";
 
 const Page = () => {
     return (
