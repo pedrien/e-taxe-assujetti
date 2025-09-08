@@ -1,27 +1,15 @@
-import React from "react";;
-import { Button } from "@/components/ui/button";
-import { Plus, ArrowRight } from "lucide-react";
+import React from "react";
 import TableActivities from "./tableActivities";
-
+import BannerPage from "@/components/features/activite/bannerPage/bannerPage";
 
 const BlockDash = () => {
   return (
     <>
-      <div className="max-w-[1520px] px-3 mx-auto w-full lg:px-6 mt-4 lg:mt-5">
-        <div className="flex items-center justify-between gap-3 mb-3 lg:mb-4">
-          <h2 className="font-semibold text-[18px]">Activités commerciales</h2>
-          <div className="flex items-center gap-2">
-            <Button className="bg-bgCard shadow-none text-colorTitle cursor-pointer hover:bg-bgCard hover:text-primaryColor h-10 rounded-lg">
-              Exporter
-              <ArrowRight></ArrowRight>
-            </Button>
-            <Button className="bg-primaryColor shadow-none cursor-pointer hover:bg-primaryColor h-10 rounded-lg">
-              <Plus></Plus>
-              Ajouter
-            </Button>
-          </div>
+      <BannerPage />
+      <div className="relative z-20 mb-8 py-[50px] bg-bgFond rounded-4xl lg:mt-[-30px]">
+        <div className="container-fluid px-3 lg:px-3 2xl:px-6 max-w-[1600px] lg:mt-[-74px] mx-auto">
+          <TableActivities />
         </div>
-        <TableActivities />
       </div>
     </>
   );

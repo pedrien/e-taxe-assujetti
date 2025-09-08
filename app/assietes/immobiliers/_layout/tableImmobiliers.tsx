@@ -365,9 +365,16 @@ const TableImmobiliers = () => {
               <Card className="rounded-[24px] shadow-[var(--boxShadowCard)!important] border-0 bg-bgCard lg:p-[18px]">
                 <div className="grid grid-cols-12 gap-3 items-center">
                   <div className="col-span-12 lg:col-span-5">
-                    <h2 className="font-semibold text-colorTitle">
-                      Liste des immobiliers
-                    </h2>
+                    <div className="block-search w-[320px] max-w-full relative flex items-center">
+                      <div className="icon absolute left-2 text-colorTitle">
+                        <Search size={18} />
+                      </div>
+                      <Input
+                        type="text"
+                        className="shadow-none h-10 pl-8 rounded-lg border-borderInput placeholder:text-colorMuted placeholder:opacity-70"
+                        placeholder="Recherche"
+                      />
+                    </div>
                   </div>
                   <div className="col-span-12 lg:col-span-7">
                     <div className="flex lg:justify-end gap-2">
@@ -392,16 +399,6 @@ const TableImmobiliers = () => {
                             </SelectGroup>
                           </SelectContent>
                         </Select>
-                      </div>
-                      <div className="block-search relative flex items-center">
-                        <div className="icon absolute left-2 text-colorTitle">
-                          <Search size={18} />
-                        </div>
-                        <Input
-                          type="text"
-                          className="shadow-none h-10 pl-8 rounded-lg border-borderInput placeholder:text-colorMuted placeholder:opacity-70"
-                          placeholder="Recherche"
-                        />
                       </div>
                     </div>
                   </div>
@@ -454,7 +451,7 @@ const TableImmobiliers = () => {
                           </td>
                           <td>
                             <div className="flex items-center gap-3">
-                              <Button className="cursor-pointer shadow-none bg-transparent  text-[#494be3]  hover:bg-transparent hover:text-[#494be3] text-xs h-auto p-0">
+                              <Button className="cursor-pointer shadow-none bg-transparent  text-[#5f61e6]  hover:bg-transparent hover:text-[#494be3] text-md h-auto p-0">
                                 Déclarer
                               </Button>
                               <DropdownMenu>
@@ -595,8 +592,8 @@ const TableImmobiliers = () => {
                             <span>{row.dateDeclaration}</span>
                           </td>
                           <td>
-                            <div className="flex items-center gap-2">
-                              <Button className="cursor-pointer shadow-none bg-transparent  text-primaryColor  hover:bg-primaryColor hover:text-white text-xs h-auto py-2">
+                            <div className="flex items-center gap-3">
+                              <Button className="cursor-pointer shadow-none bg-transparent  text-[#5f61e6]  hover:bg-transparent hover:text-[#494be3] text-md h-auto p-0">
                                 Payer
                               </Button>
                               <DropdownMenu>
@@ -635,7 +632,12 @@ const TableImmobiliers = () => {
                 Mes immobiliers
               </h5>
               <p className="text-colorMuted text-sm mb-6">
-                Représente l’ensemble des biens immobiliers enregistrés à votre nom (terrains, maisons, immeubles, parcelles, etc.) et constituant l’assiette de l’<span className="text-colorTitle font-medium">Impôt Foncier (IF)</span>
+                Représente l’ensemble des biens immobiliers enregistrés à votre
+                nom (terrains, maisons, immeubles, parcelles, etc.) et
+                constituant l’assiette de l’
+                <span className="text-colorTitle font-medium">
+                  Impôt Foncier (IF)
+                </span>
               </p>
               <Card className="rounded-[24px] shadow-[var(--boxShadowCard)!important] border-0 bg-bgCard lg:p-[18px]">
                 <div className="grid grid-cols-12 gap-3 items-center">
@@ -736,8 +738,8 @@ const TableImmobiliers = () => {
                             <span>{row.montant}</span>
                           </td>
                           <td>
-                            <div className="flex items-center gap-2">
-                              <Button className="cursor-pointer shadow-none bg-transparent  text-primaryColor  hover:bg-primaryColor hover:text-white text-xs h-auto py-2">
+                            <div className="flex items-center gap-3">
+                              <Button className="cursor-pointer shadow-none bg-transparent  text-[#5f61e6]  hover:bg-transparent hover:text-[#494be3] text-md h-auto p-0">
                                 Reçu
                               </Button>
                               <DropdownMenu>
@@ -776,7 +778,12 @@ const TableImmobiliers = () => {
                 Mes immobiliers
               </h5>
               <p className="text-colorMuted text-sm mb-6">
-                Représente l’ensemble des biens immobiliers enregistrés à votre nom (terrains, maisons, immeubles, parcelles, etc.) et constituant l’assiette de l’<span className="text-colorTitle font-medium">Impôt Foncier (IF)</span>
+                Représente l’ensemble des biens immobiliers enregistrés à votre
+                nom (terrains, maisons, immeubles, parcelles, etc.) et
+                constituant l’assiette de l’
+                <span className="text-colorTitle font-medium">
+                  Impôt Foncier (IF)
+                </span>
               </p>
               <Card className="rounded-[24px] shadow-[var(--boxShadowCard)!important] border-0 bg-bgCard lg:p-[18px]">
                 <div className="grid grid-cols-12 gap-3 items-center">
@@ -866,8 +873,8 @@ const TableImmobiliers = () => {
                           <span>25/01/2024</span>
                         </td>
                         <td>
-                          <div className="flex items-center gap-2">
-                            <Button className="cursor-pointer shadow-none bg-transparent  text-primaryColor  hover:bg-primaryColor hover:text-white text-xs h-auto py-2">
+                          <div className="flex items-center gap-3">
+                            <Button className="cursor-pointer shadow-none bg-transparent  text-[#5f61e6]  hover:bg-transparent hover:text-[#494be3] text-md h-auto p-0">
                               Valider
                             </Button>
                             <DropdownMenu>
@@ -903,7 +910,12 @@ const TableImmobiliers = () => {
                 Mes immobiliers
               </h5>
               <p className="text-colorMuted text-sm mb-6">
-                Représente l’ensemble des biens immobiliers enregistrés à votre nom (terrains, maisons, immeubles, parcelles, etc.) et constituant l’assiette de l’<span className="text-colorTitle font-medium">Impôt Foncier (IF)</span>
+                Représente l’ensemble des biens immobiliers enregistrés à votre
+                nom (terrains, maisons, immeubles, parcelles, etc.) et
+                constituant l’assiette de l’
+                <span className="text-colorTitle font-medium">
+                  Impôt Foncier (IF)
+                </span>
               </p>
               <Card className="rounded-[24px] shadow-[var(--boxShadowCard)!important] border-0 bg-bgCard lg:p-[18px]">
                 <div className="grid grid-cols-12 gap-3 items-center">
@@ -997,8 +1009,8 @@ const TableImmobiliers = () => {
                           <span>30/01/2024</span>
                         </td>
                         <td>
-                          <div className="flex items-center gap-2">
-                            <Button className="cursor-pointer shadow-none bg-transparent  text-primaryColor  hover:bg-primaryColor hover:text-white text-xs h-auto py-2">
+                          <div className="flex items-center gap-3">
+                            <Button className="cursor-pointer shadow-none bg-transparent  text-[#5f61e6]  hover:bg-transparent hover:text-[#494be3] text-md h-auto p-0">
                               Imprimer
                             </Button>
                             <DropdownMenu>
@@ -1034,7 +1046,12 @@ const TableImmobiliers = () => {
                 Mes immobiliers
               </h5>
               <p className="text-colorMuted text-sm mb-6">
-                Représente l’ensemble des biens immobiliers enregistrés à votre nom (terrains, maisons, immeubles, parcelles, etc.) et constituant l’assiette de l’<span className="text-colorTitle font-medium">Impôt Foncier (IF)</span>
+                Représente l’ensemble des biens immobiliers enregistrés à votre
+                nom (terrains, maisons, immeubles, parcelles, etc.) et
+                constituant l’assiette de l’
+                <span className="text-colorTitle font-medium">
+                  Impôt Foncier (IF)
+                </span>
               </p>
               <Card className="rounded-[24px] shadow-[var(--boxShadowCard)!important] border-0 bg-bgCard lg:p-[18px]">
                 <div className="grid grid-cols-12 gap-3 items-center">
@@ -1128,8 +1145,8 @@ const TableImmobiliers = () => {
                           <span>05/02/2024</span>
                         </td>
                         <td>
-                          <div className="flex items-center gap-2">
-                            <Button className="cursor-pointer shadow-none bg-transparent  text-primaryColor  hover:bg-primaryColor hover:text-white text-xs h-auto py-2">
+                          <div className="flex items-center gap-3">
+                            <Button className="cursor-pointer shadow-none bg-transparent  text-[#5f61e6]  hover:bg-transparent hover:text-[#494be3] text-md h-auto p-0">
                               Corriger
                             </Button>
                             <DropdownMenu>
@@ -1165,7 +1182,12 @@ const TableImmobiliers = () => {
                 Mes immobiliers
               </h5>
               <p className="text-colorMuted text-sm mb-6">
-                Représente l’ensemble des biens immobiliers enregistrés à votre nom (terrains, maisons, immeubles, parcelles, etc.) et constituant l’assiette de l’<span className="text-colorTitle font-medium">Impôt Foncier (IF)</span>
+                Représente l’ensemble des biens immobiliers enregistrés à votre
+                nom (terrains, maisons, immeubles, parcelles, etc.) et
+                constituant l’assiette de l’
+                <span className="text-colorTitle font-medium">
+                  Impôt Foncier (IF)
+                </span>
               </p>
               <Card className="rounded-[24px] shadow-[var(--boxShadowCard)!important] border-0 bg-bgCard lg:p-[18px]">
                 <div className="grid grid-cols-12 gap-3 items-center">
@@ -1259,8 +1281,8 @@ const TableImmobiliers = () => {
                           <span>15/02/2024</span>
                         </td>
                         <td>
-                          <div className="flex items-center gap-2">
-                            <Button className="cursor-pointer shadow-none bg-transparent  text-primaryColor  hover:bg-primaryColor hover:text-white text-xs h-auto py-2">
+                          <div className="flex items-center gap-3">
+                            <Button className="cursor-pointer shadow-none bg-transparent  text-[#5f61e6]  hover:bg-transparent hover:text-[#494be3] text-md h-auto p-0">
                               Payer
                             </Button>
                             <DropdownMenu>
@@ -1296,7 +1318,12 @@ const TableImmobiliers = () => {
                 Mes immobiliers
               </h5>
               <p className="text-colorMuted text-sm mb-6">
-                Représente l’ensemble des biens immobiliers enregistrés à votre nom (terrains, maisons, immeubles, parcelles, etc.) et constituant l’assiette de l’<span className="text-colorTitle font-medium">Impôt Foncier (IF)</span>
+                Représente l’ensemble des biens immobiliers enregistrés à votre
+                nom (terrains, maisons, immeubles, parcelles, etc.) et
+                constituant l’assiette de l’
+                <span className="text-colorTitle font-medium">
+                  Impôt Foncier (IF)
+                </span>
               </p>
               <Card className="rounded-[24px] shadow-[var(--boxShadowCard)!important] border-0 bg-bgCard lg:p-[18px]">
                 <div className="grid grid-cols-12 gap-3 items-center">
@@ -1390,8 +1417,8 @@ const TableImmobiliers = () => {
                           <span>10/02/2024</span>
                         </td>
                         <td>
-                          <div className="flex items-center gap-2">
-                            <Button className="cursor-pointer shadow-none bg-transparent  text-primaryColor  hover:bg-primaryColor hover:text-white text-xs h-auto py-2">
+                          <div className="flex items-center gap-3">
+                            <Button className="cursor-pointer shadow-none bg-transparent  text-[#5f61e6]  hover:bg-transparent hover:text-[#494be3] text-md h-auto p-0">
                               Traiter
                             </Button>
                             <DropdownMenu>
@@ -1427,7 +1454,12 @@ const TableImmobiliers = () => {
                 Mes immobiliers
               </h5>
               <p className="text-colorMuted text-sm mb-6">
-                Représente l’ensemble des biens immobiliers enregistrés à votre nom (terrains, maisons, immeubles, parcelles, etc.) et constituant l’assiette de l’<span className="text-colorTitle font-medium">Impôt Foncier (IF)</span>
+                Représente l’ensemble des biens immobiliers enregistrés à votre
+                nom (terrains, maisons, immeubles, parcelles, etc.) et
+                constituant l’assiette de l’
+                <span className="text-colorTitle font-medium">
+                  Impôt Foncier (IF)
+                </span>
               </p>
               <Card className="rounded-[24px] shadow-[var(--boxShadowCard)!important] border-0 bg-bgCard lg:p-[18px]">
                 <div className="grid grid-cols-12 gap-3 items-center">
@@ -1521,8 +1553,8 @@ const TableImmobiliers = () => {
                           <span>12/02/2024</span>
                         </td>
                         <td>
-                          <div className="flex items-center gap-2">
-                            <Button className="cursor-pointer shadow-none bg-transparent  text-primaryColor  hover:bg-primaryColor hover:text-white text-xs h-auto py-2">
+                          <div className="flex items-center gap-3">
+                            <Button className="cursor-pointer shadow-none bg-transparent  text-[#5f61e6]  hover:bg-transparent hover:text-[#494be3] text-md h-auto p-0">
                               Traiter
                             </Button>
                             <DropdownMenu>
@@ -1558,7 +1590,12 @@ const TableImmobiliers = () => {
                 Mes immobiliers
               </h5>
               <p className="text-colorMuted text-sm mb-6">
-                Représente l’ensemble des biens immobiliers enregistrés à votre nom (terrains, maisons, immeubles, parcelles, etc.) et constituant l’assiette de l’<span className="text-colorTitle font-medium">Impôt Foncier (IF)</span>
+                Représente l’ensemble des biens immobiliers enregistrés à votre
+                nom (terrains, maisons, immeubles, parcelles, etc.) et
+                constituant l’assiette de l’
+                <span className="text-colorTitle font-medium">
+                  Impôt Foncier (IF)
+                </span>
               </p>
               <Card className="rounded-[24px] shadow-[var(--boxShadowCard)!important] border-0 bg-bgCard lg:p-[18px]">
                 <div className="grid grid-cols-12 gap-3 items-center">
@@ -1652,8 +1689,8 @@ const TableImmobiliers = () => {
                           <span>15/02/2024</span>
                         </td>
                         <td>
-                          <div className="flex items-center gap-2">
-                            <Button className="cursor-pointer shadow-none bg-transparent  text-primaryColor  hover:bg-primaryColor hover:text-white text-xs h-auto py-2">
+                          <div className="flex items-center gap-3">
+                            <Button className="cursor-pointer shadow-none bg-transparent  text-[#5f61e6]  hover:bg-transparent hover:text-[#494be3] text-md h-auto p-0">
                               Traiter
                             </Button>
                             <DropdownMenu>
@@ -1689,7 +1726,12 @@ const TableImmobiliers = () => {
                 Mes immobiliers
               </h5>
               <p className="text-colorMuted text-sm mb-6">
-                Représente l’ensemble des biens immobiliers enregistrés à votre nom (terrains, maisons, immeubles, parcelles, etc.) et constituant l’assiette de l’<span className="text-colorTitle font-medium">Impôt Foncier (IF)</span>
+                Représente l’ensemble des biens immobiliers enregistrés à votre
+                nom (terrains, maisons, immeubles, parcelles, etc.) et
+                constituant l’assiette de l’
+                <span className="text-colorTitle font-medium">
+                  Impôt Foncier (IF)
+                </span>
               </p>
               <Card className="rounded-[24px] shadow-[var(--boxShadowCard)!important] border-0 bg-bgCard lg:p-[18px]">
                 <div className="grid grid-cols-12 gap-3 items-center">
@@ -1783,8 +1825,8 @@ const TableImmobiliers = () => {
                           <span>18/02/2024</span>
                         </td>
                         <td>
-                          <div className="flex items-center gap-2">
-                            <Button className="cursor-pointer shadow-none bg-transparent  text-primaryColor  hover:bg-primaryColor hover:text-white text-xs h-auto py-2">
+                          <div className="flex items-center gap-3">
+                            <Button className="cursor-pointer shadow-none bg-transparent  text-[#5f61e6]  hover:bg-transparent hover:text-[#494be3] text-md h-auto p-0">
                               Traiter
                             </Button>
                             <DropdownMenu>
@@ -1820,7 +1862,12 @@ const TableImmobiliers = () => {
                 Mes immobiliers
               </h5>
               <p className="text-colorMuted text-sm mb-6">
-                Représente l’ensemble des biens immobiliers enregistrés à votre nom (terrains, maisons, immeubles, parcelles, etc.) et constituant l’assiette de l’<span className="text-colorTitle font-medium">Impôt Foncier (IF)</span>
+                Représente l’ensemble des biens immobiliers enregistrés à votre
+                nom (terrains, maisons, immeubles, parcelles, etc.) et
+                constituant l’assiette de l’
+                <span className="text-colorTitle font-medium">
+                  Impôt Foncier (IF)
+                </span>
               </p>
               <Card className="rounded-[24px] shadow-[var(--boxShadowCard)!important] border-0 bg-bgCard lg:p-[18px]">
                 <div className="grid grid-cols-12 gap-3 items-center">
@@ -1914,8 +1961,8 @@ const TableImmobiliers = () => {
                           <span>20/02/2024</span>
                         </td>
                         <td>
-                          <div className="flex items-center gap-2">
-                            <Button className="cursor-pointer shadow-none bg-transparent  text-primaryColor  hover:bg-primaryColor hover:text-white text-xs h-auto py-2">
+                          <div className="flex items-center gap-3">
+                            <Button className="cursor-pointer shadow-none bg-transparent  text-[#5f61e6]  hover:bg-transparent hover:text-[#494be3] text-md h-auto p-0">
                               Traiter
                             </Button>
                             <DropdownMenu>
@@ -1951,7 +1998,12 @@ const TableImmobiliers = () => {
                 Mes immobiliers
               </h5>
               <p className="text-colorMuted text-sm mb-6">
-                Représente l’ensemble des biens immobiliers enregistrés à votre nom (terrains, maisons, immeubles, parcelles, etc.) et constituant l’assiette de l’<span className="text-colorTitle font-medium">Impôt Foncier (IF)</span>
+                Représente l’ensemble des biens immobiliers enregistrés à votre
+                nom (terrains, maisons, immeubles, parcelles, etc.) et
+                constituant l’assiette de l’
+                <span className="text-colorTitle font-medium">
+                  Impôt Foncier (IF)
+                </span>
               </p>
               <Card className="rounded-[24px] shadow-[var(--boxShadowCard)!important] border-0 bg-bgCard lg:p-[18px]">
                 <div className="grid grid-cols-12 gap-3 items-center">
@@ -2045,8 +2097,8 @@ const TableImmobiliers = () => {
                           <span>22/02/2024</span>
                         </td>
                         <td>
-                          <div className="flex items-center gap-2">
-                            <Button className="cursor-pointer shadow-none bg-transparent  text-primaryColor  hover:bg-primaryColor hover:text-white text-xs h-auto py-2">
+                          <div className="flex items-center gap-3">
+                            <Button className="cursor-pointer shadow-none bg-transparent  text-[#5f61e6]  hover:bg-transparent hover:text-[#494be3] text-md h-auto p-0">
                               Traiter
                             </Button>
                             <DropdownMenu>
@@ -2082,7 +2134,12 @@ const TableImmobiliers = () => {
                 Mes immobiliers
               </h5>
               <p className="text-colorMuted text-sm mb-6">
-                Représente l’ensemble des biens immobiliers enregistrés à votre nom (terrains, maisons, immeubles, parcelles, etc.) et constituant l’assiette de l’<span className="text-colorTitle font-medium">Impôt Foncier (IF)</span>
+                Représente l’ensemble des biens immobiliers enregistrés à votre
+                nom (terrains, maisons, immeubles, parcelles, etc.) et
+                constituant l’assiette de l’
+                <span className="text-colorTitle font-medium">
+                  Impôt Foncier (IF)
+                </span>
               </p>
               <Card className="rounded-[24px] shadow-[var(--boxShadowCard)!important] border-0 bg-bgCard lg:p-[18px]">
                 <div className="grid grid-cols-12 gap-3 items-center">
@@ -2176,8 +2233,8 @@ const TableImmobiliers = () => {
                           <span>25/02/2024</span>
                         </td>
                         <td>
-                          <div className="flex items-center gap-2">
-                            <Button className="cursor-pointer shadow-none bg-transparent  text-primaryColor  hover:bg-primaryColor hover:text-white text-xs h-auto py-2">
+                          <div className="flex items-center gap-3">
+                            <Button className="cursor-pointer shadow-none bg-transparent  text-[#5f61e6]  hover:bg-transparent hover:text-[#494be3] text-md h-auto p-0">
                               Traiter
                             </Button>
                             <DropdownMenu>

@@ -354,7 +354,7 @@ const TableImmobiliers = () => {
               <h5 className="text-colorTitle font-semibold text-[18px] mb-1">
                 Mes Unités Locatives
               </h5>
-              <p className="text-colorMuted text-sm mb-6 w-[750px]">
+              <p className="text-colorMuted text-sm mb-6 ">
                 Regroupe tous les biens immobiliers que vous avez mis ou
                 prévoyez mettre en location (appartements, maisons, bureaux,
                 immeubles, etc.) et générant des revenus soumis à l'
@@ -492,7 +492,7 @@ const TableImmobiliers = () => {
               <h5 className="text-colorTitle font-semibold text-[18px] mb-1">
                 Mes Unités Locatives
               </h5>
-              <p className="text-colorMuted text-sm mb-6 w-[750px]">
+              <p className="text-colorMuted text-sm mb-6 ">
                 Regroupe tous les biens immobiliers que vous avez mis ou
                 prévoyez mettre en location (appartements, maisons, bureaux,
                 immeubles, etc.) et générant des revenus soumis à l'
@@ -596,7 +596,7 @@ const TableImmobiliers = () => {
                           </td>
                           <td>
                             <div className="flex items-center gap-2">
-                              <Button className="cursor-pointer shadow-none bg-transparent  text-primaryColor  hover:bg-primaryColor hover:text-white text-xs h-auto py-2">
+                              <Button className="cursor-pointer shadow-none bg-transparent  text-[#5f61e6]  hover:bg-transparent hover:text-[#494be3] text-md h-auto p-0">
                                 Payer
                               </Button>
                               <DropdownMenu>
@@ -634,7 +634,7 @@ const TableImmobiliers = () => {
               <h5 className="text-colorTitle font-semibold text-[18px] mb-1">
                 Mes Unités Locatives
               </h5>
-              <p className="text-colorMuted text-sm mb-6 w-[750px]">
+              <p className="text-colorMuted text-sm mb-6 ">
                 Regroupe tous les biens immobiliers que vous avez mis ou
                 prévoyez mettre en location (appartements, maisons, bureaux,
                 immeubles, etc.) et générant des revenus soumis à l'
@@ -742,7 +742,7 @@ const TableImmobiliers = () => {
                           </td>
                           <td>
                             <div className="flex items-center gap-2">
-                              <Button className="cursor-pointer shadow-none bg-transparent  text-primaryColor  hover:bg-primaryColor hover:text-white text-xs h-auto py-2">
+                              <Button className="cursor-pointer shadow-none bg-transparent  text-[#5f61e6]  hover:bg-transparent hover:text-[#494be3] text-md h-auto p-0">
                                 Reçu
                               </Button>
                               <DropdownMenu>
@@ -780,7 +780,7 @@ const TableImmobiliers = () => {
               <h5 className="text-colorTitle font-semibold text-[18px] mb-1">
                 Mes Unités Locatives
               </h5>
-              <p className="text-colorMuted text-sm mb-6 w-[750px]">
+              <p className="text-colorMuted text-sm mb-6 ">
                 Regroupe tous les biens immobiliers que vous avez mis ou
                 prévoyez mettre en location (appartements, maisons, bureaux,
                 immeubles, etc.) et générant des revenus soumis à l'
@@ -877,7 +877,7 @@ const TableImmobiliers = () => {
                         </td>
                         <td>
                           <div className="flex items-center gap-2">
-                            <Button className="cursor-pointer shadow-none bg-transparent  text-primaryColor  hover:bg-primaryColor hover:text-white text-xs h-auto py-2">
+                            <Button className="cursor-pointer shadow-none bg-transparent  text-[#5f61e6]  hover:bg-transparent hover:text-[#494be3] text-md h-auto p-0">
                               Valider
                             </Button>
                             <DropdownMenu>
@@ -912,7 +912,7 @@ const TableImmobiliers = () => {
               <h5 className="text-colorTitle font-semibold text-[18px] mb-1">
                 Mes Unités Locatives
               </h5>
-              <p className="text-colorMuted text-sm mb-6 w-[750px]">
+              <p className="text-colorMuted text-sm mb-6 ">
                 Regroupe tous les biens immobiliers que vous avez mis ou
                 prévoyez mettre en location (appartements, maisons, bureaux,
                 immeubles, etc.) et générant des revenus soumis à l'
@@ -1013,7 +1013,7 @@ const TableImmobiliers = () => {
                         </td>
                         <td>
                           <div className="flex items-center gap-2">
-                            <Button className="cursor-pointer shadow-none bg-transparent  text-primaryColor  hover:bg-primaryColor hover:text-white text-xs h-auto py-2">
+                            <Button className="cursor-pointer shadow-none bg-transparent  text-[#5f61e6]  hover:bg-transparent hover:text-[#494be3] text-md h-auto p-0">
                               Imprimer
                             </Button>
                             <DropdownMenu>
@@ -1048,7 +1048,7 @@ const TableImmobiliers = () => {
               <h5 className="text-colorTitle font-semibold text-[18px] mb-1">
                 Mes Unités Locatives
               </h5>
-              <p className="text-colorMuted text-sm mb-6 w-[750px]">
+              <p className="text-colorMuted text-sm mb-6 ">
                 Regroupe tous les biens immobiliers que vous avez mis ou
                 prévoyez mettre en location (appartements, maisons, bureaux,
                 immeubles, etc.) et générant des revenus soumis à l'
@@ -1149,7 +1149,7 @@ const TableImmobiliers = () => {
                         </td>
                         <td>
                           <div className="flex items-center gap-2">
-                            <Button className="cursor-pointer shadow-none bg-transparent  text-primaryColor  hover:bg-primaryColor hover:text-white text-xs h-auto py-2">
+                            <Button className="cursor-pointer shadow-none bg-transparent  text-[#5f61e6]  hover:bg-transparent hover:text-[#494be3] text-md h-auto p-0">
                               Corriger
                             </Button>
                             <DropdownMenu>
@@ -1184,7 +1184,7 @@ const TableImmobiliers = () => {
               <h5 className="text-colorTitle font-semibold text-[18px] mb-1">
                 Mes Unités Locatives
               </h5>
-              <p className="text-colorMuted text-sm mb-6 w-[750px]">
+              <p className="text-colorMuted text-sm mb-6 ">
                 Regroupe tous les biens immobiliers que vous avez mis ou
                 prévoyez mettre en location (appartements, maisons, bureaux,
                 immeubles, etc.) et générant des revenus soumis à l'
@@ -1285,7 +1285,7 @@ const TableImmobiliers = () => {
                         </td>
                         <td>
                           <div className="flex items-center gap-2">
-                            <Button className="cursor-pointer shadow-none bg-transparent  text-primaryColor  hover:bg-primaryColor hover:text-white text-xs h-auto py-2">
+                            <Button className="cursor-pointer shadow-none bg-transparent  text-[#5f61e6]  hover:bg-transparent hover:text-[#494be3] text-md h-auto p-0">
                               Payer
                             </Button>
                             <DropdownMenu>
@@ -1320,7 +1320,7 @@ const TableImmobiliers = () => {
               <h5 className="text-colorTitle font-semibold text-[18px] mb-1">
                 Mes Unités Locatives
               </h5>
-              <p className="text-colorMuted text-sm mb-6 w-[750px]">
+              <p className="text-colorMuted text-sm mb-6 ">
                 Regroupe tous les biens immobiliers que vous avez mis ou
                 prévoyez mettre en location (appartements, maisons, bureaux,
                 immeubles, etc.) et générant des revenus soumis à l'
@@ -1421,7 +1421,7 @@ const TableImmobiliers = () => {
                         </td>
                         <td>
                           <div className="flex items-center gap-2">
-                            <Button className="cursor-pointer shadow-none bg-transparent  text-primaryColor  hover:bg-primaryColor hover:text-white text-xs h-auto py-2">
+                            <Button className="cursor-pointer shadow-none bg-transparent  text-[#5f61e6]  hover:bg-transparent hover:text-[#494be3] text-md h-auto p-0">
                               Traiter
                             </Button>
                             <DropdownMenu>
@@ -1456,7 +1456,7 @@ const TableImmobiliers = () => {
               <h5 className="text-colorTitle font-semibold text-[18px] mb-1">
                 Mes Unités Locatives
               </h5>
-              <p className="text-colorMuted text-sm mb-6 w-[750px]">
+              <p className="text-colorMuted text-sm mb-6 ">
                 Regroupe tous les biens immobiliers que vous avez mis ou
                 prévoyez mettre en location (appartements, maisons, bureaux,
                 immeubles, etc.) et générant des revenus soumis à l'
@@ -1557,7 +1557,7 @@ const TableImmobiliers = () => {
                         </td>
                         <td>
                           <div className="flex items-center gap-2">
-                            <Button className="cursor-pointer shadow-none bg-transparent  text-primaryColor  hover:bg-primaryColor hover:text-white text-xs h-auto py-2">
+                            <Button className="cursor-pointer shadow-none bg-transparent  text-[#5f61e6]  hover:bg-transparent hover:text-[#494be3] text-md h-auto p-0">
                               Traiter
                             </Button>
                             <DropdownMenu>
@@ -1592,7 +1592,7 @@ const TableImmobiliers = () => {
               <h5 className="text-colorTitle font-semibold text-[18px] mb-1">
                 Mes Unités Locatives
               </h5>
-              <p className="text-colorMuted text-sm mb-6 w-[750px]">
+              <p className="text-colorMuted text-sm mb-6 ">
                 Regroupe tous les biens immobiliers que vous avez mis ou
                 prévoyez mettre en location (appartements, maisons, bureaux,
                 immeubles, etc.) et générant des revenus soumis à l'
@@ -1693,7 +1693,7 @@ const TableImmobiliers = () => {
                         </td>
                         <td>
                           <div className="flex items-center gap-2">
-                            <Button className="cursor-pointer shadow-none bg-transparent  text-primaryColor  hover:bg-primaryColor hover:text-white text-xs h-auto py-2">
+                            <Button className="cursor-pointer shadow-none bg-transparent  text-[#5f61e6]  hover:bg-transparent hover:text-[#494be3] text-md h-auto p-0">
                               Traiter
                             </Button>
                             <DropdownMenu>
@@ -1728,7 +1728,7 @@ const TableImmobiliers = () => {
               <h5 className="text-colorTitle font-semibold text-[18px] mb-1">
                 Mes Unités Locatives
               </h5>
-              <p className="text-colorMuted text-sm mb-6 w-[750px]">
+              <p className="text-colorMuted text-sm mb-6 ">
                 Regroupe tous les biens immobiliers que vous avez mis ou
                 prévoyez mettre en location (appartements, maisons, bureaux,
                 immeubles, etc.) et générant des revenus soumis à l'
@@ -1829,7 +1829,7 @@ const TableImmobiliers = () => {
                         </td>
                         <td>
                           <div className="flex items-center gap-2">
-                            <Button className="cursor-pointer shadow-none bg-transparent  text-primaryColor  hover:bg-primaryColor hover:text-white text-xs h-auto py-2">
+                            <Button className="cursor-pointer shadow-none bg-transparent  text-[#5f61e6]  hover:bg-transparent hover:text-[#494be3] text-md h-auto p-0">
                               Traiter
                             </Button>
                             <DropdownMenu>
@@ -1864,7 +1864,7 @@ const TableImmobiliers = () => {
               <h5 className="text-colorTitle font-semibold text-[18px] mb-1">
                 Mes Unités Locatives
               </h5>
-              <p className="text-colorMuted text-sm mb-6 w-[750px]">
+              <p className="text-colorMuted text-sm mb-6 ">
                 Regroupe tous les biens immobiliers que vous avez mis ou
                 prévoyez mettre en location (appartements, maisons, bureaux,
                 immeubles, etc.) et générant des revenus soumis à l'
@@ -1965,7 +1965,7 @@ const TableImmobiliers = () => {
                         </td>
                         <td>
                           <div className="flex items-center gap-2">
-                            <Button className="cursor-pointer shadow-none bg-transparent  text-primaryColor  hover:bg-primaryColor hover:text-white text-xs h-auto py-2">
+                            <Button className="cursor-pointer shadow-none bg-transparent  text-[#5f61e6]  hover:bg-transparent hover:text-[#494be3] text-md h-auto p-0">
                               Traiter
                             </Button>
                             <DropdownMenu>
@@ -2000,7 +2000,7 @@ const TableImmobiliers = () => {
               <h5 className="text-colorTitle font-semibold text-[18px] mb-1">
                 Mes Unités Locatives
               </h5>
-              <p className="text-colorMuted text-sm mb-6 w-[750px]">
+              <p className="text-colorMuted text-sm mb-6 ">
                 Regroupe tous les biens immobiliers que vous avez mis ou
                 prévoyez mettre en location (appartements, maisons, bureaux,
                 immeubles, etc.) et générant des revenus soumis à l'
@@ -2101,7 +2101,7 @@ const TableImmobiliers = () => {
                         </td>
                         <td>
                           <div className="flex items-center gap-2">
-                            <Button className="cursor-pointer shadow-none bg-transparent  text-primaryColor  hover:bg-primaryColor hover:text-white text-xs h-auto py-2">
+                            <Button className="cursor-pointer shadow-none bg-transparent  text-[#5f61e6]  hover:bg-transparent hover:text-[#494be3] text-md h-auto p-0">
                               Traiter
                             </Button>
                             <DropdownMenu>
@@ -2136,7 +2136,7 @@ const TableImmobiliers = () => {
               <h5 className="text-colorTitle font-semibold text-[18px] mb-1">
                 Mes Unités Locatives
               </h5>
-              <p className="text-colorMuted text-sm mb-6 w-[750px]">
+              <p className="text-colorMuted text-sm mb-6 ">
                 Regroupe tous les biens immobiliers que vous avez mis ou
                 prévoyez mettre en location (appartements, maisons, bureaux,
                 immeubles, etc.) et générant des revenus soumis à l'
@@ -2237,7 +2237,7 @@ const TableImmobiliers = () => {
                         </td>
                         <td>
                           <div className="flex items-center gap-2">
-                            <Button className="cursor-pointer shadow-none bg-transparent  text-primaryColor  hover:bg-primaryColor hover:text-white text-xs h-auto py-2">
+                            <Button className="cursor-pointer shadow-none bg-transparent  text-[#5f61e6]  hover:bg-transparent hover:text-[#494be3] text-md h-auto p-0">
                               Traiter
                             </Button>
                             <DropdownMenu>

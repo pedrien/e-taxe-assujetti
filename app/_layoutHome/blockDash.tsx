@@ -15,6 +15,7 @@ import CardCompte from "./cardCompte";
 import ShowPay from "@/components/features/showPay/showPay";
 import { Button } from "@/components/ui/button";
 import { ChevronDown } from "lucide-react";
+
 const BlockDash = () => {
   return (
     <>
@@ -31,7 +32,7 @@ const BlockDash = () => {
             </div>
             <div className="col-span-12 lg:col-span-6">
               <div className="flex justify-end">
-                <Button className="bg-primaryColor rounded-lg">
+                <Button className="bg-primaryColor rounded-lg cursor-pointer shadow-[0_5px_10px_#00000026]">
                   Actions rapides
                   <ChevronDown></ChevronDown>
                 </Button>

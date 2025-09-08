@@ -41,16 +41,16 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
-  --color-blueDarken:  #5f61e6;
-  --color-bgFond:#f5f7fb;
+  --color-blueDarken: #5f61e6;
+  --color-bgFond: #f5f7fb;
   --color-bgGray: var(--bgGray);
   --color-bgCard: #fff;
-  --color-primaryColor: #ee7a34;
+  --color-primaryColor: #ff8e4a;
   --color-colorTitle: var(--colorTitle);
   --color-colorMuted: var(--colorMuted);
   --color-borderInput: var(--borderInput);
   --color-borderTr: var(--borderTr);
-  /* #113151 #168fe6 #1c4ab5 #383ac4 #494be3 */
+  /* #113151 #168fe6 #1c4ab5 #383ac4 #494be3  #ee7a34*/
 }
 
 :root {
@@ -151,7 +151,7 @@
     }
   }
   tr {
-    border-top: 1px solid var(--borderTr);
+    border-top: 1px dashed var(--borderTr);
     vertical-align: middle;
   }
   td {
@@ -164,32 +164,3 @@
   }
 }
 
-/* Click-bubble animation for .btn-action inside a container */
-.bid-bubble-wrap { position: relative; }
-.add-click-numbe {
-  position: absolute;
-  left: 0;
-  top: 0;
-  transform: translate(-50%, -50%);
-  padding: 6px 10px;
-  border-radius: 999px;
-  background: rgba(255, 80, 80, 0.95);
-  color: #fff;
-  font-weight: 700;
-  font-size: 14px;
-  pointer-events: none;
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
-  animation: add-click-numbe-fly 600ms cubic-bezier(.2, .9, .2, 1) forwards;
-}
-
-@keyframes add-click-numbe-fly {
-  0% {
-    transform: translate(-50%, -50%) scale(1);
-    opacity: 1;
-  }
-  70% { opacity: 1; }
-  100% {
-    transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(.9);
-    opacity: 0;
-  }
-}
