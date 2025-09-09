@@ -3,8 +3,8 @@ import { ChevronDown } from "lucide-react";
 import { Bell, Search, Sun, ArrowDown, LogOut } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
-<<<<<<< HEAD
 import { useNextAuth } from "@/app/contexts/auth/useNextAuth";
+import { useTaxpayerAvatar } from "@/app/hooks/useTaxpayerAvatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,25 +13,21 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-
-const Navbar = () => {
-  const { user, payerId, logout } = useNextAuth();
-
-=======
 import { useEffect, useState } from "react";
 
 const Navbar = () => {
+  const { user, payerId, logout } = useNextAuth();
+  const { src: avatarSrc } = useTaxpayerAvatar(payerId);
   const [scrolled, setScrolled] = useState(false);
   useEffect(() => {
     const handleScroll = () => {
       const offset = window.scrollY;
-      setScrolled(offset > 40); // Active à partir de 50px
+      setScrolled(offset > 40);
     };
 
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
->>>>>>> origin/UI
   return (
     <div className={`nav ${
       scrolled
@@ -154,14 +150,10 @@ const Navbar = () => {
             >
               <Bell size={22}></Bell>
             </Link>
-<<<<<<< HEAD
             <DropdownMenu>
               <DropdownMenuTrigger className="block-avatar flex items-center gap-1 p-[5px] bg-[#ffffff1c] text-white rounded-full hover:bg-[#ffffff2c] transition-colors">
                 <Avatar className="w-[32px] h-[32px]">
-                  <AvatarImage
-                    src="https://github.com/shadcn.png"
-                    alt={user?.name || "User"}
-                  />
+                  <AvatarImage src={avatarSrc ?? undefined} alt={user?.name || "User"} />
                   <AvatarFallback className="bg-bgCard text-colorTitle text-sm font-medium">
                     {user?.name ? user.name.substring(0, 2).toUpperCase() : "U"}
                   </AvatarFallback>
@@ -189,20 +181,6 @@ const Navbar = () => {
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-=======
-            <div className="block-avatar flex items-center gap-1 p-[5px] bg-[#ffffff2a] text-white rounded-full">
-              <Avatar className="w-[32px] h-[32px]">
-                <AvatarImage
-                  src="https://github.com/shadcn.png"
-                  alt="@shadcn"
-                />
-                <AvatarFallback className="bg-bgCard text-colorTitle text-sm font-medium">
-                  CN
-                </AvatarFallback>
-              </Avatar>
-              <ChevronDown size={22} />
-            </div>
->>>>>>> origin/UI
           </div>
         </div>
       </div>

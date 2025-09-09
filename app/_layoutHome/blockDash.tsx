@@ -1,4 +1,6 @@
 import React from "react";
+import { useNextAuth } from "@/app/contexts/auth/useNextAuth";
+import { useTaxpayerCounts } from "@/app/hooks/useTaxpayerCounts";
 import { Card } from "@/components/ui/card";
 import {
   MoveUp,
@@ -17,6 +19,10 @@ import { Button } from "@/components/ui/button";
 import { ChevronDown } from "lucide-react";
 
 const BlockDash = () => {
+  const { payerId } = useNextAuth();
+  const { counts, loading } = useTaxpayerCounts(payerId);
+  const { immovables: immovablesCount, vehicles: vehiclesCount, activities: activitiesCount } = counts;
+
   return (
     <>
       <div className="banner-home lg:pt-[40px] lg:pb-[150px] bg-blueDarken relative z-10">
@@ -58,7 +64,7 @@ const BlockDash = () => {
                 </div>
                 <div className="flex items-center justify-between">
                   <h4 className="text-colorTitle font-medium lg:text-[22px]">
-                    10
+                    {loading ? "—" : immovablesCount}
                   </h4>
                   <div className="indice flex items-center text-xs text-[#2fac71]">
                     <span>+2.5%</span>
@@ -75,7 +81,7 @@ const BlockDash = () => {
                       <FileText size={24} />
                     </div>
                     <h3 className="text-start text-colorMuted text-sm">
-                      Contrats de bail
+                      Unités locatives
                     </h3>
                   </div>
                 </div>
@@ -104,7 +110,7 @@ const BlockDash = () => {
                 </div>
                 <div className="flex items-center justify-between">
                   <h4 className="text-colorTitle font-medium lg:text-[22px]">
-                    3
+                    {loading ? "—" : vehiclesCount}
                   </h4>
                   <div className="indice flex items-center text-xs text-[#da2d2d]">
                     <span>+2.5%</span>
@@ -151,7 +157,7 @@ const BlockDash = () => {
                 </div>
                 <div className="flex items-center justify-between">
                   <h4 className="text-colorTitle font-medium lg:text-[22px]">
-                    9
+                    {loading ? "—" : activitiesCount}
                   </h4>
                   <div className="indice flex items-center text-xs text-[#2fac71]">
                     <span>+2.5%</span>

@@ -24,6 +24,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useNextAuth } from "@/app/contexts/auth/useNextAuth";
+import { useTaxpayerVehicles } from "@/app/hooks/useTaxpayerVehicles";
 
 const TableVehicules = () => {
   // États pour gérer les checkboxes de chaque onglet
@@ -130,32 +132,20 @@ const TableVehicules = () => {
       />
     );
   };
-  const identItems = [
-    {
-      id: "2783730092",
-      matricule: "2783730092",
-      chassis: "357484",
-      annee: "2022",
-      poids: "500 kg",
-      moteur: "0",
-      marque: "Toyota",
-      modele: "Corolla",
-      carrosserie: "Jeep",
-      couleur: "Rouge",
-    },
-    {
-      id: "2783730092-2",
-      matricule: "2783730092",
-      chassis: "357484",
-      annee: "2022",
-      poids: "500 kg",
-      moteur: "0",
-      marque: "Toyota",
-      modele: "Corolla",
-      carrosserie: "Jeep",
-      couleur: "Rouge",
-    },
-  ];
+  const { payerId } = useNextAuth();
+  const { vehicles, loading } = useTaxpayerVehicles(payerId);
+  const identItems = vehicles.map((v, index) => ({
+    id: v.registration ?? v.chassisNumber ?? String(index),
+    matricule: v.registration ?? "",
+    chassis: v.chassisNumber ?? "",
+    annee: (v.circYear ?? "").toString(),
+    poids: v.weight !== null && v.weight !== undefined ? String(v.weight) : "",
+    moteur: v.power !== null && v.power !== undefined ? String(v.power) : "",
+    marque: v.mark?.headLine ?? "",
+    modele: v.model?.headLine ?? "",
+    carrosserie: "",
+    couleur: v.color?.name ?? "",
+  }));
   const declItems = [
     {
       id: "2783730092",
@@ -739,67 +729,75 @@ const TableVehicules = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {identItems.map((row) => (
-                        <tr key={row.id}>
-                          <td>{renderCheckbox("ident", row.id)}</td>
-                          <td>
-                            <span>{row.matricule}</span>
-                          </td>
-                          <td>
-                            <span>{row.chassis}</span>
-                          </td>
-                          <td>
-                            <span>{row.annee}</span>
-                          </td>
-                          <td>
-                            <span>{row.poids}</span>
-                          </td>
-                          <td>
-                            <span>{row.moteur}</span>
-                          </td>
-                          <td>
-                            <span>{row.marque}</span>
-                          </td>
-                          <td>
-                            <span>{row.modele}</span>
-                          </td>
-                          <td>
-                            <span>{row.carrosserie}</span>
-                          </td>
-                          <td>
-                            <span>{row.couleur}</span>
-                          </td>
-                          <td>
-                            <div className="flex items-center gap-3">
-                              <Button className="cursor-pointer shadow-none bg-transparent  text-[#5f61e6]  hover:bg-transparent hover:text-[#494be3] text-md h-auto p-0">
-                                Déclarer
-                              </Button>
-                              <DropdownMenu>
-                                <DropdownMenuTrigger className="cursor-pointer bg-bgGray text-colorTitle p-0 w-[28px] flex items-center justify-center rounded-lg h-[28px] hover:bg-[#07192b] hover:text-white">
-                                  <EllipsisVertical
-                                    size={18}
-                                  ></EllipsisVertical>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent>
-                                  <DropdownMenuLabel className="text-colorMuted text-xs">
-                                    Actions
-                                  </DropdownMenuLabel>
-                                  <DropdownMenuSeparator />
-                                  <DropdownMenuItem className="text-sm text-colorTitle">
-                                    Afficher
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem className="text-sm text-colorTitle">
-                                    Modifier
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem className="text-sm text-colorTitle">
-                                    Supprimer
-                                  </DropdownMenuItem>
-                                </DropdownMenuContent>
-                              </DropdownMenu>
-                            </div>
+                      {identItems.length === 0 ? (
+                        <tr>
+                          <td colSpan={11} className="text-center text-colorMuted py-6">
+                            Véhicule non trouvé
                           </td>
                         </tr>
-                      ))}
+                      ) : (
+                        identItems.map((row) => (
+                          <tr key={row.id}>
+                            <td>{renderCheckbox("ident", row.id)}</td>
+                            <td>
+                              <span>{row.matricule}</span>
+                            </td>
+                            <td>
+                              <span>{row.chassis}</span>
+                            </td>
+                            <td>
+                              <span>{row.annee}</span>
+                            </td>
+                            <td>
+                              <span>{row.poids}</span>
+                            </td>
+                            <td>
+                              <span>{row.moteur}</span>
+                            </td>
+                            <td>
+                              <span>{row.marque}</span>
+                            </td>
+                            <td>
+                              <span>{row.modele}</span>
+                            </td>
+                            <td>
+                              <span>{row.carrosserie}</span>
+                            </td>
+                            <td>
+                              <span>{row.couleur}</span>
+                            </td>
+                            <td>
+                              <div className="flex items-center gap-3">
+                                <Button className="cursor-pointer shadow-none bg-transparent  text-[#5f61e6]  hover:bg-transparent hover:text-[#494be3] text-md h-auto p-0">
+                                  Déclarer
+                                </Button>
+                                <DropdownMenu>
+                                  <DropdownMenuTrigger className="cursor-pointer bg-bgGray text-colorTitle p-0 w-[28px] flex items-center justify-center rounded-lg h-[28px] hover:bg-[#07192b] hover:text-white">
+                                    <EllipsisVertical
+                                      size={18}
+                                    ></EllipsisVertical>
+                                  </DropdownMenuTrigger>
+                                  <DropdownMenuContent>
+                                    <DropdownMenuLabel className="text-colorMuted text-xs">
+                                      Actions
+                                    </DropdownMenuLabel>
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuItem className="text-sm text-colorTitle">
+                                      Afficher
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem className="text-sm text-colorTitle">
+                                      Modifier
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem className="text-sm text-colorTitle">
+                                      Supprimer
+                                    </DropdownMenuItem>
+                                  </DropdownMenuContent>
+                                </DropdownMenu>
+                              </div>
+                            </td>
+                          </tr>
+                        ))
+                      )}
                     </tbody>
                   </table>
                 </div>
