@@ -3,7 +3,7 @@ import { StatisticsChart } from "@/components/features/charts/statisticsChart";
 import { Card } from "@/components/ui/card";
 
 const CardStat = () => {
-  const { openDrawer } = useDrawer();
+  const { } = useDrawer();
   return (
     <>
       <Card className="rounded-[24px] shadow-[var(--boxShadowCard)!important] border-0 bg-bgCard lg:p-[18px]">

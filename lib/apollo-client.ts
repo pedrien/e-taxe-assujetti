@@ -12,7 +12,7 @@ const httpLink = createHttpLink({
 // Link pour ajouter l'authentification
 const authLink = setContext((_, prevContext) => {
   const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
-  const prevHeaders = (prevContext as any)?.headers as Record<string, string> | undefined;
+  const prevHeaders = (prevContext as { headers?: Record<string, string> })?.headers;
   return {
     headers: {
       ...(prevHeaders ?? {}),
@@ -40,7 +40,7 @@ const errorLink = onError((params) => {
   if (networkError) {
     console.log(`[Network error]: ${networkError}`);
 
-    if ('statusCode' in networkError && (networkError as any).statusCode === 401) {
+    if ('statusCode' in networkError && (networkError as Error & { statusCode: number }).statusCode === 401) {
       if (typeof window !== 'undefined') {
         window.location.href = '/auth/signin';
       }

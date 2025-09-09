@@ -29,20 +29,20 @@ export const authOptions: AuthOptions = {
     secret: publicKey,
   },
   callbacks: {
-    async jwt({ token, account }: any) {
+    async jwt({ token, account }: { token: Record<string, unknown>; account: Record<string, unknown> | null }) {
       const expire_marge = 60 * 1000;
 
       // Initial sign in
       if (account) {
         return {
-          accessToken: account.access_token,
-          accessTokenExpires: Date.now() + account.expires_in * 1000,
-          refreshToken: account.refresh_token,
+          accessToken: account.access_token as string,
+          accessTokenExpires: Date.now() + (account.expires_in as number) * 1000,
+          refreshToken: account.refresh_token as string,
         };
       }
 
       // Return previous token if the access token has not expired yet
-      if (Date.now() < token.accessTokenExpires - expire_marge) {
+      if (Date.now() < (token.accessTokenExpires as number) - expire_marge) {
         return token;
       }
 
@@ -51,18 +51,18 @@ export const authOptions: AuthOptions = {
     },
     async session({ session, token }) {
       if (token.accessToken) {
-        const decodedToken = jwtDecode<any>(token.accessToken);
+        const decodedToken = jwtDecode<Record<string, string | number | boolean>>(token.accessToken);
         
         if (token) {
           session.user = {
-            name: decodedToken.name,
-            email: decodedToken.email,
-            image: decodedToken.picture,
+            name: decodedToken.name as string,
+            email: decodedToken.email as string,
+            image: decodedToken.picture as string,
           };
-          session.accessToken = token.accessToken;
-          session.refreshToken = token.refreshToken;
-          session.payerId = decodedToken.payer;
-          session.error = token.error;
+          session.accessToken = token.accessToken as string;
+          session.refreshToken = token.refreshToken as string;
+          session.payerId = decodedToken.payer as string;
+          session.error = token.error as string;
         }
       }
 

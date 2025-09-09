@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
-import { Search, Eye, EllipsisVertical } from "lucide-react";
+import { Search, EllipsisVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -133,7 +133,7 @@ const TableVehicules = () => {
     );
   };
   const { payerId } = useNextAuth();
-  const { vehicles, loading } = useTaxpayerVehicles(payerId);
+  const { vehicles } = useTaxpayerVehicles(payerId);
   const identItems = vehicles.map((v, index) => ({
     id: v.registration ?? v.chassisNumber ?? String(index),
     matricule: v.registration ?? "",

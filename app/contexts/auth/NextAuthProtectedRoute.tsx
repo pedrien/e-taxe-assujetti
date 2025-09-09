@@ -26,7 +26,7 @@ const NextAuthProtectedRoute = ({ children }: NextAuthProtectedRouteProps) => {
       <div className="min-h-screen flex items-center justify-center bg-bgFond">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primaryColor mx-auto mb-4"></div>
-          <p className="text-colorMuted">Redirection vers l'authentification...</p>
+          <p className="text-colorMuted">Redirection vers l&apos;authentification...</p>
         </div>
       </div>
     );

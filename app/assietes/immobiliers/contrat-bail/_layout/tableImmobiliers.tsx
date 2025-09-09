@@ -2230,7 +2230,7 @@ const TableImmobiliers = () => {
                           <span>20 m2</span>
                         </td>
                         <td>
-                          <span>Erreur d'évaluation</span>
+                          <span>Erreur d&apos;évaluation</span>
                         </td>
                         <td>
                           <span>25/02/2024</span>

@@ -643,7 +643,7 @@ const TableActivities = () => {
                             true
                           )}
                         </th>
-                        <th>Type d'activité</th>
+                        <th>Type d&apos;activité</th>
                         <th>Dimension</th>
                         <th>Activité principale</th>
                         <th>Nature</th>
@@ -801,7 +801,7 @@ const TableActivities = () => {
                             true
                           )}
                         </th>
-                        <th>Type d'activité</th>
+                        <th>Type d&apos;activité</th>
                         <th>Dimension</th>
                         <th>Activité principale</th>
                         <th>Nature</th>
@@ -959,7 +959,7 @@ const TableActivities = () => {
                             true
                           )}
                         </th>
-                        <th>Type d'activité</th>
+                        <th>Type d&apos;activité</th>
                         <th>Dimension</th>
                         <th>Activité principale</th>
                         <th>Nature</th>
@@ -1117,7 +1117,7 @@ const TableActivities = () => {
                             true
                           )}
                         </th>
-                        <th>Type d'activité</th>
+                        <th>Type d&apos;activité</th>
                         <th>Dimension</th>
                         <th>Activité principale</th>
                         <th>Nature</th>
@@ -1275,7 +1275,7 @@ const TableActivities = () => {
                             true
                           )}
                         </th>
-                        <th>Type d'activité</th>
+                        <th>Type d&apos;activité</th>
                         <th>Dimension</th>
                         <th>Activité principale</th>
                         <th>Nature</th>
@@ -1433,7 +1433,7 @@ const TableActivities = () => {
                             true
                           )}
                         </th>
-                        <th>Type d'activité</th>
+                        <th>Type d&apos;activité</th>
                         <th>Dimension</th>
                         <th>Activité principale</th>
                         <th>Nature</th>
@@ -1591,7 +1591,7 @@ const TableActivities = () => {
                             true
                           )}
                         </th>
-                        <th>Type d'activité</th>
+                        <th>Type d&apos;activité</th>
                         <th>Dimension</th>
                         <th>Activité principale</th>
                         <th>Nature</th>
@@ -1749,7 +1749,7 @@ const TableActivities = () => {
                             true
                           )}
                         </th>
-                        <th>Type d'activité</th>
+                        <th>Type d&apos;activité</th>
                         <th>Dimension</th>
                         <th>Activité principale</th>
                         <th>Nature</th>
@@ -1907,7 +1907,7 @@ const TableActivities = () => {
                             true
                           )}
                         </th>
-                        <th>Type d'activité</th>
+                        <th>Type d&apos;activité</th>
                         <th>Dimension</th>
                         <th>Activité principale</th>
                         <th>Nature</th>
@@ -2065,7 +2065,7 @@ const TableActivities = () => {
                             true
                           )}
                         </th>
-                        <th>Type d'activité</th>
+                        <th>Type d&apos;activité</th>
                         <th>Dimension</th>
                         <th>Activité principale</th>
                         <th>Nature</th>
@@ -2223,7 +2223,7 @@ const TableActivities = () => {
                             true
                           )}
                         </th>
-                        <th>Type d'activité</th>
+                        <th>Type d&apos;activité</th>
                         <th>Dimension</th>
                         <th>Activité principale</th>
                         <th>Nature</th>
@@ -2381,7 +2381,7 @@ const TableActivities = () => {
                             true
                           )}
                         </th>
-                        <th>Type d'activité</th>
+                        <th>Type d&apos;activité</th>
                         <th>Dimension</th>
                         <th>Activité principale</th>
                         <th>Nature</th>
@@ -2539,7 +2539,7 @@ const TableActivities = () => {
                             true
                           )}
                         </th>
-                        <th>Type d'activité</th>
+                        <th>Type d&apos;activité</th>
                         <th>Dimension</th>
                         <th>Activité principale</th>
                         <th>Nature</th>
@@ -2697,7 +2697,7 @@ const TableActivities = () => {
                             true
                           )}
                         </th>
-                        <th>Type d'activité</th>
+                        <th>Type d&apos;activité</th>
                         <th>Dimension</th>
                         <th>Activité principale</th>
                         <th>Nature</th>
