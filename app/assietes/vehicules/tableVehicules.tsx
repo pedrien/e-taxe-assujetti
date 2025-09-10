@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Search, EllipsisVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -133,19 +133,77 @@ const TableVehicules = () => {
     );
   };
   const { payerId } = useNextAuth();
-  const { vehicles } = useTaxpayerVehicles(payerId);
+  const { vehicles, loading } = useTaxpayerVehicles(payerId);
   const identItems = vehicles.map((v, index) => ({
     id: v.registration ?? v.chassisNumber ?? String(index),
     matricule: v.registration ?? "",
     chassis: v.chassisNumber ?? "",
     annee: (v.circYear ?? "").toString(),
-    poids: v.weight !== null && v.weight !== undefined ? String(v.weight) : "",
-    moteur: v.power !== null && v.power !== undefined ? String(v.power) : "",
+    poids:
+      v.weight !== null && v.weight !== undefined && v.weight !== ""
+        ? `${String(v.weight)} Kg`
+        : "",
+    moteur:
+      v.power !== null && v.power !== undefined && v.power !== ""
+        ? `${String(v.power)} CH`
+        : "",
     marque: v.mark?.headLine ?? "",
     modele: v.model?.headLine ?? "",
-    carrosserie: "",
+    carrosserie: v.calender?.headLine ?? "",
     couleur: v.color?.name ?? "",
   }));
+
+  // Etats recherche + filtres (onglet Identifiés)
+  const [searchIdent, setSearchIdent] = useState("");
+  const [filterMarque, setFilterMarque] = useState<string | undefined>();
+  const [filterModele, setFilterModele] = useState<string | undefined>();
+  const [filterCarrosserie, setFilterCarrosserie] = useState<string | undefined>();
+
+  // Options de filtres (uniques, triées)
+  const {
+    marquesOptions,
+    modelesOptions,
+    carrosseriesOptions,
+  } = useMemo(() => {
+    const marques = new Set<string>();
+    const modeles = new Set<string>();
+    const carrosseries = new Set<string>();
+    identItems.forEach((i) => {
+      if (i.marque) marques.add(i.marque);
+      if (i.modele) modeles.add(i.modele);
+      if (i.carrosserie) carrosseries.add(i.carrosserie);
+    });
+    return {
+      marquesOptions: Array.from(marques).sort((a, b) => a.localeCompare(b)),
+      modelesOptions: Array.from(modeles).sort((a, b) => a.localeCompare(b)),
+      carrosseriesOptions: Array.from(carrosseries).sort((a, b) => a.localeCompare(b)),
+    };
+  }, [identItems]);
+
+  // Liste filtrée (Identifiés)
+  const identItemsFiltered = useMemo(() => {
+    const q = searchIdent.trim().toLowerCase();
+    return identItems.filter((i) => {
+      if (filterMarque && i.marque !== filterMarque) return false;
+      if (filterModele && i.modele !== filterModele) return false;
+      if (filterCarrosserie && i.carrosserie !== filterCarrosserie) return false;
+      if (!q) return true;
+      const hay = `${i.matricule} ${i.chassis} ${i.annee} ${i.poids} ${i.moteur} ${i.marque} ${i.modele} ${i.carrosserie} ${i.couleur}`.toLowerCase();
+      return hay.includes(q);
+    });
+  }, [identItems, searchIdent, filterMarque, filterModele, filterCarrosserie]);
+  
+  // Affichage d'un loader pendant le chargement des véhicules
+  if (loading) {
+    return (
+      <Card className="rounded-[24px] shadow-[var(--boxShadowCard)!important] border-0 bg-bgCard p-6 min-h-[300px] flex items-center justify-center">
+        <div className="flex flex-col items-center gap-3">
+          <div className="animate-spin rounded-full h-10 w-10 border-2 border-primaryColor border-t-transparent"></div>
+          <p className="text-colorMuted text-sm">Chargement des véhicules…</p>
+        </div>
+      </Card>
+    );
+  }
   const declItems = [
     {
       id: "2783730092",
@@ -635,8 +693,10 @@ const TableVehicules = () => {
                       </div>
                       <Input
                         type="text"
+                        value={searchIdent}
+                        onChange={(e) => setSearchIdent(e.target.value)}
                         className="shadow-none h-10 pl-8 rounded-lg border-borderInput placeholder:text-colorMuted placeholder:opacity-70"
-                        placeholder="Recherche"
+                        placeholder="Recherche (immat, chassis, marque, modèle, ...)"
                       />
                     </div>
                   </div>
@@ -644,60 +704,42 @@ const TableVehicules = () => {
                     <div className="flex lg:justify-end gap-2">
                       {renderAppurerButton("ident")}
                       <div className="block-selects flex border border-borderInput rounded-lg">
-                        <Select>
+                        <Select value={filterMarque} onValueChange={(v) => setFilterMarque(v)}>
                           <SelectTrigger className="w-[180px] shadow-none border-0 rounded-none border-r border-borderInput text-colorTitle">
-                            <SelectValue placeholder="Nature" />
+                            <SelectValue placeholder="Marque" />
                           </SelectTrigger>
                           <SelectContent>
                             <SelectGroup>
-                              <SelectLabel>Nature</SelectLabel>
-                              <SelectItem value="apple">Apple</SelectItem>
-                              <SelectItem value="banana">Banana</SelectItem>
-                              <SelectItem value="blueberry">
-                                Blueberry
-                              </SelectItem>
-                              <SelectItem value="grapes">Grapes</SelectItem>
-                              <SelectItem value="pineapple">
-                                Pineapple
-                              </SelectItem>
+                              <SelectLabel>Marque</SelectLabel>
+                              {marquesOptions.map((m) => (
+                                <SelectItem key={m} value={m}>{m}</SelectItem>
+                              ))}
                             </SelectGroup>
                           </SelectContent>
                         </Select>
-                        <Select>
+                        <Select value={filterModele} onValueChange={(v) => setFilterModele(v)}>
                           <SelectTrigger className="w-[180px] shadow-none border-0 rounded-none border-r border-borderInput text-colorTitle">
-                            <SelectValue placeholder="Rang" />
+                            <SelectValue placeholder="Modèle" />
                           </SelectTrigger>
                           <SelectContent>
                             <SelectGroup>
-                              <SelectLabel>Rang</SelectLabel>
-                              <SelectItem value="apple">Apple</SelectItem>
-                              <SelectItem value="banana">Banana</SelectItem>
-                              <SelectItem value="blueberry">
-                                Blueberry
-                              </SelectItem>
-                              <SelectItem value="grapes">Grapes</SelectItem>
-                              <SelectItem value="pineapple">
-                                Pineapple
-                              </SelectItem>
+                              <SelectLabel>Modèle</SelectLabel>
+                              {modelesOptions.map((m) => (
+                                <SelectItem key={m} value={m}>{m}</SelectItem>
+                              ))}
                             </SelectGroup>
                           </SelectContent>
                         </Select>
-                        <Select>
+                        <Select value={filterCarrosserie} onValueChange={(v) => setFilterCarrosserie(v)}>
                           <SelectTrigger className="w-[180px] shadow-none border-0 rounded-none">
-                            <SelectValue placeholder="Statut" />
+                            <SelectValue placeholder="Carrosserie" />
                           </SelectTrigger>
                           <SelectContent>
                             <SelectGroup>
-                              <SelectLabel>Statut</SelectLabel>
-                              <SelectItem value="apple">Apple</SelectItem>
-                              <SelectItem value="banana">Banana</SelectItem>
-                              <SelectItem value="blueberry">
-                                Blueberry
-                              </SelectItem>
-                              <SelectItem value="grapes">Grapes</SelectItem>
-                              <SelectItem value="pineapple">
-                                Pineapple
-                              </SelectItem>
+                              <SelectLabel>Carrosserie</SelectLabel>
+                              {carrosseriesOptions.map((c) => (
+                                <SelectItem key={c} value={c}>{c}</SelectItem>
+                              ))}
                             </SelectGroup>
                           </SelectContent>
                         </Select>
@@ -729,14 +771,14 @@ const TableVehicules = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {identItems.length === 0 ? (
+                      {identItemsFiltered.length === 0 ? (
                         <tr>
                           <td colSpan={11} className="text-center text-colorMuted py-6">
                             Véhicule non trouvé
                           </td>
                         </tr>
                       ) : (
-                        identItems.map((row) => (
+                        identItemsFiltered.map((row) => (
                           <tr key={row.id}>
                             <td>{renderCheckbox("ident", row.id)}</td>
                             <td>

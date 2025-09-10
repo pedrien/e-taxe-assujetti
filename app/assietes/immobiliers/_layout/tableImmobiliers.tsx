@@ -11,8 +11,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { EllipsisVertical, Search } from "lucide-react";
-import { useState } from "react";
-
+import { useState, useMemo } from "react";
+import { useNextAuth } from "@/app/contexts/auth/useNextAuth";
+import { useTaxpayerImmovables } from "@/app/hooks/useTaxpayerImmovables";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -21,38 +22,57 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-
 import { Checkbox } from "@/components/ui/checkbox";
-
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
+// Types
+interface ImmovableItem {
+  id: string;
+  nia: string;
+  denomination: string;
+  nature: string;
+  usage: string;
+  rang: string;
+  sb: string;
+  snb: string;
+}
+
+interface FilterState {
+  search: string;
+  nature: string | undefined;
+  usage: string | undefined;
+  rang: string | undefined;
+}
 
 const TableImmobiliers = () => {
   // États pour gérer les checkboxes de chaque onglet
-  const [checkedItems, setCheckedItems] = useState<{ [key: string]: string[] }>(
-    {
-      ident: [],
-      decl: [],
-      pay: [],
-      app: [],
-      imp: [],
-      dd: [],
-      dp: [],
-      fpc: [],
-      amr: [],
-      pour: [],
-      cc: [],
-      adt: [],
-      con: [],
-      recl: [],
-    }
-  );
+  const [checkedItems, setCheckedItems] = useState<{ [key: string]: string[] }>({
+    ident: [],
+    decl: [],
+    pay: [],
+    app: [],
+    imp: [],
+    dd: [],
+    dp: [],
+    fpc: [],
+    amr: [],
+    pour: [],
+    cc: [],
+    adt: [],
+    con: [],
+    recl: [],
+  });
 
-  // Fonction pour gérer la sélection/désélection des checkboxes
-  const handleCheckboxChange = (
-    tabKey: string,
-    itemId: string,
-    checked: boolean
-  ) => {
+  // États pour les filtres de l'onglet Identifiés
+  const [filters, setFilters] = useState<FilterState>({
+    search: "",
+    nature: undefined,
+    usage: undefined,
+    rang: undefined,
+  });
+
+  // Fonctions utilitaires
+  const handleCheckboxChange = (tabKey: string, itemId: string, checked: boolean) => {
     setCheckedItems((prev) => ({
       ...prev,
       [tabKey]: checked
@@ -61,30 +81,18 @@ const TableImmobiliers = () => {
     }));
   };
 
-  // Fonction pour gérer la sélection/désélection de tous les éléments
-  const handleSelectAll = (
-    tabKey: string,
-    allItemIds: string[],
-    checked: boolean
-  ) => {
+  const handleSelectAll = (tabKey: string, allItemIds: string[], checked: boolean) => {
     setCheckedItems((prev) => ({
       ...prev,
       [tabKey]: checked ? allItemIds : [],
     }));
   };
 
-  // Fonction pour appurer les éléments sélectionnés
   const handleAppurer = (tabKey: string) => {
     const selectedItems = checkedItems[tabKey];
-    console.log(
-      `Appurer les éléments sélectionnés pour ${tabKey}:`,
-      selectedItems
-    );
-    // Ici vous pouvez ajouter la logique pour appurer les éléments
-    // Par exemple, appeler une API ou mettre à jour l'état
+    console.log(`Appurer les éléments sélectionnés pour ${tabKey}:`, selectedItems);
   };
 
-  // Fonction utilitaire pour créer le bouton Appurer
   const renderAppurerButton = (tabKey: string) => {
     if (checkedItems[tabKey].length > 0) {
       return (
@@ -97,6 +105,19 @@ const TableImmobiliers = () => {
       );
     }
     return null;
+  };
+
+  const handleFilterChange = (key: keyof FilterState, value: string | undefined) => {
+    setFilters(prev => ({ ...prev, [key]: value }));
+  };
+
+  const clearFilters = () => {
+    setFilters({
+      search: "",
+      nature: undefined,
+      usage: undefined,
+      rang: undefined,
+    });
   };
 
   // Fonction utilitaire pour créer les checkboxes
@@ -133,29 +154,73 @@ const TableImmobiliers = () => {
     );
   };
 
-  // Données data-driven (exemples) pour quelques onglets
-  const identItems = [
-    {
-      id: "2783730092",
-      nia: "2783730092",
-      denomination: "Immeuble galerie présidentielle",
-      nature: "Appartement",
-      usage: "Commercial",
-      rang: "2ème",
-      sb: "250 m2",
-      snb: "150 m2",
-    },
-    {
-      id: "2783730092-2",
-      nia: "2783730092",
-      denomination: "Immeuble galerie présidentielle",
-      nature: "Appartement",
-      usage: "Commercial",
-      rang: "1er",
-      sb: "180 m2",
-      snb: "90 m2",
-    },
-  ];
+  // Récupération des données réelles
+  const { payerId } = useNextAuth();
+  const { immovables, loading } = useTaxpayerImmovables(payerId);
+
+  // Données pour l'onglet Identifiés (données réelles)
+  const identItems: ImmovableItem[] = useMemo(() => 
+    immovables.map((immovable, index) => ({
+      id: immovable.taxId ?? String(index),
+      nia: immovable.taxId ?? "",
+      denomination: immovable.headLine ?? "",
+      nature: immovable.nature ?? "",
+      usage: immovable.usage ?? "",
+      rang: immovable.range ?? "",
+      sb: immovable.area,
+      snb: "-", // D.non-batie non calculée pour l'instant
+    })), [immovables]
+  );
+
+  // Options de filtres (uniques, triées)
+  const filterOptions = useMemo(() => {
+    const natures = new Set<string>();
+    const usages = new Set<string>();
+    const rangs = new Set<string>();
+    
+    identItems.forEach((item) => {
+      if (item.nature) natures.add(item.nature);
+      if (item.usage) usages.add(item.usage);
+      if (item.rang) rangs.add(item.rang);
+    });
+
+    return {
+      natures: Array.from(natures).sort((a, b) => a.localeCompare(b)),
+      usages: Array.from(usages).sort((a, b) => a.localeCompare(b)),
+      rangs: Array.from(rangs).sort((a, b) => a.localeCompare(b)),
+    };
+  }, [identItems]);
+
+  // Liste filtrée (Identifiés)
+  const identItemsFiltered = useMemo(() => {
+    const { search, nature, usage, rang } = filters;
+    const searchQuery = search.trim().toLowerCase();
+
+    return identItems.filter((item) => {
+      // Filtres par sélection
+      if (nature && item.nature !== nature) return false;
+      if (usage && item.usage !== usage) return false;
+      if (rang && item.rang !== rang) return false;
+
+      // Recherche textuelle
+      if (!searchQuery) return true;
+      
+      const searchText = `${item.nia} ${item.denomination} ${item.nature} ${item.usage} ${item.rang}`.toLowerCase();
+      return searchText.includes(searchQuery);
+    });
+  }, [identItems, filters]);
+
+  // Affichage d'un loader pendant le chargement
+  if (loading) {
+    return (
+      <Card className="rounded-[24px] shadow-[var(--boxShadowCard)!important] border-0 bg-bgCard p-6 min-h-[300px] flex items-center justify-center">
+        <div className="flex flex-col items-center gap-3">
+          <div className="animate-spin rounded-full h-10 w-10 border-2 border-primaryColor border-t-transparent"></div>
+          <p className="text-colorMuted text-sm">Chargement des immobiliers…</p>
+        </div>
+      </Card>
+    );
+  }
 
   const declItems = [
     {
@@ -225,8 +290,8 @@ const TableImmobiliers = () => {
                   className="w-full justify-start data-[state=active]:bg-[#494be314] data-[state=active]:text-[#494be3] data-[state=active]:shadow-none text-colorMuted hover:text-colorTitle cursor-pointer"
                 >
                   <div className="flex items-center justify-between w-full">
-                    Indetifiés
-                    <span className="text-xs">10</span>
+                    Identifiés
+                    <span className="text-xs">{identItemsFiltered.length}</span>
                   </div>
                 </TabsTrigger>
                 <TabsTrigger
@@ -371,8 +436,10 @@ const TableImmobiliers = () => {
                       </div>
                       <Input
                         type="text"
+                        value={filters.search}
+                        onChange={(e) => handleFilterChange('search', e.target.value)}
                         className="shadow-none h-10 pl-8 rounded-lg border-borderInput placeholder:text-colorMuted placeholder:opacity-70"
-                        placeholder="Recherche"
+                        placeholder="Recherche (NIA, dénomination, nature, usage, rang...)"
                       />
                     </div>
                   </div>
@@ -380,26 +447,70 @@ const TableImmobiliers = () => {
                     <div className="flex lg:justify-end gap-2">
                       {renderAppurerButton("ident")}
                       <div className="block-selects flex border border-borderInput rounded-lg">
-                        <Select>
-                          <SelectTrigger className="w-[180px] shadow-none border-0 rounded-none  text-colorTitle">
+                        <Select 
+                          value={filters.nature} 
+                          onValueChange={(value) => handleFilterChange('nature', value)}
+                        >
+                          <SelectTrigger className="w-[180px] shadow-none border-0 rounded-none border-r border-borderInput text-colorTitle">
                             <SelectValue placeholder="Nature" />
                           </SelectTrigger>
                           <SelectContent>
                             <SelectGroup>
                               <SelectLabel>Nature</SelectLabel>
-                              <SelectItem value="apple">Apple</SelectItem>
-                              <SelectItem value="banana">Banana</SelectItem>
-                              <SelectItem value="blueberry">
-                                Blueberry
-                              </SelectItem>
-                              <SelectItem value="grapes">Grapes</SelectItem>
-                              <SelectItem value="pineapple">
-                                Pineapple
-                              </SelectItem>
+                              {filterOptions.natures.map((nature) => (
+                                <SelectItem key={nature} value={nature}>
+                                  {nature}
+                                </SelectItem>
+                              ))}
+                            </SelectGroup>
+                          </SelectContent>
+                        </Select>
+                        <Select 
+                          value={filters.usage} 
+                          onValueChange={(value) => handleFilterChange('usage', value)}
+                        >
+                          <SelectTrigger className="w-[180px] shadow-none border-0 rounded-none border-r border-borderInput text-colorTitle">
+                            <SelectValue placeholder="Usage" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectGroup>
+                              <SelectLabel>Usage</SelectLabel>
+                              {filterOptions.usages.map((usage) => (
+                                <SelectItem key={usage} value={usage}>
+                                  {usage}
+                                </SelectItem>
+                              ))}
+                            </SelectGroup>
+                          </SelectContent>
+                        </Select>
+                        <Select 
+                          value={filters.rang} 
+                          onValueChange={(value) => handleFilterChange('rang', value)}
+                        >
+                          <SelectTrigger className="w-[180px] shadow-none border-0 rounded-none">
+                            <SelectValue placeholder="Rang" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectGroup>
+                              <SelectLabel>Rang</SelectLabel>
+                              {filterOptions.rangs.map((rang) => (
+                                <SelectItem key={rang} value={rang}>
+                                  {rang}
+                                </SelectItem>
+                              ))}
                             </SelectGroup>
                           </SelectContent>
                         </Select>
                       </div>
+                      {(filters.search || filters.nature || filters.usage || filters.rang) && (
+                        <Button
+                          onClick={clearFilters}
+                          variant="outline"
+                          className="text-xs h-10 px-3"
+                        >
+                          Effacer
+                        </Button>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -410,7 +521,7 @@ const TableImmobiliers = () => {
                         <th>
                           {renderCheckbox(
                             "ident",
-                            identItems.map((i) => i.id),
+                            identItemsFiltered.map((i) => i.id),
                             true
                           )}
                         </th>
@@ -425,7 +536,14 @@ const TableImmobiliers = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {identItems.map((row) => (
+                      {identItemsFiltered.length === 0 ? (
+                        <tr>
+                          <td colSpan={9} className="text-center text-colorMuted py-6">
+                            Aucun immobilier trouvé
+                          </td>
+                        </tr>
+                      ) : (
+                        identItemsFiltered.map((row) => (
                         <tr key={row.id}>
                           <td>{renderCheckbox("ident", row.id)}</td>
                           <td>
@@ -479,7 +597,8 @@ const TableImmobiliers = () => {
                             </div>
                           </td>
                         </tr>
-                      ))}
+                        ))
+                      )}
                     </tbody>
                   </table>
                 </div>
