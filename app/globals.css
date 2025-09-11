@@ -45,12 +45,12 @@
   --color-bgFond: #f5f7fb;
   --color-bgGray: var(--bgGray);
   --color-bgCard: #fff;
-  --color-primaryColor: #ff8e4a;
+  --color-primaryColor: #f63579;
   --color-colorTitle: var(--colorTitle);
   --color-colorMuted: var(--colorMuted);
   --color-borderInput: var(--borderInput);
   --color-borderTr: var(--borderTr);
-  /* #113151 #168fe6 #1c4ab5 #383ac4 #494be3  #ee7a34*/
+  /* #113151 #168fe6 #1c4ab5 #383ac4 #494be3  #ee7a34 #ff8e4a #e65f78*/
 }
 
 :root {

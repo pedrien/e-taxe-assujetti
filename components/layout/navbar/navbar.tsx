@@ -1,12 +1,30 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { ChevronDown } from "lucide-react";
-import { Bell, Search, Sun, ArrowDown } from "lucide-react";
+import {
+  Bell,
+  Search,
+  Sun,
+  ArrowDown,
+  ChevronDown,
+  Scale,
+  BadgeCheck,
+} from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useState } from "react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+
 
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
+  const [selected, setSelected] = useState<"Impôts" | "Taxes">("Impôts");
+
   useEffect(() => {
     const handleScroll = () => {
       const offset = window.scrollY;
@@ -17,21 +35,23 @@ const Navbar = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
   return (
-    <div className={`nav ${
-      scrolled
-        ? "sticky top-0  backdrop-blur-[8px] bg-blueDarken/90"
-        : "bg-blueDarken relative"
-    } z-50`}>
+    <div
+      className={`nav ${
+        scrolled
+          ? "sticky top-0  backdrop-blur-[8px] bg-blueDarken/90"
+          : "bg-blueDarken relative"
+      } z-50`}
+    >
       <div className="barreEtat absolute top-0 flex justify-center w-full">
         <div className="contentBarre w-[50%] flex">
           <div className="barre w-[Calc(100%/3)] h-[2px] bg-[#007ef9]"></div>
-           <div className="barre w-[Calc(100%/3)] h-[2px] bg-[#f5ce03]"></div>
-            <div className="barre w-[Calc(100%/3)] h-[2px] bg-[#d40212]"></div>
+          <div className="barre w-[Calc(100%/3)] h-[2px] bg-[#f5ce03]"></div>
+          <div className="barre w-[Calc(100%/3)] h-[2px] bg-[#d40212]"></div>
         </div>
       </div>
       <div className="container-fluid px-3 lg:px-6 xl:px-6 max-w-[1600px] mx-auto">
         <div className="flex items-center justify-between gap-3">
-          <div className="flex items-center lg:gap-14">
+          <div className="flex items-center lg:gap-6">
             <Link href={"/"}>
               <Image
                 src={"/images/logos/logo-etaxe-white.png"}
@@ -41,6 +61,12 @@ const Navbar = () => {
                 layout="responsive"
                 alt="logo de e-taxe"
               />
+            </Link>
+            <Link
+              href={"#"}
+              className="flex items-center justify-center py-1 px-2 border border-[#ffffff3b] text-xs text-white rounded-full duration-300 transition-all hover:bg-white hover:text-colorTitle"
+            >
+              <span>Kinshasa - DGRK</span>
             </Link>
           </div>
           <div className="block-links">
@@ -88,7 +114,7 @@ const Navbar = () => {
                         Activités économiques
                       </Link>
                     </li>
-                   
+
                     <li>
                       <Link
                         href={"/assietes/contrat-travail"}
@@ -119,13 +145,55 @@ const Navbar = () => {
             </ul>
           </div>
           <div className="flex justify-end items-center lg:gap-4">
-            <div className="toggle-theme cursor-pointer">
+            {/* <div className="toggle-theme cursor-pointer">
               <div className="content-toggle-theme w-[50px] bg-[#ffffff2a] rounded-full p-[4px] flex items-center rounde-full">
                 <div className="bubble-icon rounded-full bg-white w-[18px] h-[18px] flex items-center justify-center">
                   <Sun size={14} />
                 </div>
               </div>
-            </div>
+            </div> */}
+            <DropdownMenu>
+              <DropdownMenuTrigger className="flex items-center gap-1 rounded-full px-3 py-1.5 text-sm font-medium bg-card text-primary focus-visible:outline-0">
+                {selected === "Impôts" ? (
+                  <Scale size={16} />
+                ) : (
+                  <BadgeCheck size={16} />
+                )}
+                {selected}
+                <ChevronDown size={16} />
+              </DropdownMenuTrigger>
+
+              <DropdownMenuContent className="w-40">
+                <DropdownMenuLabel className="text-xs text-muted-foreground">
+                  Recettes
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+
+                <DropdownMenuItem
+                  onClick={() => setSelected("Impôts")}
+                  className={`flex items-center gap-2 ${
+                    selected === "Impôts"
+                      ? "bg-red-100 text-red-600 dark:bg-red-600/20 dark:text-red-400"
+                      : ""
+                  }`}
+                >
+                  <Scale size={16} />
+                  Impôts
+                </DropdownMenuItem>
+
+                <DropdownMenuItem
+                  onClick={() => setSelected("Taxes")}
+                  className={`flex items-center gap-2 ${
+                    selected === "Taxes"
+                      ? "bg-amber-100 text-amber-600 dark:bg-amber-600/20 dark:text-amber-400"
+                      : ""
+                  }`}
+                >
+                  <BadgeCheck size={16} />
+                  Taxes
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
             <Link
               href={"#"}
               className="text-white flex items-center justify-center"

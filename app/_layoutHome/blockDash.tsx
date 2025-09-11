@@ -15,6 +15,14 @@ import CardCompte from "./cardCompte";
 import ShowPay from "@/components/features/showPay/showPay";
 import { Button } from "@/components/ui/button";
 import { ChevronDown } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const BlockDash = () => {
   return (
@@ -33,9 +41,29 @@ const BlockDash = () => {
             <div className="col-span-12 lg:col-span-6">
               <div className="flex justify-end">
                 <Button className="bg-primaryColor rounded-lg cursor-pointer shadow-[0_5px_10px_#00000026]">
-                  Actions rapides
-                  <ChevronDown></ChevronDown>
+                  Declartion taxes
                 </Button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger className="cursor-pointer gap-2 text-sm flex items-center bg-primaryColor py-2 px-4 h-9 rounded-lg text-white shadow-[0_5px_10px_#00000026] justify-center">
+                    Declaration impôts
+                    <ChevronDown size={18}></ChevronDown>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent>
+                    <DropdownMenuLabel className="text-colorMuted text-xs">
+                      Actions
+                    </DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem className="text-sm text-colorTitle">
+                      Fonciers (IF)
+                    </DropdownMenuItem>
+                    <DropdownMenuItem className="text-sm text-colorTitle">
+                      Revenus locatifs (IRL)
+                    </DropdownMenuItem>
+                    <DropdownMenuItem className="text-sm text-colorTitle">
+                      Véchules (Vignette)
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
             </div>
           </div>

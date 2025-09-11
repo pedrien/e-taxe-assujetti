@@ -5,7 +5,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts";
+import { CartesianGrid, Line, LineChart, XAxis, YAxis, } from "recharts";
 
 // Données simulées pour les 6 derniers mois
 const data = [
@@ -82,11 +82,7 @@ export function StatisticsChart() {
             bottom: 20,
           }}
         >
-          <CartesianGrid
-            vertical={false}
-            strokeDasharray="3 3"
-            stroke="var(--borderTr)"
-          />
+          <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="var(--borderTr)" />
           <XAxis
             dataKey="month"
             className="text-xs fill-colorMuted"
@@ -104,7 +100,7 @@ export function StatisticsChart() {
           <ChartTooltip
             content={
               <ChartTooltipContent
-                cursor={false}
+              cursor={false}
                 labelFormatter={(value) => `Mois: ${value}`}
                 formatter={(value, name) => [
                   `${value.toLocaleString()} CDF`,
@@ -117,7 +113,7 @@ export function StatisticsChart() {
           <Line
             type="monotone"
             dataKey="principale"
-            stroke="#494be3"
+            stroke="#383ac4"
             strokeWidth={3}
             dot={false}
             activeDot={{

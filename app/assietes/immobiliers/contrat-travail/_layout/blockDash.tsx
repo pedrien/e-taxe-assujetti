@@ -8,7 +8,7 @@ import BannerPage from "@/components/features/immobiliers/bannerPage/bannerPage"
 const BlockDash = () => {
   return (
     <>
-    <BannerPage/>
+      <BannerPage />
       <div className="relative z-20 mb-8 py-[50px] bg-bgFond rounded-4xl lg:mt-[-30px] ">
         <div className="container-fluid px-3 lg:px-3 2xl:px-6 max-w-[1600px] lg:mt-[-74px] mx-auto">
           <div className="grid grid-cols-12 items-center justify-between gap-3 mb-3 lg:mb-6">
@@ -18,7 +18,7 @@ const BlockDash = () => {
                   <li>
                     <Link
                       href={"/assietes/immobiliers"}
-                      className="inline-flex text-sm py-[8px] px-[12px] text-white font-medium bg-[#07192b] rounded-full"
+                      className="inline-flex text-sm py-[8px] px-[12px] text-colorMuted  rounded-full hover:text-colorTitle"
                     >
                       Mes immobiliers
                     </Link>
@@ -26,14 +26,14 @@ const BlockDash = () => {
                   <li>
                     <Link
                       href={"/assietes/immobiliers/unites-locatives"}
-                      className="inline-flex text-sm py-[8px] px-[12px] text-colorMuted hover:text-colorTitle"
+                      className="inline-flex text-sm py-[8px] px-[12px]   text-colorMuted hover:text-colorTitle"
                     >
                       Mes unités locatives
                     </Link>
                   </li>
                   <li>
                     <Link
-                      href={"#"}
+                      href={"/assietes/immobiliers/contrat-bail"}
                       className="inline-flex text-sm py-[8px] px-[12px] text-colorMuted hover:text-colorTitle"
                     >
                       Mes contrats de bails
@@ -41,8 +41,8 @@ const BlockDash = () => {
                   </li>
                   <li>
                     <Link
-                      href={"/assietes/immobiliers/contrat-travail"}
-                      className="inline-flex text-sm py-[8px] px-[12px] text-colorMuted hover:text-colorTitle"
+                      href={"/assietes/immobiliers/contrat-bail"}
+                      className="inline-flex text-sm py-[8px] px-[12px] text-white bg-[#07192b] font-medium rounded-full "
                     >
                       Mes contrats de travail
                     </Link>
