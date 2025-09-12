@@ -1,7 +1,7 @@
 "use client";
 import { useMemo } from "react";
 import { useProfileData } from "./useProfileData";
-import { ACTIVITY_TYPES, getActivityTypeLabel } from "@/app/graphql/queries/getTaxpayerActivities";
+import { getActivityTypeLabel } from "@/app/graphql/queries/getTaxpayerActivities";
 
 export const useTaxpayerActivities = (profileId?: string | null) => {
   const { activities, loading, error } = useProfileData(profileId ?? null);
@@ -29,7 +29,7 @@ export const useTaxpayerActivities = (profileId?: string | null) => {
         typeActive: activityDetails?.activity?.headLine ?? "",
         description: activityDetails?.activity?.description ?? "",
         dimension: activityDetails?.dimension?.headLine ?? "",
-        activitePrinc: getActivityTypeLabel(parseInt(activityDetails?.category?.id ?? "0") as any),
+        activitePrinc: getActivityTypeLabel(parseInt(activityDetails?.category?.id ?? "0") as number),
         nature: activityDetails?.category?.headLine ?? "",
         denomination: activityDetails?.activity?.description ?? "",
         lieu: activityDetails?.pretence?.headLine ?? "",

@@ -26,7 +26,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useNextAuth } from "@/app/contexts/auth/useNextAuth";
 import { useTaxpayerVehicles } from "@/app/hooks/useTaxpayerVehicles";
-import { LoadingIndicator } from "@/components/ui/loading-indicator";
+// import { LoadingIndicator } from "@/components/ui/loading-indicator";
 import { RefreshIndicator } from "@/components/ui/refresh-indicator";
 
 const TableVehicules = () => {
@@ -135,7 +135,7 @@ const TableVehicules = () => {
     );
   };
   const { profileId } = useNextAuth();
-  const { vehicles, loading, error } = useTaxpayerVehicles(profileId);
+  const { vehicles, loading } = useTaxpayerVehicles(profileId);
 
   // Utiliser les vraies données de l'API
   const identItems = vehicles.map((v, index) => ({

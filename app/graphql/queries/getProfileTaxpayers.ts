@@ -81,7 +81,7 @@ export type ProfileTaxpayersQuery = {
           };
           collection?: Array<{
             taxId?: string | null;
-            activityDetails?: any; // Type Iterable! - sera parsé côté client
+            activityDetails?: unknown; // Type Iterable! - sera parsé côté client
           }>;
         };
         immovables?: {

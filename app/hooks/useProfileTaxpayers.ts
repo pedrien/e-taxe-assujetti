@@ -23,35 +23,40 @@ export const useProfileTaxpayers = (profileId?: string | null) => {
   
   // Calculer les totaux pour tous les taxpayers
   const totalCounts = {
-    immovables: taxpayers.reduce((total: number, taxpayer: any) => 
-      total + (taxpayer.immovables?.paginationInfo?.totalCount ?? 0), 0),
-    vehicles: taxpayers.reduce((total: number, taxpayer: any) => 
-      total + (taxpayer.vehicles?.paginationInfo?.totalCount ?? 0), 0),
-    activities: taxpayers.reduce((total: number, taxpayer: any) => 
-      total + (taxpayer.activities?.paginationInfo?.totalCount ?? 0), 0),
+    immovables: taxpayers.reduce((total: number, taxpayer: unknown) => 
+      total + ((taxpayer as { immovables?: { paginationInfo?: { totalCount?: number } } }).immovables?.paginationInfo?.totalCount ?? 0), 0),
+    vehicles: taxpayers.reduce((total: number, taxpayer: unknown) => 
+      total + ((taxpayer as { vehicles?: { paginationInfo?: { totalCount?: number } } }).vehicles?.paginationInfo?.totalCount ?? 0), 0),
+    activities: taxpayers.reduce((total: number, taxpayer: unknown) => 
+      total + ((taxpayer as { activities?: { paginationInfo?: { totalCount?: number } } }).activities?.paginationInfo?.totalCount ?? 0), 0),
   };
 
   // Récupérer tous les immovables de tous les taxpayers
-  const allImmovables = taxpayers.flatMap((taxpayer: any) => 
-    taxpayer.immovables?.collection?.map((immovable: any, index: number) => ({
-      id: immovable.taxId ?? `${taxpayer.id}-${index}`,
-      taxId: immovable.taxId ?? "",
-      headLine: immovable.headLine ?? "",
-      nature: immovable.nature?.headLine ?? "",
-      area: immovable.area ? `${Number(immovable.area).toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} m²` : "-",
-      taxpayerId: taxpayer.id,
-      payerProfile: taxpayer.payerProfile,
-    })) ?? []
-  );
+  const allImmovables = taxpayers.flatMap((taxpayer: unknown) => {
+    const t = taxpayer as { id: string; immovables?: { collection?: unknown[] }; payerProfile: unknown };
+    return t.immovables?.collection?.map((immovable: unknown, index: number) => {
+      const i = immovable as { taxId?: string; headLine?: string; nature?: { headLine?: string }; area?: string | number };
+      return {
+        id: i.taxId ?? `${t.id}-${index}`,
+        taxId: i.taxId ?? "",
+        headLine: i.headLine ?? "",
+        nature: i.nature?.headLine ?? "",
+        area: i.area ? `${Number(i.area).toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} m²` : "-",
+        taxpayerId: t.id,
+        payerProfile: t.payerProfile,
+      };
+    }) ?? [];
+  });
 
   // Récupérer tous les véhicules de tous les taxpayers
-  const allVehicles = taxpayers.flatMap((taxpayer: any) => 
-    taxpayer.vehicles?.collection?.map((vehicle: any) => ({
+  const allVehicles = taxpayers.flatMap((taxpayer: unknown) => {
+    const t = taxpayer as { id: string; vehicles?: { collection?: unknown[] }; payerProfile: unknown };
+    return t.vehicles?.collection?.map((vehicle: unknown) => ({
       ...vehicle,
-      taxpayerId: taxpayer.id,
-      payerProfile: taxpayer.payerProfile,
-    })) ?? []
-  );
+      taxpayerId: t.id,
+      payerProfile: t.payerProfile,
+    })) ?? [];
+  });
 
   return {
     taxpayers,

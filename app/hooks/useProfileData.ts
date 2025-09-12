@@ -21,7 +21,7 @@ export interface Activity {
   };
   collection: Array<{
     taxId: string;
-    activityDetails: any; // Type Iterable! - sera parsé côté client
+    activityDetails: unknown; // Type Iterable! - sera parsé côté client
   }>;
 }
 
