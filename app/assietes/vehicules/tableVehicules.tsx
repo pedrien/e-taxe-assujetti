@@ -26,6 +26,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useNextAuth } from "@/app/contexts/auth/useNextAuth";
 import { useTaxpayerVehicles } from "@/app/hooks/useTaxpayerVehicles";
+import { LoadingIndicator } from "@/components/ui/loading-indicator";
+import { RefreshIndicator } from "@/components/ui/refresh-indicator";
 
 const TableVehicules = () => {
   // États pour gérer les checkboxes de chaque onglet
@@ -132,25 +134,21 @@ const TableVehicules = () => {
       />
     );
   };
-  const { payerId } = useNextAuth();
-  const { vehicles, loading } = useTaxpayerVehicles(payerId);
+  const { profileId } = useNextAuth();
+  const { vehicles, loading, error } = useTaxpayerVehicles(profileId);
+
+  // Utiliser les vraies données de l'API
   const identItems = vehicles.map((v, index) => ({
-    id: v.registration ?? v.chassisNumber ?? String(index),
+    id: v.taxId ?? String(index),
     matricule: v.registration ?? "",
     chassis: v.chassisNumber ?? "",
-    annee: (v.circYear ?? "").toString(),
-    poids:
-      v.weight !== null && v.weight !== undefined && v.weight !== ""
-        ? `${String(v.weight)} Kg`
-        : "",
-    moteur:
-      v.power !== null && v.power !== undefined && v.power !== ""
-        ? `${String(v.power)} CH`
-        : "",
-    marque: v.mark?.headLine ?? "",
-    modele: v.model?.headLine ?? "",
-    carrosserie: v.calender?.headLine ?? "",
-    couleur: v.color?.name ?? "",
+    annee: v.circYear ?? "",
+    poids: v.weight ?? "",
+    moteur: v.power ?? "",
+    marque: v.mark ?? "",
+    modele: v.model ?? "",
+    carrosserie: v.calender ?? "",
+    couleur: v.color ?? "",
   }));
 
   // Etats recherche + filtres (onglet Identifiés)
@@ -199,7 +197,7 @@ const TableVehicules = () => {
       <Card className="rounded-[24px] shadow-[var(--boxShadowCard)!important] border-0 bg-bgCard p-6 min-h-[300px] flex items-center justify-center">
         <div className="flex flex-col items-center gap-3">
           <div className="animate-spin rounded-full h-10 w-10 border-2 border-primaryColor border-t-transparent"></div>
-          <p className="text-colorMuted text-sm">Chargement des véhicules…</p>
+          <p className="text-colorMuted text-sm">Chargement des vehicules...</p>
         </div>
       </Card>
     );
@@ -543,7 +541,9 @@ const TableVehicules = () => {
     },
   ];
   return (
-    <div className="grid grid-cols-1">
+    <>
+      <RefreshIndicator isVisible={loading} />
+      <div className="grid grid-cols-1">
       <div className="col-span-1">
         <Tabs
           defaultValue="ident"
@@ -3059,6 +3059,7 @@ const TableVehicules = () => {
         </Tabs>
       </div>
     </div>
+    </>
   );
 };
 

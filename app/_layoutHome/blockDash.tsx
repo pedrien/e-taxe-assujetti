@@ -1,6 +1,7 @@
 import React from "react";
 import { useNextAuth } from "@/app/contexts/auth/useNextAuth";
 import { useTaxpayerCounts } from "@/app/hooks/useTaxpayerCounts";
+import { useProfileData } from "@/app/hooks/useProfileData";
 import { Card } from "@/components/ui/card";
 import {
   MoveUp,
@@ -19,9 +20,13 @@ import { Button } from "@/components/ui/button";
 import { ChevronDown } from "lucide-react";
 
 const BlockDash = () => {
-  const { payerId } = useNextAuth();
-  const { counts, loading } = useTaxpayerCounts(payerId);
+  const { profileId } = useNextAuth();
+  const { counts, loading } = useTaxpayerCounts(profileId);
   const { immovables: immovablesCount, vehicles: vehiclesCount, activities: activitiesCount } = counts;
+  
+  // Récupérer les informations du profil pour le nom de l'utilisateur
+  const { payerProfile } = useProfileData(profileId || null);
+  const userName = payerProfile?.givenName || "Utilisateur";
 
   return (
     <>
@@ -30,7 +35,7 @@ const BlockDash = () => {
           <div className="grid grid-cols-12 items-center">
             <div className="col-span-12 lg:col-span-6">
               <h1 className="text-white lg:text-[34px] font-medium">
-                Salut, Pedrien !
+                Salut, {userName} !
               </h1>
               <p className="text-white opacity-80 text-sm lg:text-[16px]">
                 Bienvenu sur votre tableau de bord

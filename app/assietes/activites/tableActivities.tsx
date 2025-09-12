@@ -25,6 +25,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { LoadingIndicator } from "@/components/ui/loading-indicator";
+import { useNextAuth } from "@/app/contexts/auth/useNextAuth";
+import { useTaxpayerActivities } from "@/app/hooks/useTaxpayerActivities";
 
 const TableActivities = () => {
   // États pour gérer les checkboxes de chaque onglet
@@ -131,286 +134,58 @@ const TableActivities = () => {
       />
     );
   };
-  const identItems = [
-    {
-      id: "2783730092",
-      typeActive: "Commercial",
-      dimension: "Petit",
-      activitePrinc: "Grossiste",
-      nature: "Restaurant",
-      denimination: "Kin Resto",
-      commune: "Ngaliema",
-    },
-    {
-      id: "2783730092-2",
-      typeActive: "Commercial",
-      dimension: "Petit",
-      activitePrinc: "Grossiste",
-      nature: "Restaurant",
-      denimination: "Kin Resto",
-      commune: "Ngaliema",
-    },
-  ];
-  const declItems = [
-    {
-      id: "2783730092",
-      typeActive: "Commercial",
-      dimension: "Petit",
-      activitePrinc: "Grossiste",
-      nature: "Restaurant",
-      denimination: "Kin Resto",
-      commune: "Ngaliema",
-    },
-    {
-      id: "2783730092-2",
-      typeActive: "Commercial",
-      dimension: "Petit",
-      activitePrinc: "Grossiste",
-      nature: "Restaurant",
-      denimination: "Kin Resto",
-      commune: "Ngaliema",
-    },
-  ];
-  const payItems = [
-    {
-      id: "2783730092",
-      typeActive: "Commercial",
-      dimension: "Petit",
-      activitePrinc: "Grossiste",
-      nature: "Restaurant",
-      denimination: "Kin Resto",
-      commune: "Ngaliema",
-    },
-    {
-      id: "2783730092-2",
-      typeActive: "Commercial",
-      dimension: "Petit",
-      activitePrinc: "Grossiste",
-      nature: "Restaurant",
-      denimination: "Kin Resto",
-      commune: "Ngaliema",
-    },
-  ];
-  const appItems = [
-    {
-      id: "2783730092",
-      typeActive: "Commercial",
-      dimension: "Petit",
-      activitePrinc: "Grossiste",
-      nature: "Restaurant",
-      denimination: "Kin Resto",
-      commune: "Ngaliema",
-    },
-    {
-      id: "2783730092-2",
-      typeActive: "Commercial",
-      dimension: "Petit",
-      activitePrinc: "Grossiste",
-      nature: "Restaurant",
-      denimination: "Kin Resto",
-      commune: "Ngaliema",
-    },
-  ];
-  const impItems = [
-    {
-      id: "2783730092",
-      typeActive: "Commercial",
-      dimension: "Petit",
-      activitePrinc: "Grossiste",
-      nature: "Restaurant",
-      denimination: "Kin Resto",
-      commune: "Ngaliema",
-    },
-    {
-      id: "2783730092-2",
-      typeActive: "Commercial",
-      dimension: "Petit",
-      activitePrinc: "Grossiste",
-      nature: "Restaurant",
-      denimination: "Kin Resto",
-      commune: "Ngaliema",
-    },
-  ];
-  const ddItems = [
-    {
-      id: "2783730092",
-      typeActive: "Commercial",
-      dimension: "Petit",
-      activitePrinc: "Grossiste",
-      nature: "Restaurant",
-      denimination: "Kin Resto",
-      commune: "Ngaliema",
-    },
-    {
-      id: "2783730092-2",
-      typeActive: "Commercial",
-      dimension: "Petit",
-      activitePrinc: "Grossiste",
-      nature: "Restaurant",
-      denimination: "Kin Resto",
-      commune: "Ngaliema",
-    },
-  ];
-  const dpItems = [
-    {
-      id: "2783730092",
-      typeActive: "Commercial",
-      dimension: "Petit",
-      activitePrinc: "Grossiste",
-      nature: "Restaurant",
-      denimination: "Kin Resto",
-      commune: "Ngaliema",
-    },
-    {
-      id: "2783730092-2",
-      typeActive: "Commercial",
-      dimension: "Petit",
-      activitePrinc: "Grossiste",
-      nature: "Restaurant",
-      denimination: "Kin Resto",
-      commune: "Ngaliema",
-    },
-  ];
-  const fpcItems = [
-    {
-      id: "2783730092",
-      typeActive: "Commercial",
-      dimension: "Petit",
-      activitePrinc: "Grossiste",
-      nature: "Restaurant",
-      denimination: "Kin Resto",
-      commune: "Ngaliema",
-    },
-    {
-      id: "2783730092-2",
-      typeActive: "Commercial",
-      dimension: "Petit",
-      activitePrinc: "Grossiste",
-      nature: "Restaurant",
-      denimination: "Kin Resto",
-      commune: "Ngaliema",
-    },
-  ];
-  const amrItems = [
-    {
-      id: "2783730092",
-      typeActive: "Commercial",
-      dimension: "Petit",
-      activitePrinc: "Grossiste",
-      nature: "Restaurant",
-      denimination: "Kin Resto",
-      commune: "Ngaliema",
-    },
-    {
-      id: "2783730092-2",
-      typeActive: "Commercial",
-      dimension: "Petit",
-      activitePrinc: "Grossiste",
-      nature: "Restaurant",
-      denimination: "Kin Resto",
-      commune: "Ngaliema",
-    },
-  ];
-  const pourItems = [
-    {
-      id: "2783730092",
-      typeActive: "Commercial",
-      dimension: "Petit",
-      activitePrinc: "Grossiste",
-      nature: "Restaurant",
-      denimination: "Kin Resto",
-      commune: "Ngaliema",
-    },
-    {
-      id: "2783730092-2",
-      typeActive: "Commercial",
-      dimension: "Petit",
-      activitePrinc: "Grossiste",
-      nature: "Restaurant",
-      denimination: "Kin Resto",
-      commune: "Ngaliema",
-    },
-  ];
-  const ccItems = [
-    {
-      id: "2783730092",
-      typeActive: "Commercial",
-      dimension: "Petit",
-      activitePrinc: "Grossiste",
-      nature: "Restaurant",
-      denimination: "Kin Resto",
-      commune: "Ngaliema",
-    },
-    {
-      id: "2783730092-2",
-      typeActive: "Commercial",
-      dimension: "Petit",
-      activitePrinc: "Grossiste",
-      nature: "Restaurant",
-      denimination: "Kin Resto",
-      commune: "Ngaliema",
-    },
-  ];
-  const adtItems = [
-    {
-      id: "2783730092",
-      typeActive: "Commercial",
-      dimension: "Petit",
-      activitePrinc: "Grossiste",
-      nature: "Restaurant",
-      denimination: "Kin Resto",
-      commune: "Ngaliema",
-    },
-    {
-      id: "2783730092-2",
-      typeActive: "Commercial",
-      dimension: "Petit",
-      activitePrinc: "Grossiste",
-      nature: "Restaurant",
-      denimination: "Kin Resto",
-      commune: "Ngaliema",
-    },
-  ];
-  const conItems = [
-    {
-      id: "2783730092",
-      typeActive: "Commercial",
-      dimension: "Petit",
-      activitePrinc: "Grossiste",
-      nature: "Restaurant",
-      denimination: "Kin Resto",
-      commune: "Ngaliema",
-    },
-    {
-      id: "2783730092-2",
-      typeActive: "Commercial",
-      dimension: "Petit",
-      activitePrinc: "Grossiste",
-      nature: "Restaurant",
-      denimination: "Kin Resto",
-      commune: "Ngaliema",
-    },
-  ];
-  const reclItems = [
-    {
-      id: "2783730092",
-      typeActive: "Commercial",
-      dimension: "Petit",
-      activitePrinc: "Grossiste",
-      nature: "Restaurant",
-      denimination: "Kin Resto",
-      commune: "Ngaliema",
-    },
-    {
-      id: "2783730092-2",
-      typeActive: "Commercial",
-      dimension: "Petit",
-      activitePrinc: "Grossiste",
-      nature: "Restaurant",
-      denimination: "Kin Resto",
-      commune: "Ngaliema",
-    },
-  ];
+
+  // Récupération des données réelles
+  const { profileId } = useNextAuth();
+  const { activities, loading, error } = useTaxpayerActivities(profileId);
+
+  // Utiliser les vraies données de l'API
+  const identItems = activities.map((activity, index) => ({
+    id: activity.taxId ?? String(index),
+    typeActive: activity.typeActive ?? "",
+    dimension: activity.dimension ?? "",
+    activitePrinc: activity.activitePrinc ?? "",
+    nature: activity.nature ?? "",
+    denimination: activity.denomination ?? "",
+    lieu: activity.lieu ?? "",
+    commune: activity.lieu ?? "", // Utiliser lieu comme commune pour la compatibilité
+  })) as Array<{
+    id: string;
+    typeActive: string;
+    dimension: string;
+    activitePrinc: string;
+    nature: string;
+    denimination: string;
+    lieu: string;
+    commune: string;
+  }>;
+  // Tous les onglets utilisent les mêmes données pour l'instant
+  const declItems = identItems;
+  const payItems = identItems;
+  const appItems = identItems;
+  const impItems = identItems;
+  const ddItems = identItems;
+  const dpItems = identItems;
+  const fpcItems = identItems;
+  const amrItems = identItems;
+  const pourItems = identItems;
+  const ccItems = identItems;
+  const adtItems = identItems;
+  const conItems = identItems;
+  const reclItems = identItems;
+
+  if (loading) {
+    return <LoadingIndicator />;
+  }
+
+  if (error) {
+    return (
+      <div className="text-center py-8">
+        <p className="text-red-500">Erreur lors du chargement des activités: {error.message}</p>
+      </div>
+    );
+  }
+
   return (
     <div className="grid grid-cols-1">
       <div className="col-span-1">

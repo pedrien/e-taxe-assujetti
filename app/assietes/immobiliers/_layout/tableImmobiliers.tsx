@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { LoadingIndicator } from "@/components/ui/loading-indicator";
 
 // Types
 interface ImmovableItem {
@@ -155,8 +156,8 @@ const TableImmobiliers = () => {
   };
 
   // Récupération des données réelles
-  const { payerId } = useNextAuth();
-  const { immovables, loading } = useTaxpayerImmovables(payerId);
+  const { profileId } = useNextAuth();
+  const { immovables, loading } = useTaxpayerImmovables(profileId);
 
   // Données pour l'onglet Identifiés (données réelles)
   const identItems: ImmovableItem[] = useMemo(() => 
@@ -210,69 +211,14 @@ const TableImmobiliers = () => {
     });
   }, [identItems, filters]);
 
-  // Affichage d'un loader pendant le chargement
+  // Affichage d'un loader pendant le chargement initial
   if (loading) {
-    return (
-      <Card className="rounded-[24px] shadow-[var(--boxShadowCard)!important] border-0 bg-bgCard p-6 min-h-[300px] flex items-center justify-center">
-        <div className="flex flex-col items-center gap-3">
-          <div className="animate-spin rounded-full h-10 w-10 border-2 border-primaryColor border-t-transparent"></div>
-          <p className="text-colorMuted text-sm">Chargement des immobiliers…</p>
-        </div>
-      </Card>
-    );
+    return <LoadingIndicator message="Chargement des immobiliers..." />;
   }
 
-  const declItems = [
-    {
-      id: "2783730093",
-      nia: "2783730093",
-      denomination: "Immeuble commercial centre ville",
-      nature: "Bureau",
-      usage: "Commercial",
-      rang: "1er",
-      sb: "300 m2",
-      snb: "100 m2",
-      dateDeclaration: "15/01/2024",
-    },
-    {
-      id: "2783730093-2",
-      nia: "2783730093",
-      denomination: "Immeuble commercial centre ville",
-      nature: "Bureau",
-      usage: "Commercial",
-      rang: "2ème",
-      sb: "250 m2",
-      snb: "80 m2",
-      dateDeclaration: "18/01/2024",
-    },
-  ];
-
-  const payItems = [
-    {
-      id: "2783730094",
-      nia: "2783730094",
-      denomination: "Résidence privée",
-      nature: "Maison",
-      usage: "Résidentiel",
-      rang: "RDC",
-      sb: "200 m2",
-      snb: "500 m2",
-      datePaiement: "20/01/2024",
-      montant: "150,000 FCFA",
-    },
-    {
-      id: "2783730094-2",
-      nia: "2783730094",
-      denomination: "Résidence privée",
-      nature: "Maison",
-      usage: "Résidentiel",
-      rang: "1er",
-      sb: "180 m2",
-      snb: "400 m2",
-      datePaiement: "21/01/2024",
-      montant: "120,000 FCFA",
-    },
-  ];
+  // Utiliser uniquement les vraies données de l'API
+  const declItems: ImmovableItem[] = [];
+  const payItems: ImmovableItem[] = [];
 
   return (
     <div className="grid grid-cols-1">

@@ -1,40 +1,35 @@
 "use client";
-import { useQuery } from "@apollo/client/react";
-import { GET_TAXPAYER_IMMOVABLES, TaxpayerImmovablesQuery } from "@/app/graphql/queries/getTaxpayerImmovables";
+import { useMemo } from "react";
+import { useProfileData } from "./useProfileData";
 
-export const useTaxpayerImmovables = (payerId?: string | null) => {
-  // L'API attend un ID de type IRI: /api/payer/taxpayers/{id}
-  const iriId = payerId
-    ? payerId.startsWith("/api/")
-      ? payerId
-      : `/api/payer/taxpayers/${payerId}`
-    : undefined;
+export const useTaxpayerImmovables = (profileId?: string | null) => {
+  const { immovables, loading, error } = useProfileData(profileId ?? null);
 
-  const { data, loading, error } = useQuery<TaxpayerImmovablesQuery>(
-    GET_TAXPAYER_IMMOVABLES,
-    {
-      variables: { id: iriId as string },
-      skip: !iriId,
-      fetchPolicy: "cache-and-network",
-    }
+  // Mémoriser le formatage des immobiliers pour éviter les recalculs
+  const formattedImmovables = useMemo(() => 
+    immovables?.collection?.map((immovable, index) => ({
+      id: immovable.taxId ?? String(index),
+      taxId: immovable.taxId ?? "",
+      headLine: immovable.headLine ?? "",
+      nature: immovable.nature?.headLine ?? "",
+      usage: immovable.usage?.headLine ?? "",
+      range: immovable.range?.headLine ?? "",
+      area: immovable.area ? `${Number(immovable.area).toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} m²` : "-",
+    })) ?? [], 
+    [immovables?.collection]
   );
 
-  const immovables = data?.taxpayer?.immovables?.collection?.map((immovable, index) => ({
-    id: immovable.taxId ?? String(index),
-    taxId: immovable.taxId ?? "",
-    headLine: immovable.headLine ?? "",
-    nature: immovable.nature?.headLine ?? "",
-    usage: immovable.usage?.headLine ?? "",
-    range: immovable.range?.headLine ?? "",
-    area: immovable.area ? `${Number(immovable.area).toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} m²` : "-",
-  })) ?? [];
+  // Mémoriser le total count
+  const totalCount = useMemo(() => 
+    immovables?.paginationInfo?.totalCount ?? 0, 
+    [immovables?.paginationInfo?.totalCount]
+  );
 
-  const totalCount = data?.taxpayer?.immovables?.paginationInfo?.totalCount ?? 0;
-
-  return {
-    immovables,
+  // Mémoriser le résultat final
+  return useMemo(() => ({
+    immovables: formattedImmovables,
     totalCount,
     loading,
     error,
-  };
+  }), [formattedImmovables, totalCount, loading, error]);
 };

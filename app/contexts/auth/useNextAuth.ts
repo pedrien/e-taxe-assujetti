@@ -8,7 +8,7 @@ export const useNextAuth = () => {
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const isLoading = status === "loading";
-  const isAuthenticated = status === "authenticated" && !!session?.payerId;
+  const isAuthenticated = status === "authenticated" && !!session?.profileId;
 
   const login = () => {
     signIn("keycloak");
@@ -33,7 +33,7 @@ export const useNextAuth = () => {
 
   return {
     user: session?.user,
-    payerId: session?.payerId,
+    profileId: session?.profileId, // Renommé de payerId à profileId
     isAuthenticated,
     isLoading: isLoading || isLoggingOut,
     login,

@@ -6,17 +6,19 @@ import type { GraphQLError } from 'graphql';
 
 // URL de votre API GraphQL
 const httpLink = createHttpLink({
-  uri: process.env.NEXT_PUBLIC_GRAPHQL_ENDPOINT || 'http://localhost:4000/graphql',
+  uri: process.env.NEXT_PUBLIC_GRAPHQL_ENDPOINT || 'https://api.main.etaxrdc.com/api/graphql',
 });
 
 // Link pour ajouter l'authentification
 const authLink = setContext((_, prevContext) => {
   const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
   const prevHeaders = (prevContext as { headers?: Record<string, string> })?.headers;
+  
   return {
     headers: {
       ...(prevHeaders ?? {}),
       authorization: token ? `Bearer ${token}` : "",
+      'Content-Type': 'application/json',
     },
   };
 });
@@ -48,16 +50,29 @@ const errorLink = onError((params) => {
   }
 });
 
-// Créer le client Apollo
+// Créer le client Apollo avec optimisations de cache
 const client = new ApolloClient({
   link: from([errorLink, authLink, httpLink]),
-  cache: new InMemoryCache(),
+  cache: new InMemoryCache({
+    // Optimisations de cache pour réduire les requêtes
+    typePolicies: {
+      Query: {
+        fields: {
+          profile: {
+            merge: true, // Fusionner les données au lieu de les remplacer
+          },
+        },
+      },
+    },
+  }),
   defaultOptions: {
     watchQuery: {
       errorPolicy: 'all',
+      fetchPolicy: 'cache-first', // Utiliser le cache en priorité
     },
     query: {
       errorPolicy: 'all',
+      fetchPolicy: 'cache-first',
     },
   },
 });

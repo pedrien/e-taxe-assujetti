@@ -61,7 +61,8 @@ export const authOptions: AuthOptions = {
           };
           session.accessToken = token.accessToken as string;
           session.refreshToken = token.refreshToken as string;
-          session.payerId = decodedToken.payer as string;
+          // Le payerId du token est maintenant utilisé comme profileId
+          session.profileId = decodedToken.payer as string;
           session.error = token.error as string;
         }
       }
@@ -76,7 +77,7 @@ declare module "next-auth" {
   interface Session {
     accessToken?: string;
     refreshToken?: string;
-    payerId?: string;
+    profileId?: string; // Renommé de payerId à profileId
     error?: string;
   }
 
@@ -98,7 +99,7 @@ declare module "next-auth/jwt" {
     accessToken?: string;
     accessTokenExpires?: number;
     refreshToken?: string;
-    payerId?: string;
+    profileId?: string; // Renommé de payerId à profileId
     error?: string;
   }
 }

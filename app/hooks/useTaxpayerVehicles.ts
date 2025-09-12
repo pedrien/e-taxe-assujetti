@@ -1,25 +1,39 @@
 "use client";
-import { useQuery } from "@apollo/client/react";
-import { GET_TAXPAYER_VEHICLES, TaxpayerVehiclesQuery } from "@/app/graphql/queries/getTaxpayerVehicles";
+import { useMemo } from "react";
+import { useProfileData } from "./useProfileData";
 
-export const useTaxpayerVehicles = (payerId?: string | null) => {
-  // L'API attend un ID de type IRI: /api/payer/taxpayers/{id}
-  const iriId = payerId
-    ? payerId.startsWith("/api/")
-      ? payerId
-      : `/api/payer/taxpayers/${payerId}`
-    : undefined;
+export const useTaxpayerVehicles = (profileId?: string | null) => {
+  const { vehicles, loading, error } = useProfileData(profileId ?? null);
 
-  const { data, loading, error } = useQuery<TaxpayerVehiclesQuery>(GET_TAXPAYER_VEHICLES, {
-    variables: { id: iriId as string },
-    skip: !iriId,
-    fetchPolicy: "cache-and-network",
-  });
+  // Mémoriser le formatage des véhicules pour éviter les recalculs
+  const formattedVehicles = useMemo(() => 
+    vehicles?.collection?.map((vehicle, index) => ({
+      id: vehicle?.taxId ?? String(index),
+      taxId: vehicle?.taxId ?? "",
+      registration: vehicle?.registration ?? "",
+      chassisNumber: vehicle?.chassisNumber ?? "",
+      circYear: vehicle?.circYear?.toString() ?? "",
+      weight: vehicle?.weight ? `${vehicle.weight} Kg` : "",
+      power: vehicle?.power ? `${vehicle.power} CH` : "",
+      mark: vehicle?.mark?.headLine ?? "",
+      model: vehicle?.model?.headLine ?? "",
+      calender: vehicle?.calender?.headLine ?? "",
+      color: vehicle?.color?.name ?? "",
+    })) ?? [], 
+    [vehicles?.collection]
+  );
 
-  // Debug logs
-  const vehicles = data?.taxpayer?.vehicles?.collection ?? [];
+  // Mémoriser le total count
+  const totalCount = useMemo(() => 
+    vehicles?.paginationInfo?.totalCount ?? 0, 
+    [vehicles?.paginationInfo?.totalCount]
+  );
 
-  return { vehicles, loading, error };
+  // Mémoriser le résultat final
+  return useMemo(() => ({
+    vehicles: formattedVehicles,
+    totalCount,
+    loading,
+    error,
+  }), [formattedVehicles, totalCount, loading, error]);
 };
-
-

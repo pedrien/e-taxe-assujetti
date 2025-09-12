@@ -1,21 +1,28 @@
 "use client";
 import { useSession } from 'next-auth/react';
-import { useEffect } from 'react';
+import { useEffect, useRef, useMemo } from 'react';
 
 export const useApolloAuth = () => {
   const { data: session } = useSession();
+  const previousTokenRef = useRef<string | null>(null);
 
   useEffect(() => {
-    // Stocker le token d'accès dans localStorage pour Apollo
-    if (session?.accessToken) {
-      localStorage.setItem('accessToken', session.accessToken);
-    } else {
-      localStorage.removeItem('accessToken');
+    const currentToken = session?.accessToken;
+    
+    // Éviter les mises à jour inutiles du localStorage
+    if (currentToken !== previousTokenRef.current) {
+      if (currentToken) {
+        localStorage.setItem('accessToken', currentToken);
+      } else {
+        localStorage.removeItem('accessToken');
+      }
+      previousTokenRef.current = currentToken;
     }
   }, [session?.accessToken]);
 
-  return {
+  // Mémoriser le résultat pour éviter les re-renders
+  return useMemo(() => ({
     isAuthenticated: !!session?.accessToken,
     accessToken: session?.accessToken,
-  };
+  }), [session?.accessToken]);
 };

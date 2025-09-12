@@ -4,7 +4,7 @@ import { Bell, Search, Sun, ArrowDown, LogOut } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { useNextAuth } from "@/app/contexts/auth/useNextAuth";
-import { useTaxpayerAvatar } from "@/app/hooks/useTaxpayerAvatar";
+import { useProfileData } from "@/app/hooks/useProfileData";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,8 +16,8 @@ import {
 import { useEffect, useState } from "react";
 
 const Navbar = () => {
-  const { user, payerId, logout } = useNextAuth();
-  const { src: avatarSrc } = useTaxpayerAvatar(payerId);
+  const { user, profileId, logout } = useNextAuth();
+  const { payerId, payerAvatar, loading } = useProfileData(profileId);
   const [scrolled, setScrolled] = useState(false);
   useEffect(() => {
     const handleScroll = () => {
@@ -153,7 +153,7 @@ const Navbar = () => {
             <DropdownMenu>
               <DropdownMenuTrigger className="block-avatar flex items-center gap-1 p-[5px] bg-[#ffffff1c] text-white rounded-full hover:bg-[#ffffff2c] transition-colors">
                 <Avatar className="w-[32px] h-[32px]">
-                  <AvatarImage src={avatarSrc ?? undefined} alt={user?.name || "User"} />
+                  <AvatarImage src={payerAvatar ?? undefined} alt={user?.name || "User"} />
                   <AvatarFallback className="bg-bgCard text-colorTitle text-sm font-medium">
                     {user?.name ? user.name.substring(0, 2).toUpperCase() : "U"}
                   </AvatarFallback>
@@ -170,7 +170,10 @@ const Navbar = () => {
                       {user?.email}
                     </p>
                     <p className="text-xs leading-none text-muted-foreground">
-                      Payer ID: {payerId}
+                      Payer Profile: {profileId}
+                    </p>
+                    <p className="text-xs leading-none text-muted-foreground">
+                      Payer ID: {loading ? "Chargement..." : payerId || "Non trouvé"}
                     </p>
                   </div>
                 </DropdownMenuLabel>
