@@ -29,7 +29,7 @@ export const useTaxpayerActivities = (profileId?: string | null) => {
         typeActive: activityDetails?.activity?.headLine ?? "",
         description: activityDetails?.activity?.description ?? "",
         dimension: activityDetails?.dimension?.headLine ?? "",
-        activitePrinc: getActivityTypeLabel(parseInt(activityDetails?.category?.id ?? "0") as number),
+        activitePrinc: getActivityTypeLabel(parseInt(activityDetails?.category?.id ?? "0") as 0 | 1 | 2 | 3),
         nature: activityDetails?.category?.headLine ?? "",
         denomination: activityDetails?.activity?.description ?? "",
         lieu: activityDetails?.pretence?.headLine ?? "",

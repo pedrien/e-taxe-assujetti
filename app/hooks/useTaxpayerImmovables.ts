@@ -8,13 +8,13 @@ export const useTaxpayerImmovables = (profileId?: string | null) => {
   // Mémoriser le formatage des immobiliers pour éviter les recalculs
   const formattedImmovables = useMemo(() => 
     immovables?.collection?.map((immovable, index) => ({
-      id: immovable.taxId ?? String(index),
-      taxId: immovable.taxId ?? "",
-      headLine: immovable.headLine ?? "",
-      nature: immovable.nature?.headLine ?? "",
-      usage: immovable.usage?.headLine ?? "",
-      range: immovable.range?.headLine ?? "",
-      area: immovable.area ? `${Number(immovable.area).toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} m²` : "-",
+      id: immovable?.taxId ?? String(index),
+      taxId: immovable?.taxId ?? "",
+      headLine: immovable?.headLine ?? "",
+      nature: immovable?.nature?.headLine ?? "",
+      usage: immovable?.usage?.headLine ?? "",
+      range: immovable?.range?.headLine ?? "",
+      area: immovable?.area ? `${Number(immovable.area).toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} m²` : "-",
     })) ?? [], 
     [immovables?.collection]
   );

@@ -52,7 +52,7 @@ export const useProfileTaxpayers = (profileId?: string | null) => {
   const allVehicles = taxpayers.flatMap((taxpayer: unknown) => {
     const t = taxpayer as { id: string; vehicles?: { collection?: unknown[] }; payerProfile: unknown };
     return t.vehicles?.collection?.map((vehicle: unknown) => ({
-      ...vehicle,
+      ...(vehicle as Record<string, unknown>),
       taxpayerId: t.id,
       payerProfile: t.payerProfile,
     })) ?? [];

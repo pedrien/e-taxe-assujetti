@@ -36,6 +36,9 @@ interface ImmovableItem {
   rang: string;
   sb: string;
   snb: string;
+  dateDeclaration?: string;
+  datePaiement?: string;
+  montant?: string;
 }
 
 interface FilterState {
@@ -170,6 +173,9 @@ const TableImmobiliers = () => {
       rang: immovable.range ?? "",
       sb: immovable.area,
       snb: "-", // D.non-batie non calculée pour l'instant
+      dateDeclaration: "-", // Date de déclaration non disponible pour l'instant
+      datePaiement: "-", // Date de paiement non disponible pour l'instant
+      montant: "-", // Montant non disponible pour l'instant
     })), [immovables]
   );
 

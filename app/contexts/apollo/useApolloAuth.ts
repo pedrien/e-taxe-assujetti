@@ -7,7 +7,7 @@ export const useApolloAuth = () => {
   const previousTokenRef = useRef<string | null>(null);
 
   useEffect(() => {
-    const currentToken = session?.accessToken;
+    const currentToken = session?.accessToken ?? null;
     
     // Éviter les mises à jour inutiles du localStorage
     if (currentToken !== previousTokenRef.current) {

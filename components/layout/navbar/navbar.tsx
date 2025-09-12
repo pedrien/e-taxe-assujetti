@@ -17,7 +17,7 @@ import { useEffect, useState } from "react";
 
 const Navbar = () => {
   const { user, profileId, logout } = useNextAuth();
-  const { payerId, payerAvatar, loading } = useProfileData(profileId);
+  const { payerId, payerAvatar, loading } = useProfileData(profileId ?? null);
   const [scrolled, setScrolled] = useState(false);
   useEffect(() => {
     const handleScroll = () => {
