@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { Card } from "@/components/ui/card";
 import { Search,  EllipsisVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -28,6 +28,9 @@ import {
 import { LoadingIndicator } from "@/components/ui/loading-indicator";
 import { useNextAuth } from "@/app/contexts/auth/useNextAuth";
 import { useTaxpayerActivities } from "@/app/hooks/useTaxpayerActivities";
+import { RefreshButton } from "@/components/ui/refresh-button";
+import { TableSkeleton } from "@/components/ui/table-skeleton";
+import { useDebounce } from "@/app/hooks/useDebounce";
 
 const TableActivities = () => {
   // États pour gérer les checkboxes de chaque onglet
@@ -135,44 +138,235 @@ const TableActivities = () => {
     );
   };
 
+  // Fonction utilitaire pour rendre la barre de recherche et de filtres
+  const renderSearchAndFilters = (tabKey: string) => (
+    <div className="grid grid-cols-12 gap-3 items-center">
+      <div className="col-span-12 lg:col-span-4">
+        <div className="block-search w-[320px] max-w-full relative flex items-center">
+          <div className="icon absolute left-2 text-colorTitle">
+            <Search size={18} />
+          </div>
+          <Input
+            type="text"
+            className="shadow-none h-10 pl-8 rounded-lg border-borderInput placeholder:text-colorMuted placeholder:opacity-70"
+            placeholder="Recherche"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+      </div>
+      <div className="col-span-12 lg:col-span-8">
+        <div className="flex lg:justify-end gap-2">
+          <RefreshButton 
+            onRefresh={async () => {
+              try {
+                await refetch();
+              } catch (error) {
+                console.error("Erreur lors du rafraîchissement:", error);
+              }
+            }}
+            size="sm"
+            variant="outline"
+            className="border-borderInput hover:bg-gray-50"
+          />
+          {renderAppurerButton(tabKey)}
+          <div className="block-selects flex border border-borderInput rounded-lg">
+            <Select value={filterTypeActive} onValueChange={setFilterTypeActive}>
+              <SelectTrigger className="w-[180px] shadow-none border-0 rounded-none border-r border-borderInput text-colorTitle">
+                <SelectValue placeholder="Type d'activité" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  <SelectLabel>Type d&apos;activité</SelectLabel>
+                  <SelectItem value="all">Tous</SelectItem>
+                  {filterOptions.typeActiveOptions.map((option) => (
+                    <SelectItem key={option} value={option}>
+                      {option}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+            <Select value={filterDimension} onValueChange={setFilterDimension}>
+              <SelectTrigger className="w-[180px] shadow-none border-0 rounded-none border-r border-borderInput text-colorTitle">
+                <SelectValue placeholder="Dimension" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  <SelectLabel>Dimension</SelectLabel>
+                  <SelectItem value="all">Tous</SelectItem>
+                  {filterOptions.dimensionOptions.map((option) => (
+                    <SelectItem key={option} value={option}>
+                      {option}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+            <Select value={filterActivitePrinc} onValueChange={setFilterActivitePrinc}>
+              <SelectTrigger className="w-[180px] shadow-none border-0 rounded-none">
+                <SelectValue placeholder="Activité principale" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  <SelectLabel>Activité principale</SelectLabel>
+                  <SelectItem value="all">Tous</SelectItem>
+                  {filterOptions.activitePrincOptions.map((option) => (
+                    <SelectItem key={option} value={option}>
+                      {option}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  // États pour la recherche et les filtres
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterTypeActive, setFilterTypeActive] = useState<string>("all");
+  const [filterDimension, setFilterDimension] = useState<string>("all");
+  const [filterActivitePrinc, setFilterActivitePrinc] = useState<string>("all");
+
+  // Debounce pour la recherche (300ms de délai)
+  const debouncedSearchTerm = useDebounce(searchTerm, 300);
+
   // Récupération des données réelles
   const { profileId } = useNextAuth();
-  const { activities, loading, error } = useTaxpayerActivities(profileId);
+  const { activities, loading, error, refetch, isInitialLoad } = useTaxpayerActivities(profileId);
 
-  // Utiliser les vraies données de l'API
-  const identItems = activities.map((activity, index) => ({
-    id: activity.taxId ?? String(index),
-    typeActive: activity.typeActive ?? "",
-    dimension: activity.dimension ?? "",
-    activitePrinc: activity.activitePrinc ?? "",
-    nature: activity.nature ?? "",
-    denimination: activity.denomination ?? "",
-    lieu: activity.lieu ?? "",
-    commune: activity.lieu ?? "", // Utiliser lieu comme commune pour la compatibilité
-  })) as Array<{
-    id: string;
-    typeActive: string;
-    dimension: string;
-    activitePrinc: string;
-    nature: string;
-    denimination: string;
-    lieu: string;
-    commune: string;
-  }>;
-  // Tous les onglets utilisent les mêmes données pour l'instant
-  const declItems = identItems;
-  const payItems = identItems;
-  const appItems = identItems;
-  const impItems = identItems;
-  const ddItems = identItems;
-  const dpItems = identItems;
-  const fpcItems = identItems;
-  const amrItems = identItems;
-  const pourItems = identItems;
-  const ccItems = identItems;
-  const adtItems = identItems;
-  const conItems = identItems;
-  const reclItems = identItems;
+  // Fonction utilitaire pour mapper les données d'activité
+  const mapActivityData = (activity: unknown, index: number) => {
+    const act = activity as Record<string, unknown>;
+    return {
+      id: (act.taxId as string) ?? String(index),
+      typeActive: (act.typeActive as string) ?? "",
+      dimension: (act.dimension as string) ?? "",
+      activitePrinc: (act.activitePrinc as string) ?? "",
+      categorie: (act.nature as string) ?? "", // Renommé de nature à catégorie
+      denimination: (act.denomination as string) ?? "",
+      lieu: (act.lieu as string) ?? "", // Renommé de commune à lieu
+    };
+  };
+
+  // Fonction utilitaire pour rendre les lignes de tableau
+  const renderTableRows = (tabKey: string) => {
+    return filteredItems.map((activity, index) => {
+      const row = mapActivityData(activity, index);
+      return (
+        <tr key={row.id}>
+          <td>{renderCheckbox(tabKey, row.id)}</td>
+          <td>
+            <span>{row.typeActive}</span>
+          </td>
+          <td>
+            <span>{row.dimension}</span>
+          </td>
+          <td>
+            <span>{row.activitePrinc}</span>
+          </td>
+          <td>
+            <span>{row.categorie}</span>
+          </td>
+          <td>
+            <span>{row.denimination}</span>
+          </td>
+          <td>
+            <span>{row.lieu}</span>
+          </td>
+          <td>
+            <div className="flex items-center gap-3">
+              <Button className="cursor-pointer shadow-none bg-transparent  text-[#5f61e6]  hover:bg-transparent hover:text-[#494be3] text-md h-auto p-0">
+                Déclarer
+              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger className="cursor-pointer bg-bgGray text-colorTitle p-0 w-[28px] flex items-center justify-center rounded-lg h-[28px] hover:bg-[#07192b] hover:text-white">
+                  <EllipsisVertical size={18}></EllipsisVertical>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="border-0 shadow-[var(--boxShadowCard)!important]">
+                  <DropdownMenuLabel className="text-colorMuted text-xs opacity-70">
+                    Actions
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem className="text-sm text-colorMuted">
+                    Afficher
+                  </DropdownMenuItem>
+                  <DropdownMenuItem className="text-sm text-colorMuted">
+                    Modifier
+                  </DropdownMenuItem>
+                  <DropdownMenuItem className="text-sm text-colorMuted">
+                    Supprimer
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          </td>
+        </tr>
+      );
+    });
+  };
+
+  // Options de filtres (calculées une seule fois)
+  const filterOptions = useMemo(() => {
+    const typeActive = new Set<string>();
+    const dimension = new Set<string>();
+    const activitePrinc = new Set<string>();
+    
+    activities.forEach((activity) => {
+      if (activity.typeActive) typeActive.add(activity.typeActive);
+      if (activity.dimension) dimension.add(activity.dimension);
+      if (activity.activitePrinc) activitePrinc.add(activity.activitePrinc);
+    });
+    
+    return {
+      typeActiveOptions: Array.from(typeActive).sort((a, b) => a.localeCompare(b)),
+      dimensionOptions: Array.from(dimension).sort((a, b) => a.localeCompare(b)),
+      activitePrincOptions: Array.from(activitePrinc).sort((a, b) => a.localeCompare(b)),
+    };
+  }, [activities]);
+
+  // Liste filtrée (optimisée avec debounce)
+  const filteredItems = useMemo(() => {
+    if (!activities.length) return [];
+    
+    const q = debouncedSearchTerm.trim().toLowerCase();
+    const isTypeActiveFiltered = filterTypeActive !== "all";
+    const isDimensionFiltered = filterDimension !== "all";
+    const isActivitePrincFiltered = filterActivitePrinc !== "all";
+    const hasSearchTerm = q.length > 0;
+    
+    return activities.filter((activity) => {
+      // Filtres par sélection
+      if (isTypeActiveFiltered && activity.typeActive !== filterTypeActive) return false;
+      if (isDimensionFiltered && activity.dimension !== filterDimension) return false;
+      if (isActivitePrincFiltered && activity.activitePrinc !== filterActivitePrinc) return false;
+      
+      // Recherche textuelle
+      if (hasSearchTerm) {
+        const searchText = `${activity.typeActive || ''} ${activity.dimension || ''} ${activity.activitePrinc || ''} ${activity.nature || ''} ${activity.denomination || ''} ${activity.lieu || ''}`.toLowerCase();
+        if (!searchText.includes(q)) return false;
+      }
+      
+      return true;
+    });
+  }, [activities, debouncedSearchTerm, filterTypeActive, filterDimension, filterActivitePrinc]);
+  // Tous les onglets utilisent les mêmes données filtrées
+  // const declItems = filteredItems;
+  // const payItems = filteredItems;
+  // const appItems = filteredItems;
+  // const impItems = filteredItems;
+  // const ddItems = filteredItems;
+  // const dpItems = filteredItems;
+  // const fpcItems = filteredItems;
+  // const amrItems = filteredItems;
+  // const pourItems = filteredItems;
+  // const ccItems = filteredItems;
+  // const adtItems = filteredItems;
+  // const conItems = filteredItems;
+  // const reclItems = filteredItems;
 
   if (loading) {
     return <LoadingIndicator />;
@@ -184,6 +378,11 @@ const TableActivities = () => {
         <p className="text-red-500">Erreur lors du chargement des activités: {error.message}</p>
       </div>
     );
+  }
+
+  // Afficher le skeleton pendant le chargement initial
+  if (isInitialLoad) {
+    return <TableSkeleton rows={5} columns={6} showSearch={true} showFilters={true} />;
   }
 
   return (
@@ -329,84 +528,7 @@ const TableActivities = () => {
           <div className="col-span-12 lg:col-span-9">
             <TabsContent value="ident">
               <Card className="rounded-[24px] shadow-[var(--boxShadowCard)!important] border-0 bg-bgCard lg:p-[18px]">
-                <div className="grid grid-cols-12 gap-3 items-center">
-                  <div className="col-span-12 lg:col-span-4">
-                    <div className="block-search w-[320px] max-w-full relative flex items-center">
-                      <div className="icon absolute left-2 text-colorTitle">
-                        <Search size={18} />
-                      </div>
-                      <Input
-                        type="text"
-                        className="shadow-none h-10 pl-8 rounded-lg border-borderInput placeholder:text-colorMuted placeholder:opacity-70"
-                        placeholder="Recherche"
-                      />
-                    </div>
-                  </div>
-                  <div className="col-span-12 lg:col-span-8">
-                    <div className="flex lg:justify-end gap-2">
-                      {renderAppurerButton("ident")}
-                      <div className="block-selects flex border border-borderInput rounded-lg">
-                        <Select>
-                          <SelectTrigger className="w-[180px] shadow-none border-0 rounded-none border-r border-borderInput text-colorTitle">
-                            <SelectValue placeholder="Nature" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectGroup>
-                              <SelectLabel>Nature</SelectLabel>
-                              <SelectItem value="apple">Apple</SelectItem>
-                              <SelectItem value="banana">Banana</SelectItem>
-                              <SelectItem value="blueberry">
-                                Blueberry
-                              </SelectItem>
-                              <SelectItem value="grapes">Grapes</SelectItem>
-                              <SelectItem value="pineapple">
-                                Pineapple
-                              </SelectItem>
-                            </SelectGroup>
-                          </SelectContent>
-                        </Select>
-                        <Select>
-                          <SelectTrigger className="w-[180px] shadow-none border-0 rounded-none border-r border-borderInput text-colorTitle">
-                            <SelectValue placeholder="Rang" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectGroup>
-                              <SelectLabel>Rang</SelectLabel>
-                              <SelectItem value="apple">Apple</SelectItem>
-                              <SelectItem value="banana">Banana</SelectItem>
-                              <SelectItem value="blueberry">
-                                Blueberry
-                              </SelectItem>
-                              <SelectItem value="grapes">Grapes</SelectItem>
-                              <SelectItem value="pineapple">
-                                Pineapple
-                              </SelectItem>
-                            </SelectGroup>
-                          </SelectContent>
-                        </Select>
-                        <Select>
-                          <SelectTrigger className="w-[180px] shadow-none border-0 rounded-none">
-                            <SelectValue placeholder="Statut" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectGroup>
-                              <SelectLabel>Statut</SelectLabel>
-                              <SelectItem value="apple">Apple</SelectItem>
-                              <SelectItem value="banana">Banana</SelectItem>
-                              <SelectItem value="blueberry">
-                                Blueberry
-                              </SelectItem>
-                              <SelectItem value="grapes">Grapes</SelectItem>
-                              <SelectItem value="pineapple">
-                                Pineapple
-                              </SelectItem>
-                            </SelectGroup>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                {renderSearchAndFilters("ident")}
                 <div className="overflow-x-auto">
                   <table className="table w-full table-bordered">
                     <thead>
@@ -414,72 +536,21 @@ const TableActivities = () => {
                         <th>
                           {renderCheckbox(
                             "ident",
-                            identItems.map((i) => i.id),
+                            filteredItems.map((_, i) => String(i)),
                             true
                           )}
                         </th>
                         <th>Type d&apos;activité</th>
                         <th>Dimension</th>
                         <th>Activité principale</th>
-                        <th>Nature</th>
+                        <th>Catégorie</th>
                         <th>Dénomination</th>
-                        <th>Commune</th>
+                        <th>Lieu</th>
                         <th>Actions</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {identItems.map((row) => (
-                        <tr key={row.id}>
-                          <td>{renderCheckbox("ident", row.id)}</td>
-                          <td>
-                            <span>{row.typeActive}</span>
-                          </td>
-                          <td>
-                            <span>{row.dimension}</span>
-                          </td>
-                          <td>
-                            <span>{row.activitePrinc}</span>
-                          </td>
-                          <td>
-                            <span>{row.nature}</span>
-                          </td>
-                          <td>
-                            <span>{row.denimination}</span>
-                          </td>
-                          <td>
-                            <span>{row.commune}</span>
-                          </td>
-                          <td>
-                            <div className="flex items-center gap-3">
-                              <Button className="cursor-pointer shadow-none bg-transparent  text-[#5f61e6]  hover:bg-transparent hover:text-[#494be3] text-md h-auto p-0">
-                                Déclarer
-                              </Button>
-                              <DropdownMenu>
-                                <DropdownMenuTrigger className="cursor-pointer bg-bgGray text-colorTitle p-0 w-[28px] flex items-center justify-center rounded-lg h-[28px] hover:bg-[#07192b] hover:text-white">
-                                  <EllipsisVertical
-                                    size={18}
-                                  ></EllipsisVertical>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent className="border-0 shadow-[var(--boxShadowCard)!important]">
-                                  <DropdownMenuLabel className="text-colorMuted text-xs opacity-70">
-                                    Actions
-                                  </DropdownMenuLabel>
-                                  <DropdownMenuSeparator />
-                                  <DropdownMenuItem className="text-sm text-colorMuted">
-                                    Afficher
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem className="text-sm text-colorMuted">
-                                    Modifier
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem className="text-sm text-colorMuted">
-                                    Supprimer
-                                  </DropdownMenuItem>
-                                </DropdownMenuContent>
-                              </DropdownMenu>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
+                      {renderTableRows("ident")}
                     </tbody>
                   </table>
                 </div>
@@ -487,84 +558,7 @@ const TableActivities = () => {
             </TabsContent>
             <TabsContent value="decl">
               <Card className="rounded-[24px] shadow-[var(--boxShadowCard)!important] border-0 bg-bgCard lg:p-[18px]">
-                <div className="grid grid-cols-12 gap-3 items-center">
-                  <div className="col-span-12 lg:col-span-4">
-                    <div className="block-search w-[320px] max-w-full relative flex items-center">
-                      <div className="icon absolute left-2 text-colorTitle">
-                        <Search size={18} />
-                      </div>
-                      <Input
-                        type="text"
-                        className="shadow-none h-10 pl-8 rounded-lg border-borderInput placeholder:text-colorMuted placeholder:opacity-70"
-                        placeholder="Recherche"
-                      />
-                    </div>
-                  </div>
-                  <div className="col-span-12 lg:col-span-8">
-                    <div className="flex lg:justify-end gap-2">
-                      {renderAppurerButton("decl")}
-                      <div className="block-selects flex border border-borderInput rounded-lg">
-                        <Select>
-                          <SelectTrigger className="w-[180px] shadow-none border-0 rounded-none border-r border-borderInput text-colorTitle">
-                            <SelectValue placeholder="Nature" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectGroup>
-                              <SelectLabel>Nature</SelectLabel>
-                              <SelectItem value="apple">Apple</SelectItem>
-                              <SelectItem value="banana">Banana</SelectItem>
-                              <SelectItem value="blueberry">
-                                Blueberry
-                              </SelectItem>
-                              <SelectItem value="grapes">Grapes</SelectItem>
-                              <SelectItem value="pineapple">
-                                Pineapple
-                              </SelectItem>
-                            </SelectGroup>
-                          </SelectContent>
-                        </Select>
-                        <Select>
-                          <SelectTrigger className="w-[180px] shadow-none border-0 rounded-none border-r border-borderInput text-colorTitle">
-                            <SelectValue placeholder="Rang" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectGroup>
-                              <SelectLabel>Rang</SelectLabel>
-                              <SelectItem value="apple">Apple</SelectItem>
-                              <SelectItem value="banana">Banana</SelectItem>
-                              <SelectItem value="blueberry">
-                                Blueberry
-                              </SelectItem>
-                              <SelectItem value="grapes">Grapes</SelectItem>
-                              <SelectItem value="pineapple">
-                                Pineapple
-                              </SelectItem>
-                            </SelectGroup>
-                          </SelectContent>
-                        </Select>
-                        <Select>
-                          <SelectTrigger className="w-[180px] shadow-none border-0 rounded-none">
-                            <SelectValue placeholder="Statut" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectGroup>
-                              <SelectLabel>Statut</SelectLabel>
-                              <SelectItem value="apple">Apple</SelectItem>
-                              <SelectItem value="banana">Banana</SelectItem>
-                              <SelectItem value="blueberry">
-                                Blueberry
-                              </SelectItem>
-                              <SelectItem value="grapes">Grapes</SelectItem>
-                              <SelectItem value="pineapple">
-                                Pineapple
-                              </SelectItem>
-                            </SelectGroup>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                {renderSearchAndFilters("decl")}
                 <div className="overflow-x-auto">
                   <table className="table w-full table-bordered">
                     <thead>
@@ -572,72 +566,21 @@ const TableActivities = () => {
                         <th>
                           {renderCheckbox(
                             "decl",
-                            declItems.map((i) => i.id),
+                            filteredItems.map((_, i) => String(i)),
                             true
                           )}
                         </th>
                         <th>Type d&apos;activité</th>
                         <th>Dimension</th>
                         <th>Activité principale</th>
-                        <th>Nature</th>
+                        <th>Catégorie</th>
                         <th>Dénomination</th>
-                        <th>Commune</th>
+                        <th>Lieu</th>
                         <th>Actions</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {declItems.map((row) => (
-                        <tr key={row.id}>
-                          <td>{renderCheckbox("decl", row.id)}</td>
-                          <td>
-                            <span>{row.typeActive}</span>
-                          </td>
-                          <td>
-                            <span>{row.dimension}</span>
-                          </td>
-                          <td>
-                            <span>{row.activitePrinc}</span>
-                          </td>
-                          <td>
-                            <span>{row.nature}</span>
-                          </td>
-                          <td>
-                            <span>{row.denimination}</span>
-                          </td>
-                          <td>
-                            <span>{row.commune}</span>
-                          </td>
-                          <td>
-                            <div className="flex items-center gap-3">
-                              <Button className="cursor-pointer shadow-none bg-transparent  text-[#5f61e6]  hover:bg-transparent hover:text-[#494be3] text-md h-auto p-0">
-                                Déclarer
-                              </Button>
-                              <DropdownMenu>
-                                <DropdownMenuTrigger className="cursor-pointer bg-bgGray text-colorTitle p-0 w-[28px] flex items-center justify-center rounded-lg h-[28px] hover:bg-[#07192b] hover:text-white">
-                                  <EllipsisVertical
-                                    size={18}
-                                  ></EllipsisVertical>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent className="border-0 shadow-[var(--boxShadowCard)!important]">
-                                  <DropdownMenuLabel className="text-colorMuted text-xs opacity-70">
-                                    Actions
-                                  </DropdownMenuLabel>
-                                  <DropdownMenuSeparator />
-                                  <DropdownMenuItem className="text-sm text-colorMuted">
-                                    Afficher
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem className="text-sm text-colorMuted">
-                                    Modifier
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem className="text-sm text-colorMuted">
-                                    Supprimer
-                                  </DropdownMenuItem>
-                                </DropdownMenuContent>
-                              </DropdownMenu>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
+                      {renderTableRows("decl")}
                     </tbody>
                   </table>
                 </div>
@@ -645,84 +588,7 @@ const TableActivities = () => {
             </TabsContent>
             <TabsContent value="pay">
               <Card className="rounded-[24px] shadow-[var(--boxShadowCard)!important] border-0 bg-bgCard lg:p-[18px]">
-                <div className="grid grid-cols-12 gap-3 items-center">
-                  <div className="col-span-12 lg:col-span-4">
-                    <div className="block-search w-[320px] max-w-full relative flex items-center">
-                      <div className="icon absolute left-2 text-colorTitle">
-                        <Search size={18} />
-                      </div>
-                      <Input
-                        type="text"
-                        className="shadow-none h-10 pl-8 rounded-lg border-borderInput placeholder:text-colorMuted placeholder:opacity-70"
-                        placeholder="Recherche"
-                      />
-                    </div>
-                  </div>
-                  <div className="col-span-12 lg:col-span-8">
-                    <div className="flex lg:justify-end gap-2">
-                      {renderAppurerButton("pay")}
-                      <div className="block-selects flex border border-borderInput rounded-lg">
-                        <Select>
-                          <SelectTrigger className="w-[180px] shadow-none border-0 rounded-none border-r border-borderInput text-colorTitle">
-                            <SelectValue placeholder="Nature" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectGroup>
-                              <SelectLabel>Nature</SelectLabel>
-                              <SelectItem value="apple">Apple</SelectItem>
-                              <SelectItem value="banana">Banana</SelectItem>
-                              <SelectItem value="blueberry">
-                                Blueberry
-                              </SelectItem>
-                              <SelectItem value="grapes">Grapes</SelectItem>
-                              <SelectItem value="pineapple">
-                                Pineapple
-                              </SelectItem>
-                            </SelectGroup>
-                          </SelectContent>
-                        </Select>
-                        <Select>
-                          <SelectTrigger className="w-[180px] shadow-none border-0 rounded-none border-r border-borderInput text-colorTitle">
-                            <SelectValue placeholder="Rang" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectGroup>
-                              <SelectLabel>Rang</SelectLabel>
-                              <SelectItem value="apple">Apple</SelectItem>
-                              <SelectItem value="banana">Banana</SelectItem>
-                              <SelectItem value="blueberry">
-                                Blueberry
-                              </SelectItem>
-                              <SelectItem value="grapes">Grapes</SelectItem>
-                              <SelectItem value="pineapple">
-                                Pineapple
-                              </SelectItem>
-                            </SelectGroup>
-                          </SelectContent>
-                        </Select>
-                        <Select>
-                          <SelectTrigger className="w-[180px] shadow-none border-0 rounded-none">
-                            <SelectValue placeholder="Statut" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectGroup>
-                              <SelectLabel>Statut</SelectLabel>
-                              <SelectItem value="apple">Apple</SelectItem>
-                              <SelectItem value="banana">Banana</SelectItem>
-                              <SelectItem value="blueberry">
-                                Blueberry
-                              </SelectItem>
-                              <SelectItem value="grapes">Grapes</SelectItem>
-                              <SelectItem value="pineapple">
-                                Pineapple
-                              </SelectItem>
-                            </SelectGroup>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                {renderSearchAndFilters("pay")}
                 <div className="overflow-x-auto">
                   <table className="table w-full table-bordered">
                     <thead>
@@ -730,72 +596,21 @@ const TableActivities = () => {
                         <th>
                           {renderCheckbox(
                             "pay",
-                            payItems.map((i) => i.id),
+                            filteredItems.map((_, i) => String(i)),
                             true
                           )}
                         </th>
                         <th>Type d&apos;activité</th>
                         <th>Dimension</th>
                         <th>Activité principale</th>
-                        <th>Nature</th>
+                        <th>Catégorie</th>
                         <th>Dénomination</th>
-                        <th>Commune</th>
+                        <th>Lieu</th>
                         <th>Actions</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {payItems.map((row) => (
-                        <tr key={row.id}>
-                          <td>{renderCheckbox("pay", row.id)}</td>
-                          <td>
-                            <span>{row.typeActive}</span>
-                          </td>
-                          <td>
-                            <span>{row.dimension}</span>
-                          </td>
-                          <td>
-                            <span>{row.activitePrinc}</span>
-                          </td>
-                          <td>
-                            <span>{row.nature}</span>
-                          </td>
-                          <td>
-                            <span>{row.denimination}</span>
-                          </td>
-                          <td>
-                            <span>{row.commune}</span>
-                          </td>
-                          <td>
-                            <div className="flex items-center gap-3">
-                              <Button className="cursor-pointer shadow-none bg-transparent  text-[#5f61e6]  hover:bg-transparent hover:text-[#494be3] text-md h-auto p-0">
-                                Déclarer
-                              </Button>
-                              <DropdownMenu>
-                                <DropdownMenuTrigger className="cursor-pointer bg-bgGray text-colorTitle p-0 w-[28px] flex items-center justify-center rounded-lg h-[28px] hover:bg-[#07192b] hover:text-white">
-                                  <EllipsisVertical
-                                    size={18}
-                                  ></EllipsisVertical>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent className="border-0 shadow-[var(--boxShadowCard)!important]">
-                                  <DropdownMenuLabel className="text-colorMuted text-xs opacity-70">
-                                    Actions
-                                  </DropdownMenuLabel>
-                                  <DropdownMenuSeparator />
-                                  <DropdownMenuItem className="text-sm text-colorMuted">
-                                    Afficher
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem className="text-sm text-colorMuted">
-                                    Modifier
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem className="text-sm text-colorMuted">
-                                    Supprimer
-                                  </DropdownMenuItem>
-                                </DropdownMenuContent>
-                              </DropdownMenu>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
+                      {renderTableRows("pay")}
                     </tbody>
                   </table>
                 </div>
@@ -803,84 +618,7 @@ const TableActivities = () => {
             </TabsContent>
             <TabsContent value="app">
               <Card className="rounded-[24px] shadow-[var(--boxShadowCard)!important] border-0 bg-bgCard lg:p-[18px]">
-                <div className="grid grid-cols-12 gap-3 items-center">
-                  <div className="col-span-12 lg:col-span-4">
-                    <div className="block-search w-[320px] max-w-full relative flex items-center">
-                      <div className="icon absolute left-2 text-colorTitle">
-                        <Search size={18} />
-                      </div>
-                      <Input
-                        type="text"
-                        className="shadow-none h-10 pl-8 rounded-lg border-borderInput placeholder:text-colorMuted placeholder:opacity-70"
-                        placeholder="Recherche"
-                      />
-                    </div>
-                  </div>
-                  <div className="col-span-12 lg:col-span-8">
-                    <div className="flex lg:justify-end gap-2">
-                      {renderAppurerButton("app")}
-                      <div className="block-selects flex border border-borderInput rounded-lg">
-                        <Select>
-                          <SelectTrigger className="w-[180px] shadow-none border-0 rounded-none border-r border-borderInput text-colorTitle">
-                            <SelectValue placeholder="Nature" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectGroup>
-                              <SelectLabel>Nature</SelectLabel>
-                              <SelectItem value="apple">Apple</SelectItem>
-                              <SelectItem value="banana">Banana</SelectItem>
-                              <SelectItem value="blueberry">
-                                Blueberry
-                              </SelectItem>
-                              <SelectItem value="grapes">Grapes</SelectItem>
-                              <SelectItem value="pineapple">
-                                Pineapple
-                              </SelectItem>
-                            </SelectGroup>
-                          </SelectContent>
-                        </Select>
-                        <Select>
-                          <SelectTrigger className="w-[180px] shadow-none border-0 rounded-none border-r border-borderInput text-colorTitle">
-                            <SelectValue placeholder="Rang" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectGroup>
-                              <SelectLabel>Rang</SelectLabel>
-                              <SelectItem value="apple">Apple</SelectItem>
-                              <SelectItem value="banana">Banana</SelectItem>
-                              <SelectItem value="blueberry">
-                                Blueberry
-                              </SelectItem>
-                              <SelectItem value="grapes">Grapes</SelectItem>
-                              <SelectItem value="pineapple">
-                                Pineapple
-                              </SelectItem>
-                            </SelectGroup>
-                          </SelectContent>
-                        </Select>
-                        <Select>
-                          <SelectTrigger className="w-[180px] shadow-none border-0 rounded-none">
-                            <SelectValue placeholder="Statut" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectGroup>
-                              <SelectLabel>Statut</SelectLabel>
-                              <SelectItem value="apple">Apple</SelectItem>
-                              <SelectItem value="banana">Banana</SelectItem>
-                              <SelectItem value="blueberry">
-                                Blueberry
-                              </SelectItem>
-                              <SelectItem value="grapes">Grapes</SelectItem>
-                              <SelectItem value="pineapple">
-                                Pineapple
-                              </SelectItem>
-                            </SelectGroup>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                {renderSearchAndFilters("app")}
                 <div className="overflow-x-auto">
                   <table className="table w-full table-bordered">
                     <thead>
@@ -888,72 +626,21 @@ const TableActivities = () => {
                         <th>
                           {renderCheckbox(
                             "app",
-                            appItems.map((i) => i.id),
+                            filteredItems.map((_, i) => String(i)),
                             true
                           )}
                         </th>
                         <th>Type d&apos;activité</th>
                         <th>Dimension</th>
                         <th>Activité principale</th>
-                        <th>Nature</th>
+                        <th>Catégorie</th>
                         <th>Dénomination</th>
-                        <th>Commune</th>
+                        <th>Lieu</th>
                         <th>Actions</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {appItems.map((row) => (
-                        <tr key={row.id}>
-                          <td>{renderCheckbox("app", row.id)}</td>
-                          <td>
-                            <span>{row.typeActive}</span>
-                          </td>
-                          <td>
-                            <span>{row.dimension}</span>
-                          </td>
-                          <td>
-                            <span>{row.activitePrinc}</span>
-                          </td>
-                          <td>
-                            <span>{row.nature}</span>
-                          </td>
-                          <td>
-                            <span>{row.denimination}</span>
-                          </td>
-                          <td>
-                            <span>{row.commune}</span>
-                          </td>
-                          <td>
-                            <div className="flex items-center gap-3">
-                              <Button className="cursor-pointer shadow-none bg-transparent  text-[#5f61e6]  hover:bg-transparent hover:text-[#494be3] text-md h-auto p-0">
-                                Déclarer
-                              </Button>
-                              <DropdownMenu>
-                                <DropdownMenuTrigger className="cursor-pointer bg-bgGray text-colorTitle p-0 w-[28px] flex items-center justify-center rounded-lg h-[28px] hover:bg-[#07192b] hover:text-white">
-                                  <EllipsisVertical
-                                    size={18}
-                                  ></EllipsisVertical>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent className="border-0 shadow-[var(--boxShadowCard)!important]">
-                                  <DropdownMenuLabel className="text-colorMuted text-xs opacity-70">
-                                    Actions
-                                  </DropdownMenuLabel>
-                                  <DropdownMenuSeparator />
-                                  <DropdownMenuItem className="text-sm text-colorMuted">
-                                    Afficher
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem className="text-sm text-colorMuted">
-                                    Modifier
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem className="text-sm text-colorMuted">
-                                    Supprimer
-                                  </DropdownMenuItem>
-                                </DropdownMenuContent>
-                              </DropdownMenu>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
+                      {renderTableRows("app")}
                     </tbody>
                   </table>
                 </div>
@@ -961,84 +648,7 @@ const TableActivities = () => {
             </TabsContent>
             <TabsContent value="imp">
               <Card className="rounded-[24px] shadow-[var(--boxShadowCard)!important] border-0 bg-bgCard lg:p-[18px]">
-                <div className="grid grid-cols-12 gap-3 items-center">
-                  <div className="col-span-12 lg:col-span-4">
-                    <div className="block-search w-[320px] max-w-full relative flex items-center">
-                      <div className="icon absolute left-2 text-colorTitle">
-                        <Search size={18} />
-                      </div>
-                      <Input
-                        type="text"
-                        className="shadow-none h-10 pl-8 rounded-lg border-borderInput placeholder:text-colorMuted placeholder:opacity-70"
-                        placeholder="Recherche"
-                      />
-                    </div>
-                  </div>
-                  <div className="col-span-12 lg:col-span-8">
-                    <div className="flex lg:justify-end gap-2">
-                      {renderAppurerButton("imp")}
-                      <div className="block-selects flex border border-borderInput rounded-lg">
-                        <Select>
-                          <SelectTrigger className="w-[180px] shadow-none border-0 rounded-none border-r border-borderInput text-colorTitle">
-                            <SelectValue placeholder="Nature" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectGroup>
-                              <SelectLabel>Nature</SelectLabel>
-                              <SelectItem value="apple">Apple</SelectItem>
-                              <SelectItem value="banana">Banana</SelectItem>
-                              <SelectItem value="blueberry">
-                                Blueberry
-                              </SelectItem>
-                              <SelectItem value="grapes">Grapes</SelectItem>
-                              <SelectItem value="pineapple">
-                                Pineapple
-                              </SelectItem>
-                            </SelectGroup>
-                          </SelectContent>
-                        </Select>
-                        <Select>
-                          <SelectTrigger className="w-[180px] shadow-none border-0 rounded-none border-r border-borderInput text-colorTitle">
-                            <SelectValue placeholder="Rang" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectGroup>
-                              <SelectLabel>Rang</SelectLabel>
-                              <SelectItem value="apple">Apple</SelectItem>
-                              <SelectItem value="banana">Banana</SelectItem>
-                              <SelectItem value="blueberry">
-                                Blueberry
-                              </SelectItem>
-                              <SelectItem value="grapes">Grapes</SelectItem>
-                              <SelectItem value="pineapple">
-                                Pineapple
-                              </SelectItem>
-                            </SelectGroup>
-                          </SelectContent>
-                        </Select>
-                        <Select>
-                          <SelectTrigger className="w-[180px] shadow-none border-0 rounded-none">
-                            <SelectValue placeholder="Statut" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectGroup>
-                              <SelectLabel>Statut</SelectLabel>
-                              <SelectItem value="apple">Apple</SelectItem>
-                              <SelectItem value="banana">Banana</SelectItem>
-                              <SelectItem value="blueberry">
-                                Blueberry
-                              </SelectItem>
-                              <SelectItem value="grapes">Grapes</SelectItem>
-                              <SelectItem value="pineapple">
-                                Pineapple
-                              </SelectItem>
-                            </SelectGroup>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                {renderSearchAndFilters("imp")}
                 <div className="overflow-x-auto">
                   <table className="table w-full table-bordered">
                     <thead>
@@ -1046,72 +656,21 @@ const TableActivities = () => {
                         <th>
                           {renderCheckbox(
                             "imp",
-                            impItems.map((i) => i.id),
+                            filteredItems.map((_, i) => String(i)),
                             true
                           )}
                         </th>
                         <th>Type d&apos;activité</th>
                         <th>Dimension</th>
                         <th>Activité principale</th>
-                        <th>Nature</th>
+                        <th>Catégorie</th>
                         <th>Dénomination</th>
-                        <th>Commune</th>
+                        <th>Lieu</th>
                         <th>Actions</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {impItems.map((row) => (
-                        <tr key={row.id}>
-                          <td>{renderCheckbox("imp", row.id)}</td>
-                          <td>
-                            <span>{row.typeActive}</span>
-                          </td>
-                          <td>
-                            <span>{row.dimension}</span>
-                          </td>
-                          <td>
-                            <span>{row.activitePrinc}</span>
-                          </td>
-                          <td>
-                            <span>{row.nature}</span>
-                          </td>
-                          <td>
-                            <span>{row.denimination}</span>
-                          </td>
-                          <td>
-                            <span>{row.commune}</span>
-                          </td>
-                          <td>
-                            <div className="flex items-center gap-3">
-                              <Button className="cursor-pointer shadow-none bg-transparent  text-[#5f61e6]  hover:bg-transparent hover:text-[#494be3] text-md h-auto p-0">
-                                Déclarer
-                              </Button>
-                              <DropdownMenu>
-                                <DropdownMenuTrigger className="cursor-pointer bg-bgGray text-colorTitle p-0 w-[28px] flex items-center justify-center rounded-lg h-[28px] hover:bg-[#07192b] hover:text-white">
-                                  <EllipsisVertical
-                                    size={18}
-                                  ></EllipsisVertical>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent className="border-0 shadow-[var(--boxShadowCard)!important]">
-                                  <DropdownMenuLabel className="text-colorMuted text-xs opacity-70">
-                                    Actions
-                                  </DropdownMenuLabel>
-                                  <DropdownMenuSeparator />
-                                  <DropdownMenuItem className="text-sm text-colorMuted">
-                                    Afficher
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem className="text-sm text-colorMuted">
-                                    Modifier
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem className="text-sm text-colorMuted">
-                                    Supprimer
-                                  </DropdownMenuItem>
-                                </DropdownMenuContent>
-                              </DropdownMenu>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
+                      {renderTableRows("imp")}
                     </tbody>
                   </table>
                 </div>
@@ -1119,84 +678,7 @@ const TableActivities = () => {
             </TabsContent>
             <TabsContent value="dd">
               <Card className="rounded-[24px] shadow-[var(--boxShadowCard)!important] border-0 bg-bgCard lg:p-[18px]">
-                <div className="grid grid-cols-12 gap-3 items-center">
-                  <div className="col-span-12 lg:col-span-4">
-                    <div className="block-search w-[320px] max-w-full relative flex items-center">
-                      <div className="icon absolute left-2 text-colorTitle">
-                        <Search size={18} />
-                      </div>
-                      <Input
-                        type="text"
-                        className="shadow-none h-10 pl-8 rounded-lg border-borderInput placeholder:text-colorMuted placeholder:opacity-70"
-                        placeholder="Recherche"
-                      />
-                    </div>
-                  </div>
-                  <div className="col-span-12 lg:col-span-8">
-                    <div className="flex lg:justify-end gap-2">
-                      {renderAppurerButton("dd")}
-                      <div className="block-selects flex border border-borderInput rounded-lg">
-                        <Select>
-                          <SelectTrigger className="w-[180px] shadow-none border-0 rounded-none border-r border-borderInput text-colorTitle">
-                            <SelectValue placeholder="Nature" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectGroup>
-                              <SelectLabel>Nature</SelectLabel>
-                              <SelectItem value="apple">Apple</SelectItem>
-                              <SelectItem value="banana">Banana</SelectItem>
-                              <SelectItem value="blueberry">
-                                Blueberry
-                              </SelectItem>
-                              <SelectItem value="grapes">Grapes</SelectItem>
-                              <SelectItem value="pineapple">
-                                Pineapple
-                              </SelectItem>
-                            </SelectGroup>
-                          </SelectContent>
-                        </Select>
-                        <Select>
-                          <SelectTrigger className="w-[180px] shadow-none border-0 rounded-none border-r border-borderInput text-colorTitle">
-                            <SelectValue placeholder="Rang" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectGroup>
-                              <SelectLabel>Rang</SelectLabel>
-                              <SelectItem value="apple">Apple</SelectItem>
-                              <SelectItem value="banana">Banana</SelectItem>
-                              <SelectItem value="blueberry">
-                                Blueberry
-                              </SelectItem>
-                              <SelectItem value="grapes">Grapes</SelectItem>
-                              <SelectItem value="pineapple">
-                                Pineapple
-                              </SelectItem>
-                            </SelectGroup>
-                          </SelectContent>
-                        </Select>
-                        <Select>
-                          <SelectTrigger className="w-[180px] shadow-none border-0 rounded-none">
-                            <SelectValue placeholder="Statut" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectGroup>
-                              <SelectLabel>Statut</SelectLabel>
-                              <SelectItem value="apple">Apple</SelectItem>
-                              <SelectItem value="banana">Banana</SelectItem>
-                              <SelectItem value="blueberry">
-                                Blueberry
-                              </SelectItem>
-                              <SelectItem value="grapes">Grapes</SelectItem>
-                              <SelectItem value="pineapple">
-                                Pineapple
-                              </SelectItem>
-                            </SelectGroup>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                {renderSearchAndFilters("dd")}
                 <div className="overflow-x-auto">
                   <table className="table w-full table-bordered">
                     <thead>
@@ -1204,72 +686,21 @@ const TableActivities = () => {
                         <th>
                           {renderCheckbox(
                             "dd",
-                            ddItems.map((i) => i.id),
+                            filteredItems.map((_, i) => String(i)),
                             true
                           )}
                         </th>
                         <th>Type d&apos;activité</th>
                         <th>Dimension</th>
                         <th>Activité principale</th>
-                        <th>Nature</th>
+                        <th>Catégorie</th>
                         <th>Dénomination</th>
-                        <th>Commune</th>
+                        <th>Lieu</th>
                         <th>Actions</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {ddItems.map((row) => (
-                        <tr key={row.id}>
-                          <td>{renderCheckbox("dd", row.id)}</td>
-                          <td>
-                            <span>{row.typeActive}</span>
-                          </td>
-                          <td>
-                            <span>{row.dimension}</span>
-                          </td>
-                          <td>
-                            <span>{row.activitePrinc}</span>
-                          </td>
-                          <td>
-                            <span>{row.nature}</span>
-                          </td>
-                          <td>
-                            <span>{row.denimination}</span>
-                          </td>
-                          <td>
-                            <span>{row.commune}</span>
-                          </td>
-                          <td>
-                            <div className="flex items-center gap-3">
-                              <Button className="cursor-pointer shadow-none bg-transparent  text-[#5f61e6]  hover:bg-transparent hover:text-[#494be3] text-md h-auto p-0">
-                                Déclarer
-                              </Button>
-                              <DropdownMenu>
-                                <DropdownMenuTrigger className="cursor-pointer bg-bgGray text-colorTitle p-0 w-[28px] flex items-center justify-center rounded-lg h-[28px] hover:bg-[#07192b] hover:text-white">
-                                  <EllipsisVertical
-                                    size={18}
-                                  ></EllipsisVertical>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent className="border-0 shadow-[var(--boxShadowCard)!important]">
-                                  <DropdownMenuLabel className="text-colorMuted text-xs opacity-70">
-                                    Actions
-                                  </DropdownMenuLabel>
-                                  <DropdownMenuSeparator />
-                                  <DropdownMenuItem className="text-sm text-colorMuted">
-                                    Afficher
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem className="text-sm text-colorMuted">
-                                    Modifier
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem className="text-sm text-colorMuted">
-                                    Supprimer
-                                  </DropdownMenuItem>
-                                </DropdownMenuContent>
-                              </DropdownMenu>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
+                      {renderTableRows("dd")}
                     </tbody>
                   </table>
                 </div>
@@ -1277,84 +708,7 @@ const TableActivities = () => {
             </TabsContent>
             <TabsContent value="dp">
               <Card className="rounded-[24px] shadow-[var(--boxShadowCard)!important] border-0 bg-bgCard lg:p-[18px]">
-                <div className="grid grid-cols-12 gap-3 items-center">
-                  <div className="col-span-12 lg:col-span-4">
-                    <div className="block-search w-[320px] max-w-full relative flex items-center">
-                      <div className="icon absolute left-2 text-colorTitle">
-                        <Search size={18} />
-                      </div>
-                      <Input
-                        type="text"
-                        className="shadow-none h-10 pl-8 rounded-lg border-borderInput placeholder:text-colorMuted placeholder:opacity-70"
-                        placeholder="Recherche"
-                      />
-                    </div>
-                  </div>
-                  <div className="col-span-12 lg:col-span-8">
-                    <div className="flex lg:justify-end gap-2">
-                      {renderAppurerButton("dp")}
-                      <div className="block-selects flex border border-borderInput rounded-lg">
-                        <Select>
-                          <SelectTrigger className="w-[180px] shadow-none border-0 rounded-none border-r border-borderInput text-colorTitle">
-                            <SelectValue placeholder="Nature" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectGroup>
-                              <SelectLabel>Nature</SelectLabel>
-                              <SelectItem value="apple">Apple</SelectItem>
-                              <SelectItem value="banana">Banana</SelectItem>
-                              <SelectItem value="blueberry">
-                                Blueberry
-                              </SelectItem>
-                              <SelectItem value="grapes">Grapes</SelectItem>
-                              <SelectItem value="pineapple">
-                                Pineapple
-                              </SelectItem>
-                            </SelectGroup>
-                          </SelectContent>
-                        </Select>
-                        <Select>
-                          <SelectTrigger className="w-[180px] shadow-none border-0 rounded-none border-r border-borderInput text-colorTitle">
-                            <SelectValue placeholder="Rang" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectGroup>
-                              <SelectLabel>Rang</SelectLabel>
-                              <SelectItem value="apple">Apple</SelectItem>
-                              <SelectItem value="banana">Banana</SelectItem>
-                              <SelectItem value="blueberry">
-                                Blueberry
-                              </SelectItem>
-                              <SelectItem value="grapes">Grapes</SelectItem>
-                              <SelectItem value="pineapple">
-                                Pineapple
-                              </SelectItem>
-                            </SelectGroup>
-                          </SelectContent>
-                        </Select>
-                        <Select>
-                          <SelectTrigger className="w-[180px] shadow-none border-0 rounded-none">
-                            <SelectValue placeholder="Statut" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectGroup>
-                              <SelectLabel>Statut</SelectLabel>
-                              <SelectItem value="apple">Apple</SelectItem>
-                              <SelectItem value="banana">Banana</SelectItem>
-                              <SelectItem value="blueberry">
-                                Blueberry
-                              </SelectItem>
-                              <SelectItem value="grapes">Grapes</SelectItem>
-                              <SelectItem value="pineapple">
-                                Pineapple
-                              </SelectItem>
-                            </SelectGroup>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                {renderSearchAndFilters("dp")}
                 <div className="overflow-x-auto">
                   <table className="table w-full table-bordered">
                     <thead>
@@ -1362,72 +716,21 @@ const TableActivities = () => {
                         <th>
                           {renderCheckbox(
                             "dp",
-                            dpItems.map((i) => i.id),
+                            filteredItems.map((_, i) => String(i)),
                             true
                           )}
                         </th>
                         <th>Type d&apos;activité</th>
                         <th>Dimension</th>
                         <th>Activité principale</th>
-                        <th>Nature</th>
+                        <th>Catégorie</th>
                         <th>Dénomination</th>
-                        <th>Commune</th>
+                        <th>Lieu</th>
                         <th>Actions</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {dpItems.map((row) => (
-                        <tr key={row.id}>
-                          <td>{renderCheckbox("dp", row.id)}</td>
-                          <td>
-                            <span>{row.typeActive}</span>
-                          </td>
-                          <td>
-                            <span>{row.dimension}</span>
-                          </td>
-                          <td>
-                            <span>{row.activitePrinc}</span>
-                          </td>
-                          <td>
-                            <span>{row.nature}</span>
-                          </td>
-                          <td>
-                            <span>{row.denimination}</span>
-                          </td>
-                          <td>
-                            <span>{row.commune}</span>
-                          </td>
-                          <td>
-                            <div className="flex items-center gap-3">
-                              <Button className="cursor-pointer shadow-none bg-transparent  text-[#5f61e6]  hover:bg-transparent hover:text-[#494be3] text-md h-auto p-0">
-                                Déclarer
-                              </Button>
-                              <DropdownMenu>
-                                <DropdownMenuTrigger className="cursor-pointer bg-bgGray text-colorTitle p-0 w-[28px] flex items-center justify-center rounded-lg h-[28px] hover:bg-[#07192b] hover:text-white">
-                                  <EllipsisVertical
-                                    size={18}
-                                  ></EllipsisVertical>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent className="border-0 shadow-[var(--boxShadowCard)!important]">
-                                  <DropdownMenuLabel className="text-colorMuted text-xs opacity-70">
-                                    Actions
-                                  </DropdownMenuLabel>
-                                  <DropdownMenuSeparator />
-                                  <DropdownMenuItem className="text-sm text-colorMuted">
-                                    Afficher
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem className="text-sm text-colorMuted">
-                                    Modifier
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem className="text-sm text-colorMuted">
-                                    Supprimer
-                                  </DropdownMenuItem>
-                                </DropdownMenuContent>
-                              </DropdownMenu>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
+                      {renderTableRows("dp")}
                     </tbody>
                   </table>
                 </div>
@@ -1435,84 +738,7 @@ const TableActivities = () => {
             </TabsContent>
             <TabsContent value="fpc">
               <Card className="rounded-[24px] shadow-[var(--boxShadowCard)!important] border-0 bg-bgCard lg:p-[18px]">
-                <div className="grid grid-cols-12 gap-3 items-center">
-                  <div className="col-span-12 lg:col-span-4">
-                    <div className="block-search w-[320px] max-w-full relative flex items-center">
-                      <div className="icon absolute left-2 text-colorTitle">
-                        <Search size={18} />
-                      </div>
-                      <Input
-                        type="text"
-                        className="shadow-none h-10 pl-8 rounded-lg border-borderInput placeholder:text-colorMuted placeholder:opacity-70"
-                        placeholder="Recherche"
-                      />
-                    </div>
-                  </div>
-                  <div className="col-span-12 lg:col-span-8">
-                    <div className="flex lg:justify-end gap-2">
-                      {renderAppurerButton("fpc")}
-                      <div className="block-selects flex border border-borderInput rounded-lg">
-                        <Select>
-                          <SelectTrigger className="w-[180px] shadow-none border-0 rounded-none border-r border-borderInput text-colorTitle">
-                            <SelectValue placeholder="Nature" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectGroup>
-                              <SelectLabel>Nature</SelectLabel>
-                              <SelectItem value="apple">Apple</SelectItem>
-                              <SelectItem value="banana">Banana</SelectItem>
-                              <SelectItem value="blueberry">
-                                Blueberry
-                              </SelectItem>
-                              <SelectItem value="grapes">Grapes</SelectItem>
-                              <SelectItem value="pineapple">
-                                Pineapple
-                              </SelectItem>
-                            </SelectGroup>
-                          </SelectContent>
-                        </Select>
-                        <Select>
-                          <SelectTrigger className="w-[180px] shadow-none border-0 rounded-none border-r border-borderInput text-colorTitle">
-                            <SelectValue placeholder="Rang" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectGroup>
-                              <SelectLabel>Rang</SelectLabel>
-                              <SelectItem value="apple">Apple</SelectItem>
-                              <SelectItem value="banana">Banana</SelectItem>
-                              <SelectItem value="blueberry">
-                                Blueberry
-                              </SelectItem>
-                              <SelectItem value="grapes">Grapes</SelectItem>
-                              <SelectItem value="pineapple">
-                                Pineapple
-                              </SelectItem>
-                            </SelectGroup>
-                          </SelectContent>
-                        </Select>
-                        <Select>
-                          <SelectTrigger className="w-[180px] shadow-none border-0 rounded-none">
-                            <SelectValue placeholder="Statut" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectGroup>
-                              <SelectLabel>Statut</SelectLabel>
-                              <SelectItem value="apple">Apple</SelectItem>
-                              <SelectItem value="banana">Banana</SelectItem>
-                              <SelectItem value="blueberry">
-                                Blueberry
-                              </SelectItem>
-                              <SelectItem value="grapes">Grapes</SelectItem>
-                              <SelectItem value="pineapple">
-                                Pineapple
-                              </SelectItem>
-                            </SelectGroup>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                {renderSearchAndFilters("fpc")}
                 <div className="overflow-x-auto">
                   <table className="table w-full table-bordered">
                     <thead>
@@ -1520,72 +746,21 @@ const TableActivities = () => {
                         <th>
                           {renderCheckbox(
                             "fpc",
-                            fpcItems.map((i) => i.id),
+                            filteredItems.map((_, i) => String(i)),
                             true
                           )}
                         </th>
                         <th>Type d&apos;activité</th>
                         <th>Dimension</th>
                         <th>Activité principale</th>
-                        <th>Nature</th>
+                        <th>Catégorie</th>
                         <th>Dénomination</th>
-                        <th>Commune</th>
+                        <th>Lieu</th>
                         <th>Actions</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {fpcItems.map((row) => (
-                        <tr key={row.id}>
-                          <td>{renderCheckbox("fpc", row.id)}</td>
-                          <td>
-                            <span>{row.typeActive}</span>
-                          </td>
-                          <td>
-                            <span>{row.dimension}</span>
-                          </td>
-                          <td>
-                            <span>{row.activitePrinc}</span>
-                          </td>
-                          <td>
-                            <span>{row.nature}</span>
-                          </td>
-                          <td>
-                            <span>{row.denimination}</span>
-                          </td>
-                          <td>
-                            <span>{row.commune}</span>
-                          </td>
-                          <td>
-                            <div className="flex items-center gap-3">
-                              <Button className="cursor-pointer shadow-none bg-transparent  text-[#5f61e6]  hover:bg-transparent hover:text-[#494be3] text-md h-auto p-0">
-                                Déclarer
-                              </Button>
-                              <DropdownMenu>
-                                <DropdownMenuTrigger className="cursor-pointer bg-bgGray text-colorTitle p-0 w-[28px] flex items-center justify-center rounded-lg h-[28px] hover:bg-[#07192b] hover:text-white">
-                                  <EllipsisVertical
-                                    size={18}
-                                  ></EllipsisVertical>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent className="border-0 shadow-[var(--boxShadowCard)!important]">
-                                  <DropdownMenuLabel className="text-colorMuted text-xs opacity-70">
-                                    Actions
-                                  </DropdownMenuLabel>
-                                  <DropdownMenuSeparator />
-                                  <DropdownMenuItem className="text-sm text-colorMuted">
-                                    Afficher
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem className="text-sm text-colorMuted">
-                                    Modifier
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem className="text-sm text-colorMuted">
-                                    Supprimer
-                                  </DropdownMenuItem>
-                                </DropdownMenuContent>
-                              </DropdownMenu>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
+                      {renderTableRows("fpc")}
                     </tbody>
                   </table>
                 </div>
@@ -1593,84 +768,7 @@ const TableActivities = () => {
             </TabsContent>
             <TabsContent value="amr">
               <Card className="rounded-[24px] shadow-[var(--boxShadowCard)!important] border-0 bg-bgCard lg:p-[18px]">
-                <div className="grid grid-cols-12 gap-3 items-center">
-                  <div className="col-span-12 lg:col-span-4">
-                    <div className="block-search w-[320px] max-w-full relative flex items-center">
-                      <div className="icon absolute left-2 text-colorTitle">
-                        <Search size={18} />
-                      </div>
-                      <Input
-                        type="text"
-                        className="shadow-none h-10 pl-8 rounded-lg border-borderInput placeholder:text-colorMuted placeholder:opacity-70"
-                        placeholder="Recherche"
-                      />
-                    </div>
-                  </div>
-                  <div className="col-span-12 lg:col-span-8">
-                    <div className="flex lg:justify-end gap-2">
-                      {renderAppurerButton("amr")}
-                      <div className="block-selects flex border border-borderInput rounded-lg">
-                        <Select>
-                          <SelectTrigger className="w-[180px] shadow-none border-0 rounded-none border-r border-borderInput text-colorTitle">
-                            <SelectValue placeholder="Nature" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectGroup>
-                              <SelectLabel>Nature</SelectLabel>
-                              <SelectItem value="apple">Apple</SelectItem>
-                              <SelectItem value="banana">Banana</SelectItem>
-                              <SelectItem value="blueberry">
-                                Blueberry
-                              </SelectItem>
-                              <SelectItem value="grapes">Grapes</SelectItem>
-                              <SelectItem value="pineapple">
-                                Pineapple
-                              </SelectItem>
-                            </SelectGroup>
-                          </SelectContent>
-                        </Select>
-                        <Select>
-                          <SelectTrigger className="w-[180px] shadow-none border-0 rounded-none border-r border-borderInput text-colorTitle">
-                            <SelectValue placeholder="Rang" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectGroup>
-                              <SelectLabel>Rang</SelectLabel>
-                              <SelectItem value="apple">Apple</SelectItem>
-                              <SelectItem value="banana">Banana</SelectItem>
-                              <SelectItem value="blueberry">
-                                Blueberry
-                              </SelectItem>
-                              <SelectItem value="grapes">Grapes</SelectItem>
-                              <SelectItem value="pineapple">
-                                Pineapple
-                              </SelectItem>
-                            </SelectGroup>
-                          </SelectContent>
-                        </Select>
-                        <Select>
-                          <SelectTrigger className="w-[180px] shadow-none border-0 rounded-none">
-                            <SelectValue placeholder="Statut" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectGroup>
-                              <SelectLabel>Statut</SelectLabel>
-                              <SelectItem value="apple">Apple</SelectItem>
-                              <SelectItem value="banana">Banana</SelectItem>
-                              <SelectItem value="blueberry">
-                                Blueberry
-                              </SelectItem>
-                              <SelectItem value="grapes">Grapes</SelectItem>
-                              <SelectItem value="pineapple">
-                                Pineapple
-                              </SelectItem>
-                            </SelectGroup>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                {renderSearchAndFilters("amr")}
                 <div className="overflow-x-auto">
                   <table className="table w-full table-bordered">
                     <thead>
@@ -1678,72 +776,21 @@ const TableActivities = () => {
                         <th>
                           {renderCheckbox(
                             "amr",
-                            amrItems.map((i) => i.id),
+                            filteredItems.map((_, i) => String(i)),
                             true
                           )}
                         </th>
                         <th>Type d&apos;activité</th>
                         <th>Dimension</th>
                         <th>Activité principale</th>
-                        <th>Nature</th>
+                        <th>Catégorie</th>
                         <th>Dénomination</th>
-                        <th>Commune</th>
+                        <th>Lieu</th>
                         <th>Actions</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {amrItems.map((row) => (
-                        <tr key={row.id}>
-                          <td>{renderCheckbox("amr", row.id)}</td>
-                          <td>
-                            <span>{row.typeActive}</span>
-                          </td>
-                          <td>
-                            <span>{row.dimension}</span>
-                          </td>
-                          <td>
-                            <span>{row.activitePrinc}</span>
-                          </td>
-                          <td>
-                            <span>{row.nature}</span>
-                          </td>
-                          <td>
-                            <span>{row.denimination}</span>
-                          </td>
-                          <td>
-                            <span>{row.commune}</span>
-                          </td>
-                          <td>
-                            <div className="flex items-center gap-3">
-                              <Button className="cursor-pointer shadow-none bg-transparent  text-[#5f61e6]  hover:bg-transparent hover:text-[#494be3] text-md h-auto p-0">
-                                Déclarer
-                              </Button>
-                              <DropdownMenu>
-                                <DropdownMenuTrigger className="cursor-pointer bg-bgGray text-colorTitle p-0 w-[28px] flex items-center justify-center rounded-lg h-[28px] hover:bg-[#07192b] hover:text-white">
-                                  <EllipsisVertical
-                                    size={18}
-                                  ></EllipsisVertical>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent className="border-0 shadow-[var(--boxShadowCard)!important]">
-                                  <DropdownMenuLabel className="text-colorMuted text-xs opacity-70">
-                                    Actions
-                                  </DropdownMenuLabel>
-                                  <DropdownMenuSeparator />
-                                  <DropdownMenuItem className="text-sm text-colorMuted">
-                                    Afficher
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem className="text-sm text-colorMuted">
-                                    Modifier
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem className="text-sm text-colorMuted">
-                                    Supprimer
-                                  </DropdownMenuItem>
-                                </DropdownMenuContent>
-                              </DropdownMenu>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
+                      {renderTableRows("amr")}
                     </tbody>
                   </table>
                 </div>
@@ -1751,84 +798,7 @@ const TableActivities = () => {
             </TabsContent>
             <TabsContent value="pour">
               <Card className="rounded-[24px] shadow-[var(--boxShadowCard)!important] border-0 bg-bgCard lg:p-[18px]">
-                <div className="grid grid-cols-12 gap-3 items-center">
-                  <div className="col-span-12 lg:col-span-4">
-                    <div className="block-search w-[320px] max-w-full relative flex items-center">
-                      <div className="icon absolute left-2 text-colorTitle">
-                        <Search size={18} />
-                      </div>
-                      <Input
-                        type="text"
-                        className="shadow-none h-10 pl-8 rounded-lg border-borderInput placeholder:text-colorMuted placeholder:opacity-70"
-                        placeholder="Recherche"
-                      />
-                    </div>
-                  </div>
-                  <div className="col-span-12 lg:col-span-8">
-                    <div className="flex lg:justify-end gap-2">
-                      {renderAppurerButton("pour")}
-                      <div className="block-selects flex border border-borderInput rounded-lg">
-                        <Select>
-                          <SelectTrigger className="w-[180px] shadow-none border-0 rounded-none border-r border-borderInput text-colorTitle">
-                            <SelectValue placeholder="Nature" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectGroup>
-                              <SelectLabel>Nature</SelectLabel>
-                              <SelectItem value="apple">Apple</SelectItem>
-                              <SelectItem value="banana">Banana</SelectItem>
-                              <SelectItem value="blueberry">
-                                Blueberry
-                              </SelectItem>
-                              <SelectItem value="grapes">Grapes</SelectItem>
-                              <SelectItem value="pineapple">
-                                Pineapple
-                              </SelectItem>
-                            </SelectGroup>
-                          </SelectContent>
-                        </Select>
-                        <Select>
-                          <SelectTrigger className="w-[180px] shadow-none border-0 rounded-none border-r border-borderInput text-colorTitle">
-                            <SelectValue placeholder="Rang" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectGroup>
-                              <SelectLabel>Rang</SelectLabel>
-                              <SelectItem value="apple">Apple</SelectItem>
-                              <SelectItem value="banana">Banana</SelectItem>
-                              <SelectItem value="blueberry">
-                                Blueberry
-                              </SelectItem>
-                              <SelectItem value="grapes">Grapes</SelectItem>
-                              <SelectItem value="pineapple">
-                                Pineapple
-                              </SelectItem>
-                            </SelectGroup>
-                          </SelectContent>
-                        </Select>
-                        <Select>
-                          <SelectTrigger className="w-[180px] shadow-none border-0 rounded-none">
-                            <SelectValue placeholder="Statut" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectGroup>
-                              <SelectLabel>Statut</SelectLabel>
-                              <SelectItem value="apple">Apple</SelectItem>
-                              <SelectItem value="banana">Banana</SelectItem>
-                              <SelectItem value="blueberry">
-                                Blueberry
-                              </SelectItem>
-                              <SelectItem value="grapes">Grapes</SelectItem>
-                              <SelectItem value="pineapple">
-                                Pineapple
-                              </SelectItem>
-                            </SelectGroup>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                {renderSearchAndFilters("pour")}
                 <div className="overflow-x-auto">
                   <table className="table w-full table-bordered">
                     <thead>
@@ -1836,72 +806,21 @@ const TableActivities = () => {
                         <th>
                           {renderCheckbox(
                             "pour",
-                            pourItems.map((i) => i.id),
+                            filteredItems.map((_, i) => String(i)),
                             true
                           )}
                         </th>
                         <th>Type d&apos;activité</th>
                         <th>Dimension</th>
                         <th>Activité principale</th>
-                        <th>Nature</th>
+                        <th>Catégorie</th>
                         <th>Dénomination</th>
-                        <th>Commune</th>
+                        <th>Lieu</th>
                         <th>Actions</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {pourItems.map((row) => (
-                        <tr key={row.id}>
-                          <td>{renderCheckbox("pour", row.id)}</td>
-                          <td>
-                            <span>{row.typeActive}</span>
-                          </td>
-                          <td>
-                            <span>{row.dimension}</span>
-                          </td>
-                          <td>
-                            <span>{row.activitePrinc}</span>
-                          </td>
-                          <td>
-                            <span>{row.nature}</span>
-                          </td>
-                          <td>
-                            <span>{row.denimination}</span>
-                          </td>
-                          <td>
-                            <span>{row.commune}</span>
-                          </td>
-                          <td>
-                            <div className="flex items-center gap-3">
-                              <Button className="cursor-pointer shadow-none bg-transparent  text-[#5f61e6]  hover:bg-transparent hover:text-[#494be3] text-md h-auto p-0">
-                                Déclarer
-                              </Button>
-                              <DropdownMenu>
-                                <DropdownMenuTrigger className="cursor-pointer bg-bgGray text-colorTitle p-0 w-[28px] flex items-center justify-center rounded-lg h-[28px] hover:bg-[#07192b] hover:text-white">
-                                  <EllipsisVertical
-                                    size={18}
-                                  ></EllipsisVertical>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent className="border-0 shadow-[var(--boxShadowCard)!important]">
-                                  <DropdownMenuLabel className="text-colorMuted text-xs opacity-70">
-                                    Actions
-                                  </DropdownMenuLabel>
-                                  <DropdownMenuSeparator />
-                                  <DropdownMenuItem className="text-sm text-colorMuted">
-                                    Afficher
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem className="text-sm text-colorMuted">
-                                    Modifier
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem className="text-sm text-colorMuted">
-                                    Supprimer
-                                  </DropdownMenuItem>
-                                </DropdownMenuContent>
-                              </DropdownMenu>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
+                      {renderTableRows("pour")}
                     </tbody>
                   </table>
                 </div>
@@ -1909,84 +828,7 @@ const TableActivities = () => {
             </TabsContent>
             <TabsContent value="cc">
               <Card className="rounded-[24px] shadow-[var(--boxShadowCard)!important] border-0 bg-bgCard lg:p-[18px]">
-                <div className="grid grid-cols-12 gap-3 items-center">
-                  <div className="col-span-12 lg:col-span-4">
-                    <div className="block-search w-[320px] max-w-full relative flex items-center">
-                      <div className="icon absolute left-2 text-colorTitle">
-                        <Search size={18} />
-                      </div>
-                      <Input
-                        type="text"
-                        className="shadow-none h-10 pl-8 rounded-lg border-borderInput placeholder:text-colorMuted placeholder:opacity-70"
-                        placeholder="Recherche"
-                      />
-                    </div>
-                  </div>
-                  <div className="col-span-12 lg:col-span-8">
-                    <div className="flex lg:justify-end gap-2">
-                      {renderAppurerButton("cc")}
-                      <div className="block-selects flex border border-borderInput rounded-lg">
-                        <Select>
-                          <SelectTrigger className="w-[180px] shadow-none border-0 rounded-none border-r border-borderInput text-colorTitle">
-                            <SelectValue placeholder="Nature" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectGroup>
-                              <SelectLabel>Nature</SelectLabel>
-                              <SelectItem value="apple">Apple</SelectItem>
-                              <SelectItem value="banana">Banana</SelectItem>
-                              <SelectItem value="blueberry">
-                                Blueberry
-                              </SelectItem>
-                              <SelectItem value="grapes">Grapes</SelectItem>
-                              <SelectItem value="pineapple">
-                                Pineapple
-                              </SelectItem>
-                            </SelectGroup>
-                          </SelectContent>
-                        </Select>
-                        <Select>
-                          <SelectTrigger className="w-[180px] shadow-none border-0 rounded-none border-r border-borderInput text-colorTitle">
-                            <SelectValue placeholder="Rang" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectGroup>
-                              <SelectLabel>Rang</SelectLabel>
-                              <SelectItem value="apple">Apple</SelectItem>
-                              <SelectItem value="banana">Banana</SelectItem>
-                              <SelectItem value="blueberry">
-                                Blueberry
-                              </SelectItem>
-                              <SelectItem value="grapes">Grapes</SelectItem>
-                              <SelectItem value="pineapple">
-                                Pineapple
-                              </SelectItem>
-                            </SelectGroup>
-                          </SelectContent>
-                        </Select>
-                        <Select>
-                          <SelectTrigger className="w-[180px] shadow-none border-0 rounded-none">
-                            <SelectValue placeholder="Statut" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectGroup>
-                              <SelectLabel>Statut</SelectLabel>
-                              <SelectItem value="apple">Apple</SelectItem>
-                              <SelectItem value="banana">Banana</SelectItem>
-                              <SelectItem value="blueberry">
-                                Blueberry
-                              </SelectItem>
-                              <SelectItem value="grapes">Grapes</SelectItem>
-                              <SelectItem value="pineapple">
-                                Pineapple
-                              </SelectItem>
-                            </SelectGroup>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                {renderSearchAndFilters("cc")}
                 <div className="overflow-x-auto">
                   <table className="table w-full table-bordered">
                     <thead>
@@ -1994,72 +836,21 @@ const TableActivities = () => {
                         <th>
                           {renderCheckbox(
                             "cc",
-                            ccItems.map((i) => i.id),
+                            filteredItems.map((_, i) => String(i)),
                             true
                           )}
                         </th>
                         <th>Type d&apos;activité</th>
                         <th>Dimension</th>
                         <th>Activité principale</th>
-                        <th>Nature</th>
+                        <th>Catégorie</th>
                         <th>Dénomination</th>
-                        <th>Commune</th>
+                        <th>Lieu</th>
                         <th>Actions</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {ccItems.map((row) => (
-                        <tr key={row.id}>
-                          <td>{renderCheckbox("cc", row.id)}</td>
-                          <td>
-                            <span>{row.typeActive}</span>
-                          </td>
-                          <td>
-                            <span>{row.dimension}</span>
-                          </td>
-                          <td>
-                            <span>{row.activitePrinc}</span>
-                          </td>
-                          <td>
-                            <span>{row.nature}</span>
-                          </td>
-                          <td>
-                            <span>{row.denimination}</span>
-                          </td>
-                          <td>
-                            <span>{row.commune}</span>
-                          </td>
-                          <td>
-                            <div className="flex items-center gap-3">
-                              <Button className="cursor-pointer shadow-none bg-transparent  text-[#5f61e6]  hover:bg-transparent hover:text-[#494be3] text-md h-auto p-0">
-                                Déclarer
-                              </Button>
-                              <DropdownMenu>
-                                <DropdownMenuTrigger className="cursor-pointer bg-bgGray text-colorTitle p-0 w-[28px] flex items-center justify-center rounded-lg h-[28px] hover:bg-[#07192b] hover:text-white">
-                                  <EllipsisVertical
-                                    size={18}
-                                  ></EllipsisVertical>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent className="border-0 shadow-[var(--boxShadowCard)!important]">
-                                  <DropdownMenuLabel className="text-colorMuted text-xs opacity-70">
-                                    Actions
-                                  </DropdownMenuLabel>
-                                  <DropdownMenuSeparator />
-                                  <DropdownMenuItem className="text-sm text-colorMuted">
-                                    Afficher
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem className="text-sm text-colorMuted">
-                                    Modifier
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem className="text-sm text-colorMuted">
-                                    Supprimer
-                                  </DropdownMenuItem>
-                                </DropdownMenuContent>
-                              </DropdownMenu>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
+                      {renderTableRows("cc")}
                     </tbody>
                   </table>
                 </div>
@@ -2067,84 +858,7 @@ const TableActivities = () => {
             </TabsContent>
             <TabsContent value="adt">
               <Card className="rounded-[24px] shadow-[var(--boxShadowCard)!important] border-0 bg-bgCard lg:p-[18px]">
-                <div className="grid grid-cols-12 gap-3 items-center">
-                  <div className="col-span-12 lg:col-span-4">
-                    <div className="block-search w-[320px] max-w-full relative flex items-center">
-                      <div className="icon absolute left-2 text-colorTitle">
-                        <Search size={18} />
-                      </div>
-                      <Input
-                        type="text"
-                        className="shadow-none h-10 pl-8 rounded-lg border-borderInput placeholder:text-colorMuted placeholder:opacity-70"
-                        placeholder="Recherche"
-                      />
-                    </div>
-                  </div>
-                  <div className="col-span-12 lg:col-span-8">
-                    <div className="flex lg:justify-end gap-2">
-                      {renderAppurerButton("adt")}
-                      <div className="block-selects flex border border-borderInput rounded-lg">
-                        <Select>
-                          <SelectTrigger className="w-[180px] shadow-none border-0 rounded-none border-r border-borderInput text-colorTitle">
-                            <SelectValue placeholder="Nature" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectGroup>
-                              <SelectLabel>Nature</SelectLabel>
-                              <SelectItem value="apple">Apple</SelectItem>
-                              <SelectItem value="banana">Banana</SelectItem>
-                              <SelectItem value="blueberry">
-                                Blueberry
-                              </SelectItem>
-                              <SelectItem value="grapes">Grapes</SelectItem>
-                              <SelectItem value="pineapple">
-                                Pineapple
-                              </SelectItem>
-                            </SelectGroup>
-                          </SelectContent>
-                        </Select>
-                        <Select>
-                          <SelectTrigger className="w-[180px] shadow-none border-0 rounded-none border-r border-borderInput text-colorTitle">
-                            <SelectValue placeholder="Rang" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectGroup>
-                              <SelectLabel>Rang</SelectLabel>
-                              <SelectItem value="apple">Apple</SelectItem>
-                              <SelectItem value="banana">Banana</SelectItem>
-                              <SelectItem value="blueberry">
-                                Blueberry
-                              </SelectItem>
-                              <SelectItem value="grapes">Grapes</SelectItem>
-                              <SelectItem value="pineapple">
-                                Pineapple
-                              </SelectItem>
-                            </SelectGroup>
-                          </SelectContent>
-                        </Select>
-                        <Select>
-                          <SelectTrigger className="w-[180px] shadow-none border-0 rounded-none">
-                            <SelectValue placeholder="Statut" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectGroup>
-                              <SelectLabel>Statut</SelectLabel>
-                              <SelectItem value="apple">Apple</SelectItem>
-                              <SelectItem value="banana">Banana</SelectItem>
-                              <SelectItem value="blueberry">
-                                Blueberry
-                              </SelectItem>
-                              <SelectItem value="grapes">Grapes</SelectItem>
-                              <SelectItem value="pineapple">
-                                Pineapple
-                              </SelectItem>
-                            </SelectGroup>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                {renderSearchAndFilters("adt")}
                 <div className="overflow-x-auto">
                   <table className="table w-full table-bordered">
                     <thead>
@@ -2152,72 +866,21 @@ const TableActivities = () => {
                         <th>
                           {renderCheckbox(
                             "adt",
-                            adtItems.map((i) => i.id),
+                            filteredItems.map((_, i) => String(i)),
                             true
                           )}
                         </th>
                         <th>Type d&apos;activité</th>
                         <th>Dimension</th>
                         <th>Activité principale</th>
-                        <th>Nature</th>
+                        <th>Catégorie</th>
                         <th>Dénomination</th>
-                        <th>Commune</th>
+                        <th>Lieu</th>
                         <th>Actions</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {adtItems.map((row) => (
-                        <tr key={row.id}>
-                          <td>{renderCheckbox("adt", row.id)}</td>
-                          <td>
-                            <span>{row.typeActive}</span>
-                          </td>
-                          <td>
-                            <span>{row.dimension}</span>
-                          </td>
-                          <td>
-                            <span>{row.activitePrinc}</span>
-                          </td>
-                          <td>
-                            <span>{row.nature}</span>
-                          </td>
-                          <td>
-                            <span>{row.denimination}</span>
-                          </td>
-                          <td>
-                            <span>{row.commune}</span>
-                          </td>
-                          <td>
-                            <div className="flex items-center gap-3">
-                              <Button className="cursor-pointer shadow-none bg-transparent  text-[#5f61e6]  hover:bg-transparent hover:text-[#494be3] text-md h-auto p-0">
-                                Déclarer
-                              </Button>
-                              <DropdownMenu>
-                                <DropdownMenuTrigger className="cursor-pointer bg-bgGray text-colorTitle p-0 w-[28px] flex items-center justify-center rounded-lg h-[28px] hover:bg-[#07192b] hover:text-white">
-                                  <EllipsisVertical
-                                    size={18}
-                                  ></EllipsisVertical>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent className="border-0 shadow-[var(--boxShadowCard)!important]">
-                                  <DropdownMenuLabel className="text-colorMuted text-xs opacity-70">
-                                    Actions
-                                  </DropdownMenuLabel>
-                                  <DropdownMenuSeparator />
-                                  <DropdownMenuItem className="text-sm text-colorMuted">
-                                    Afficher
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem className="text-sm text-colorMuted">
-                                    Modifier
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem className="text-sm text-colorMuted">
-                                    Supprimer
-                                  </DropdownMenuItem>
-                                </DropdownMenuContent>
-                              </DropdownMenu>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
+                      {renderTableRows("adt")}
                     </tbody>
                   </table>
                 </div>
@@ -2225,84 +888,7 @@ const TableActivities = () => {
             </TabsContent>
             <TabsContent value="con">
               <Card className="rounded-[24px] shadow-[var(--boxShadowCard)!important] border-0 bg-bgCard lg:p-[18px]">
-                <div className="grid grid-cols-12 gap-3 items-center">
-                  <div className="col-span-12 lg:col-span-4">
-                    <div className="block-search w-[320px] max-w-full relative flex items-center">
-                      <div className="icon absolute left-2 text-colorTitle">
-                        <Search size={18} />
-                      </div>
-                      <Input
-                        type="text"
-                        className="shadow-none h-10 pl-8 rounded-lg border-borderInput placeholder:text-colorMuted placeholder:opacity-70"
-                        placeholder="Recherche"
-                      />
-                    </div>
-                  </div>
-                  <div className="col-span-12 lg:col-span-8">
-                    <div className="flex lg:justify-end gap-2">
-                      {renderAppurerButton("con")}
-                      <div className="block-selects flex border border-borderInput rounded-lg">
-                        <Select>
-                          <SelectTrigger className="w-[180px] shadow-none border-0 rounded-none border-r border-borderInput text-colorTitle">
-                            <SelectValue placeholder="Nature" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectGroup>
-                              <SelectLabel>Nature</SelectLabel>
-                              <SelectItem value="apple">Apple</SelectItem>
-                              <SelectItem value="banana">Banana</SelectItem>
-                              <SelectItem value="blueberry">
-                                Blueberry
-                              </SelectItem>
-                              <SelectItem value="grapes">Grapes</SelectItem>
-                              <SelectItem value="pineapple">
-                                Pineapple
-                              </SelectItem>
-                            </SelectGroup>
-                          </SelectContent>
-                        </Select>
-                        <Select>
-                          <SelectTrigger className="w-[180px] shadow-none border-0 rounded-none border-r border-borderInput text-colorTitle">
-                            <SelectValue placeholder="Rang" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectGroup>
-                              <SelectLabel>Rang</SelectLabel>
-                              <SelectItem value="apple">Apple</SelectItem>
-                              <SelectItem value="banana">Banana</SelectItem>
-                              <SelectItem value="blueberry">
-                                Blueberry
-                              </SelectItem>
-                              <SelectItem value="grapes">Grapes</SelectItem>
-                              <SelectItem value="pineapple">
-                                Pineapple
-                              </SelectItem>
-                            </SelectGroup>
-                          </SelectContent>
-                        </Select>
-                        <Select>
-                          <SelectTrigger className="w-[180px] shadow-none border-0 rounded-none">
-                            <SelectValue placeholder="Statut" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectGroup>
-                              <SelectLabel>Statut</SelectLabel>
-                              <SelectItem value="apple">Apple</SelectItem>
-                              <SelectItem value="banana">Banana</SelectItem>
-                              <SelectItem value="blueberry">
-                                Blueberry
-                              </SelectItem>
-                              <SelectItem value="grapes">Grapes</SelectItem>
-                              <SelectItem value="pineapple">
-                                Pineapple
-                              </SelectItem>
-                            </SelectGroup>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                {renderSearchAndFilters("con")}
                 <div className="overflow-x-auto">
                   <table className="table w-full table-bordered">
                     <thead>
@@ -2310,72 +896,21 @@ const TableActivities = () => {
                         <th>
                           {renderCheckbox(
                             "con",
-                            conItems.map((i) => i.id),
+                            filteredItems.map((_, i) => String(i)),
                             true
                           )}
                         </th>
                         <th>Type d&apos;activité</th>
                         <th>Dimension</th>
                         <th>Activité principale</th>
-                        <th>Nature</th>
+                        <th>Catégorie</th>
                         <th>Dénomination</th>
-                        <th>Commune</th>
+                        <th>Lieu</th>
                         <th>Actions</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {conItems.map((row) => (
-                        <tr key={row.id}>
-                          <td>{renderCheckbox("con", row.id)}</td>
-                          <td>
-                            <span>{row.typeActive}</span>
-                          </td>
-                          <td>
-                            <span>{row.dimension}</span>
-                          </td>
-                          <td>
-                            <span>{row.activitePrinc}</span>
-                          </td>
-                          <td>
-                            <span>{row.nature}</span>
-                          </td>
-                          <td>
-                            <span>{row.denimination}</span>
-                          </td>
-                          <td>
-                            <span>{row.commune}</span>
-                          </td>
-                          <td>
-                            <div className="flex items-center gap-3">
-                              <Button className="cursor-pointer shadow-none bg-transparent  text-[#5f61e6]  hover:bg-transparent hover:text-[#494be3] text-md h-auto p-0">
-                                Déclarer
-                              </Button>
-                              <DropdownMenu>
-                                <DropdownMenuTrigger className="cursor-pointer bg-bgGray text-colorTitle p-0 w-[28px] flex items-center justify-center rounded-lg h-[28px] hover:bg-[#07192b] hover:text-white">
-                                  <EllipsisVertical
-                                    size={18}
-                                  ></EllipsisVertical>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent className="border-0 shadow-[var(--boxShadowCard)!important]">
-                                  <DropdownMenuLabel className="text-colorMuted text-xs opacity-70">
-                                    Actions
-                                  </DropdownMenuLabel>
-                                  <DropdownMenuSeparator />
-                                  <DropdownMenuItem className="text-sm text-colorMuted">
-                                    Afficher
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem className="text-sm text-colorMuted">
-                                    Modifier
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem className="text-sm text-colorMuted">
-                                    Supprimer
-                                  </DropdownMenuItem>
-                                </DropdownMenuContent>
-                              </DropdownMenu>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
+                      {renderTableRows("con")}
                     </tbody>
                   </table>
                 </div>
@@ -2383,84 +918,7 @@ const TableActivities = () => {
             </TabsContent>
             <TabsContent value="recl">
               <Card className="rounded-[24px] shadow-[var(--boxShadowCard)!important] border-0 bg-bgCard lg:p-[18px]">
-                <div className="grid grid-cols-12 gap-3 items-center">
-                  <div className="col-span-12 lg:col-span-4">
-                    <div className="block-search w-[320px] max-w-full relative flex items-center">
-                      <div className="icon absolute left-2 text-colorTitle">
-                        <Search size={18} />
-                      </div>
-                      <Input
-                        type="text"
-                        className="shadow-none h-10 pl-8 rounded-lg border-borderInput placeholder:text-colorMuted placeholder:opacity-70"
-                        placeholder="Recherche"
-                      />
-                    </div>
-                  </div>
-                  <div className="col-span-12 lg:col-span-8">
-                    <div className="flex lg:justify-end gap-2">
-                      {renderAppurerButton("recl")}
-                      <div className="block-selects flex border border-borderInput rounded-lg">
-                        <Select>
-                          <SelectTrigger className="w-[180px] shadow-none border-0 rounded-none border-r border-borderInput text-colorTitle">
-                            <SelectValue placeholder="Nature" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectGroup>
-                              <SelectLabel>Nature</SelectLabel>
-                              <SelectItem value="apple">Apple</SelectItem>
-                              <SelectItem value="banana">Banana</SelectItem>
-                              <SelectItem value="blueberry">
-                                Blueberry
-                              </SelectItem>
-                              <SelectItem value="grapes">Grapes</SelectItem>
-                              <SelectItem value="pineapple">
-                                Pineapple
-                              </SelectItem>
-                            </SelectGroup>
-                          </SelectContent>
-                        </Select>
-                        <Select>
-                          <SelectTrigger className="w-[180px] shadow-none border-0 rounded-none border-r border-borderInput text-colorTitle">
-                            <SelectValue placeholder="Rang" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectGroup>
-                              <SelectLabel>Rang</SelectLabel>
-                              <SelectItem value="apple">Apple</SelectItem>
-                              <SelectItem value="banana">Banana</SelectItem>
-                              <SelectItem value="blueberry">
-                                Blueberry
-                              </SelectItem>
-                              <SelectItem value="grapes">Grapes</SelectItem>
-                              <SelectItem value="pineapple">
-                                Pineapple
-                              </SelectItem>
-                            </SelectGroup>
-                          </SelectContent>
-                        </Select>
-                        <Select>
-                          <SelectTrigger className="w-[180px] shadow-none border-0 rounded-none">
-                            <SelectValue placeholder="Statut" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectGroup>
-                              <SelectLabel>Statut</SelectLabel>
-                              <SelectItem value="apple">Apple</SelectItem>
-                              <SelectItem value="banana">Banana</SelectItem>
-                              <SelectItem value="blueberry">
-                                Blueberry
-                              </SelectItem>
-                              <SelectItem value="grapes">Grapes</SelectItem>
-                              <SelectItem value="pineapple">
-                                Pineapple
-                              </SelectItem>
-                            </SelectGroup>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                {renderSearchAndFilters("recl")}
                 <div className="overflow-x-auto">
                   <table className="table w-full table-bordered">
                     <thead>
@@ -2468,72 +926,21 @@ const TableActivities = () => {
                         <th>
                           {renderCheckbox(
                             "recl",
-                            reclItems.map((i) => i.id),
+                            filteredItems.map((_, i) => String(i)),
                             true
                           )}
                         </th>
                         <th>Type d&apos;activité</th>
                         <th>Dimension</th>
                         <th>Activité principale</th>
-                        <th>Nature</th>
+                        <th>Catégorie</th>
                         <th>Dénomination</th>
-                        <th>Commune</th>
+                        <th>Lieu</th>
                         <th>Actions</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {reclItems.map((row) => (
-                        <tr key={row.id}>
-                          <td>{renderCheckbox("recl", row.id)}</td>
-                          <td>
-                            <span>{row.typeActive}</span>
-                          </td>
-                          <td>
-                            <span>{row.dimension}</span>
-                          </td>
-                          <td>
-                            <span>{row.activitePrinc}</span>
-                          </td>
-                          <td>
-                            <span>{row.nature}</span>
-                          </td>
-                          <td>
-                            <span>{row.denimination}</span>
-                          </td>
-                          <td>
-                            <span>{row.commune}</span>
-                          </td>
-                          <td>
-                            <div className="flex items-center gap-3">
-                              <Button className="cursor-pointer shadow-none bg-transparent  text-[#5f61e6]  hover:bg-transparent hover:text-[#494be3] text-md h-auto p-0">
-                                Déclarer
-                              </Button>
-                              <DropdownMenu>
-                                <DropdownMenuTrigger className="cursor-pointer bg-bgGray text-colorTitle p-0 w-[28px] flex items-center justify-center rounded-lg h-[28px] hover:bg-[#07192b] hover:text-white">
-                                  <EllipsisVertical
-                                    size={18}
-                                  ></EllipsisVertical>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent className="border-0 shadow-[var(--boxShadowCard)!important]">
-                                  <DropdownMenuLabel className="text-colorMuted text-xs opacity-70">
-                                    Actions
-                                  </DropdownMenuLabel>
-                                  <DropdownMenuSeparator />
-                                  <DropdownMenuItem className="text-sm text-colorMuted">
-                                    Afficher
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem className="text-sm text-colorMuted">
-                                    Modifier
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem className="text-sm text-colorMuted">
-                                    Supprimer
-                                  </DropdownMenuItem>
-                                </DropdownMenuContent>
-                              </DropdownMenu>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
+                      {renderTableRows("recl")}
                     </tbody>
                   </table>
                 </div>

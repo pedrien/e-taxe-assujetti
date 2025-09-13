@@ -18,10 +18,12 @@ import CardCompte from "./cardCompte";
 import ShowPay from "@/components/features/showPay/showPay";
 import { Button } from "@/components/ui/button";
 import { ChevronDown } from "lucide-react";
+import { RefreshButton } from "@/components/ui/refresh-button";
+import { RefetchDebug } from "@/components/debug/refetch-debug";
 
 const BlockDash = () => {
   const { profileId } = useNextAuth();
-  const { counts, loading } = useTaxpayerCounts(profileId);
+  const { counts, loading, refetch } = useTaxpayerCounts(profileId);
   const { immovables: immovablesCount, vehicles: vehiclesCount, activities: activitiesCount } = counts;
   
   // Récupérer les informations du profil pour le nom de l'utilisateur
@@ -42,7 +44,23 @@ const BlockDash = () => {
               </p>
             </div>
             <div className="col-span-12 lg:col-span-6">
-              <div className="flex justify-end">
+              <div className="flex justify-end items-center gap-3">
+                <RefreshButton 
+                  onRefresh={async () => {
+                    try {
+                      if (refetch && typeof refetch === 'function') {
+                        await refetch();
+                      } else {
+                        console.warn("Fonction refetch non disponible dans le dashboard");
+                      }
+                    } catch (error) {
+                      console.error("Erreur lors du rafraîchissement:", error);
+                    }
+                  }}
+                  size="md"
+                  variant="outline"
+                  className="bg-white/10 hover:bg-white/20 border-white/20 text-white hover:text-white"
+                />
                 <Button className="bg-primaryColor rounded-lg cursor-pointer shadow-[0_5px_10px_#00000026]">
                   Actions rapides
                   <ChevronDown></ChevronDown>
@@ -186,6 +204,7 @@ const BlockDash = () => {
         </div>
       </div>
       <ShowPay />
+      <RefetchDebug refetch={refetch} componentName="BlockDash" />
     </>
   );
 };

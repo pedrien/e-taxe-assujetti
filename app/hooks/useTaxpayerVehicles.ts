@@ -1,9 +1,12 @@
 "use client";
-import { useMemo } from "react";
+import { useMemo, useState, useEffect, useCallback } from "react";
 import { useProfileData } from "./useProfileData";
 
 export const useTaxpayerVehicles = (profileId?: string | null) => {
-  const { vehicles, loading, error } = useProfileData(profileId ?? null);
+  const { vehicles, loading, error, refetch } = useProfileData(profileId ?? null);
+  
+  // État pour gérer le chargement progressif
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
 
   // Mémoriser le formatage des véhicules pour éviter les recalculs
   const formattedVehicles = useMemo(() => 
@@ -29,11 +32,36 @@ export const useTaxpayerVehicles = (profileId?: string | null) => {
     [vehicles?.paginationInfo?.totalCount]
   );
 
+  // Gérer le chargement progressif
+  useEffect(() => {
+    if (vehicles && !loading) {
+      // Délai pour permettre l'affichage de la page avant le chargement du tableau
+      const timer = setTimeout(() => {
+        setIsInitialLoad(false);
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [vehicles, loading]);
+
+  // Fonction de rafraîchissement avec gestion du chargement
+  const handleRefresh = useCallback(async () => {
+    setIsInitialLoad(true);
+    try {
+      await refetch();
+    } catch (error) {
+      console.error("Erreur lors du rafraîchissement:", error);
+    } finally {
+      setTimeout(() => setIsInitialLoad(false), 100);
+    }
+  }, [refetch]);
+
   // Mémoriser le résultat final
   return useMemo(() => ({
     vehicles: formattedVehicles,
     totalCount,
-    loading,
+    loading: isInitialLoad, // Utiliser l'état de chargement progressif
     error,
-  }), [formattedVehicles, totalCount, loading, error]);
+    refetch: handleRefresh,
+    isInitialLoad, // Exposer l'état pour l'UI
+  }), [formattedVehicles, totalCount, isInitialLoad, error, handleRefresh]);
 };

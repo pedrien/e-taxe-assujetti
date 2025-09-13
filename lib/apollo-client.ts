@@ -50,7 +50,7 @@ const errorLink = onError((params) => {
   }
 });
 
-// Créer le client Apollo avec optimisations de cache
+// Créer le client Apollo avec optimisations de cache avancées
 const client = new ApolloClient({
   link: from([errorLink, authLink, httpLink]),
   cache: new InMemoryCache({
@@ -59,22 +59,63 @@ const client = new ApolloClient({
       Query: {
         fields: {
           profile: {
-            merge: true, // Fusionner les données au lieu de les remplacer
+            // Cache pendant 5 minutes
+            read(existing: unknown) {
+              if (existing && typeof existing === 'object' && existing !== null && '__cacheTime' in existing && typeof existing.__cacheTime === 'number' && Date.now() - existing.__cacheTime < 300000) {
+                return existing;
+              }
+              return undefined;
+            },
+            merge(existing: unknown, incoming: unknown) {
+              if (typeof incoming === 'object' && incoming !== null) {
+                return {
+                  ...incoming,
+                  __cacheTime: Date.now(),
+                };
+              }
+              return incoming;
+            },
           },
         },
       },
+      // Optimiser les collections pour éviter les re-renders
+      Payer: {
+        fields: {
+          activities: {
+            merge: true,
+          },
+          immovables: {
+            merge: true,
+          },
+          vehicles: {
+            merge: true,
+          },
+        },
+      },
+    },
+    // Optimisations de cache globales
+    possibleTypes: {},
+    dataIdFromObject: (object) => {
+      // Utiliser des IDs stables pour le cache
+      if (object.__typename && object.id) {
+        return `${object.__typename}:${object.id}`;
+      }
+      return undefined;
     },
   }),
   defaultOptions: {
     watchQuery: {
       errorPolicy: 'all',
       fetchPolicy: 'cache-first', // Utiliser le cache en priorité
+      notifyOnNetworkStatusChange: false, // Réduire les re-renders
     },
     query: {
       errorPolicy: 'all',
       fetchPolicy: 'cache-first',
     },
   },
+  // Optimisations de performance
+  assumeImmutableResults: true, // Optimisation pour les données immutables
 });
 
 export default client;

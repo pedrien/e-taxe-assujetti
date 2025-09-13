@@ -2,7 +2,7 @@
 import { useProfileData } from "./useProfileData";
 
 export const useTaxpayerCounts = (profileId?: string | null) => {
-  const { immovables, vehicles, activities, loading, error } = useProfileData(profileId ?? null);
+  const { immovables, vehicles, activities, loading, error, refetch } = useProfileData(profileId ?? null);
 
   const counts = {
     immovables: immovables?.paginationInfo?.totalCount ?? 0,
@@ -10,7 +10,7 @@ export const useTaxpayerCounts = (profileId?: string | null) => {
     activities: activities?.paginationInfo?.totalCount ?? 0,
   };
 
-  return { counts, loading, error };
+  return { counts, loading, error, refetch };
 };
 
 

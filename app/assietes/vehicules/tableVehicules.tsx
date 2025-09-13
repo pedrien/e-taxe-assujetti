@@ -28,6 +28,8 @@ import { useNextAuth } from "@/app/contexts/auth/useNextAuth";
 import { useTaxpayerVehicles } from "@/app/hooks/useTaxpayerVehicles";
 // import { LoadingIndicator } from "@/components/ui/loading-indicator";
 import { RefreshIndicator } from "@/components/ui/refresh-indicator";
+import { RefreshButton } from "@/components/ui/refresh-button";
+import { TableSkeleton } from "@/components/ui/table-skeleton";
 
 const TableVehicules = () => {
   // États pour gérer les checkboxes de chaque onglet
@@ -135,21 +137,24 @@ const TableVehicules = () => {
     );
   };
   const { profileId } = useNextAuth();
-  const { vehicles, loading } = useTaxpayerVehicles(profileId);
+  const { vehicles, loading, refetch, isInitialLoad } = useTaxpayerVehicles(profileId);
 
-  // Utiliser les vraies données de l'API
-  const identItems = vehicles.map((v, index) => ({
-    id: v.taxId ?? String(index),
-    matricule: v.registration ?? "",
-    chassis: v.chassisNumber ?? "",
-    annee: v.circYear ?? "",
-    poids: v.weight ?? "",
-    moteur: v.power ?? "",
-    marque: v.mark ?? "",
-    modele: v.model ?? "",
-    carrosserie: v.calender ?? "",
-    couleur: v.color ?? "",
-  }));
+  // Fonction utilitaire pour mapper les données de véhicule
+  const mapVehicleData = (vehicle: unknown, index: number) => {
+    const veh = vehicle as Record<string, unknown>;
+    return {
+      id: (veh.taxId as string) ?? String(index),
+      matricule: (veh.registration as string) ?? "",
+      chassis: (veh.chassisNumber as string) ?? "",
+      annee: (veh.circYear as string) ?? "",
+      poids: (veh.weight as string) ?? "",
+      moteur: (veh.power as string) ?? "",
+      marque: (veh.mark as string) ?? "",
+      modele: (veh.model as string) ?? "",
+      carrosserie: (veh.calender as string) ?? "",
+      couleur: (veh.color as string) ?? "",
+    };
+  };
 
   // Etats recherche + filtres (onglet Identifiés)
   const [searchIdent, setSearchIdent] = useState("");
@@ -157,39 +162,116 @@ const TableVehicules = () => {
   const [filterModele, setFilterModele] = useState<string | undefined>();
   const [filterCarrosserie, setFilterCarrosserie] = useState<string | undefined>();
 
-  // Options de filtres (uniques, triées)
-  const {
-    marquesOptions,
-    modelesOptions,
-    carrosseriesOptions,
-  } = useMemo(() => {
+  // Options de filtres (calculées une seule fois)
+  const filterOptions = useMemo(() => {
     const marques = new Set<string>();
     const modeles = new Set<string>();
     const carrosseries = new Set<string>();
-    identItems.forEach((i) => {
-      if (i.marque) marques.add(i.marque);
-      if (i.modele) modeles.add(i.modele);
-      if (i.carrosserie) carrosseries.add(i.carrosserie);
+    
+    vehicles.forEach((vehicle) => {
+      if (vehicle.mark) marques.add(vehicle.mark);
+      if (vehicle.model) modeles.add(vehicle.model);
+      if (vehicle.calender) carrosseries.add(vehicle.calender);
     });
+    
     return {
       marquesOptions: Array.from(marques).sort((a, b) => a.localeCompare(b)),
       modelesOptions: Array.from(modeles).sort((a, b) => a.localeCompare(b)),
       carrosseriesOptions: Array.from(carrosseries).sort((a, b) => a.localeCompare(b)),
     };
-  }, [identItems]);
+  }, [vehicles]);
 
-  // Liste filtrée (Identifiés)
-  const identItemsFiltered = useMemo(() => {
+  // Liste filtrée (optimisée)
+  const filteredItems = useMemo(() => {
+    if (!vehicles.length) return [];
+    
     const q = searchIdent.trim().toLowerCase();
-    return identItems.filter((i) => {
-      if (filterMarque && i.marque !== filterMarque) return false;
-      if (filterModele && i.modele !== filterModele) return false;
-      if (filterCarrosserie && i.carrosserie !== filterCarrosserie) return false;
-      if (!q) return true;
-      const hay = `${i.matricule} ${i.chassis} ${i.annee} ${i.poids} ${i.moteur} ${i.marque} ${i.modele} ${i.carrosserie} ${i.couleur}`.toLowerCase();
-      return hay.includes(q);
+    const isMarqueFiltered = filterMarque !== undefined;
+    const isModeleFiltered = filterModele !== undefined;
+    const isCarrosserieFiltered = filterCarrosserie !== undefined;
+    const hasSearchTerm = q.length > 0;
+    
+    return vehicles.filter((vehicle) => {
+      // Filtres par sélection
+      if (isMarqueFiltered && vehicle.mark !== filterMarque) return false;
+      if (isModeleFiltered && vehicle.model !== filterModele) return false;
+      if (isCarrosserieFiltered && vehicle.calender !== filterCarrosserie) return false;
+      
+      // Recherche textuelle
+      if (hasSearchTerm) {
+        const searchText = `${vehicle.registration || ''} ${vehicle.chassisNumber || ''} ${vehicle.circYear || ''} ${vehicle.weight || ''} ${vehicle.power || ''} ${vehicle.mark || ''} ${vehicle.model || ''} ${vehicle.calender || ''} ${vehicle.color || ''}`.toLowerCase();
+        if (!searchText.includes(q)) return false;
+      }
+      
+      return true;
     });
-  }, [identItems, searchIdent, filterMarque, filterModele, filterCarrosserie]);
+  }, [vehicles, searchIdent, filterMarque, filterModele, filterCarrosserie]);
+
+  // Fonction utilitaire pour rendre les lignes de tableau
+  const renderTableRows = (tabKey: string) => {
+    return filteredItems.map((vehicle, index) => {
+      const row = mapVehicleData(vehicle, index);
+      return (
+        <tr key={row.id}>
+          <td>{renderCheckbox(tabKey, row.id)}</td>
+          <td>
+            <span>{row.matricule}</span>
+          </td>
+          <td>
+            <span>{row.chassis}</span>
+          </td>
+          <td>
+            <span>{row.annee}</span>
+          </td>
+          <td>
+            <span>{row.poids}</span>
+          </td>
+          <td>
+            <span>{row.moteur}</span>
+          </td>
+          <td>
+            <span>{row.marque}</span>
+          </td>
+          <td>
+            <span>{row.modele}</span>
+          </td>
+          <td>
+            <span>{row.carrosserie}</span>
+          </td>
+          <td>
+            <span>{row.couleur}</span>
+          </td>
+          <td>
+            <div className="flex items-center gap-3">
+              <Button className="cursor-pointer shadow-none bg-transparent  text-[#5f61e6]  hover:bg-transparent hover:text-[#494be3] text-md h-auto p-0">
+                Déclarer
+              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger className="cursor-pointer bg-bgGray text-colorTitle p-0 w-[28px] flex items-center justify-center rounded-lg h-[28px] hover:bg-[#07192b] hover:text-white">
+                  <EllipsisVertical size={18}></EllipsisVertical>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="border-0 shadow-[var(--boxShadowCard)!important]">
+                  <DropdownMenuLabel className="text-colorMuted text-xs opacity-70">
+                    Actions
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem className="text-sm text-colorMuted">
+                    Afficher
+                  </DropdownMenuItem>
+                  <DropdownMenuItem className="text-sm text-colorMuted">
+                    Modifier
+                  </DropdownMenuItem>
+                  <DropdownMenuItem className="text-sm text-colorMuted">
+                    Supprimer
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          </td>
+        </tr>
+      );
+    });
+  };
   
   // Affichage d'un loader pendant le chargement des véhicules
   if (loading) {
@@ -202,344 +284,13 @@ const TableVehicules = () => {
       </Card>
     );
   }
-  const declItems = [
-    {
-      id: "2783730092",
-      matricule: "2783730092",
-      chassis: "357484",
-      annee: "2022",
-      poids: "500 kg",
-      moteur: "0",
-      marque: "Toyota",
-      modele: "Corolla",
-      carrosserie: "Jeep",
-      couleur: "Rouge",
-    },
-    {
-      id: "2783730092-2",
-      matricule: "2783730092",
-      chassis: "357484",
-      annee: "2022",
-      poids: "500 kg",
-      moteur: "0",
-      marque: "Toyota",
-      modele: "Corolla",
-      carrosserie: "Jeep",
-      couleur: "Rouge",
-    },
-  ];
-  const payItems = [
-    {
-      id: "2783730092",
-      matricule: "2783730092",
-      chassis: "357484",
-      annee: "2022",
-      poids: "500 kg",
-      moteur: "0",
-      marque: "Toyota",
-      modele: "Corolla",
-      carrosserie: "Jeep",
-      couleur: "Rouge",
-    },
-    {
-      id: "2783730092-2",
-      matricule: "2783730092",
-      chassis: "357484",
-      annee: "2022",
-      poids: "500 kg",
-      moteur: "0",
-      marque: "Toyota",
-      modele: "Corolla",
-      carrosserie: "Jeep",
-      couleur: "Rouge",
-    },
-  ];
-  const appItems = [
-    {
-      id: "2783730092",
-      matricule: "2783730092",
-      chassis: "357484",
-      annee: "2022",
-      poids: "500 kg",
-      moteur: "0",
-      marque: "Toyota",
-      modele: "Corolla",
-      carrosserie: "Jeep",
-      couleur: "Rouge",
-    },
-    {
-      id: "2783730092-2",
-      matricule: "2783730092",
-      chassis: "357484",
-      annee: "2022",
-      poids: "500 kg",
-      moteur: "0",
-      marque: "Toyota",
-      modele: "Corolla",
-      carrosserie: "Jeep",
-      couleur: "Rouge",
-    },
-  ];
-  const impItems = [
-    {
-      id: "2783730092",
-      matricule: "2783730092",
-      chassis: "357484",
-      annee: "2022",
-      poids: "500 kg",
-      moteur: "0",
-      marque: "Toyota",
-      modele: "Corolla",
-      carrosserie: "Jeep",
-      couleur: "Rouge",
-    },
-    {
-      id: "2783730092-2",
-      matricule: "2783730092",
-      chassis: "357484",
-      annee: "2022",
-      poids: "500 kg",
-      moteur: "0",
-      marque: "Toyota",
-      modele: "Corolla",
-      carrosserie: "Jeep",
-      couleur: "Rouge",
-    },
-  ];
-  const ddItems = [
-    {
-      id: "2783730092",
-      matricule: "2783730092",
-      chassis: "357484",
-      annee: "2022",
-      poids: "500 kg",
-      moteur: "0",
-      marque: "Toyota",
-      modele: "Corolla",
-      carrosserie: "Jeep",
-      couleur: "Rouge",
-    },
-    {
-      id: "2783730092-2",
-      matricule: "2783730092",
-      chassis: "357484",
-      annee: "2022",
-      poids: "500 kg",
-      moteur: "0",
-      marque: "Toyota",
-      modele: "Corolla",
-      carrosserie: "Jeep",
-      couleur: "Rouge",
-    },
-  ];
-  const dpItems = [
-    {
-      id: "2783730092",
-      matricule: "2783730092",
-      chassis: "357484",
-      annee: "2022",
-      poids: "500 kg",
-      moteur: "0",
-      marque: "Toyota",
-      modele: "Corolla",
-      carrosserie: "Jeep",
-      couleur: "Rouge",
-    },
-    {
-      id: "2783730092-2",
-      matricule: "2783730092",
-      chassis: "357484",
-      annee: "2022",
-      poids: "500 kg",
-      moteur: "0",
-      marque: "Toyota",
-      modele: "Corolla",
-      carrosserie: "Jeep",
-      couleur: "Rouge",
-    },
-  ];
-  const fpcItems = [
-    {
-      id: "2783730092",
-      matricule: "2783730092",
-      chassis: "357484",
-      annee: "2022",
-      poids: "500 kg",
-      moteur: "0",
-      marque: "Toyota",
-      modele: "Corolla",
-      carrosserie: "Jeep",
-      couleur: "Rouge",
-    },
-    {
-      id: "2783730092-2",
-      matricule: "2783730092",
-      chassis: "357484",
-      annee: "2022",
-      poids: "500 kg",
-      moteur: "0",
-      marque: "Toyota",
-      modele: "Corolla",
-      carrosserie: "Jeep",
-      couleur: "Rouge",
-    },
-  ];
-  const amrItems = [
-    {
-      id: "2783730092",
-      matricule: "2783730092",
-      chassis: "357484",
-      annee: "2022",
-      poids: "500 kg",
-      moteur: "0",
-      marque: "Toyota",
-      modele: "Corolla",
-      carrosserie: "Jeep",
-      couleur: "Rouge",
-    },
-    {
-      id: "2783730092-2",
-      matricule: "2783730092",
-      chassis: "357484",
-      annee: "2022",
-      poids: "500 kg",
-      moteur: "0",
-      marque: "Toyota",
-      modele: "Corolla",
-      carrosserie: "Jeep",
-      couleur: "Rouge",
-    },
-  ];
-  const pourItems = [
-    {
-      id: "2783730092",
-      matricule: "2783730092",
-      chassis: "357484",
-      annee: "2022",
-      poids: "500 kg",
-      moteur: "0",
-      marque: "Toyota",
-      modele: "Corolla",
-      carrosserie: "Jeep",
-      couleur: "Rouge",
-    },
-    {
-      id: "2783730092-2",
-      matricule: "2783730092",
-      chassis: "357484",
-      annee: "2022",
-      poids: "500 kg",
-      moteur: "0",
-      marque: "Toyota",
-      modele: "Corolla",
-      carrosserie: "Jeep",
-      couleur: "Rouge",
-    },
-  ];
-  const ccItems = [
-    {
-      id: "2783730092",
-      matricule: "2783730092",
-      chassis: "357484",
-      annee: "2022",
-      poids: "500 kg",
-      moteur: "0",
-      marque: "Toyota",
-      modele: "Corolla",
-      carrosserie: "Jeep",
-      couleur: "Rouge",
-    },
-    {
-      id: "2783730092-2",
-      matricule: "2783730092",
-      chassis: "357484",
-      annee: "2022",
-      poids: "500 kg",
-      moteur: "0",
-      marque: "Toyota",
-      modele: "Corolla",
-      carrosserie: "Jeep",
-      couleur: "Rouge",
-    },
-  ];
-  const adtItems = [
-    {
-      id: "2783730092",
-      matricule: "2783730092",
-      chassis: "357484",
-      annee: "2022",
-      poids: "500 kg",
-      moteur: "0",
-      marque: "Toyota",
-      modele: "Corolla",
-      carrosserie: "Jeep",
-      couleur: "Rouge",
-    },
-    {
-      id: "2783730092-2",
-      matricule: "2783730092",
-      chassis: "357484",
-      annee: "2022",
-      poids: "500 kg",
-      moteur: "0",
-      marque: "Toyota",
-      modele: "Corolla",
-      carrosserie: "Jeep",
-      couleur: "Rouge",
-    },
-  ];
-  const conItems = [
-    {
-      id: "2783730092",
-      matricule: "2783730092",
-      chassis: "357484",
-      annee: "2022",
-      poids: "500 kg",
-      moteur: "0",
-      marque: "Toyota",
-      modele: "Corolla",
-      carrosserie: "Jeep",
-      couleur: "Rouge",
-    },
-    {
-      id: "2783730092-2",
-      matricule: "2783730092",
-      chassis: "357484",
-      annee: "2022",
-      poids: "500 kg",
-      moteur: "0",
-      marque: "Toyota",
-      modele: "Corolla",
-      carrosserie: "Jeep",
-      couleur: "Rouge",
-    },
-  ];
-  const reclItems = [
-    {
-      id: "2783730092",
-      matricule: "2783730092",
-      chassis: "357484",
-      annee: "2022",
-      poids: "500 kg",
-      moteur: "0",
-      marque: "Toyota",
-      modele: "Corolla",
-      carrosserie: "Jeep",
-      couleur: "Rouge",
-    },
-    {
-      id: "2783730092-2",
-      matricule: "2783730092",
-      chassis: "357484",
-      annee: "2022",
-      poids: "500 kg",
-      moteur: "0",
-      marque: "Toyota",
-      modele: "Corolla",
-      carrosserie: "Jeep",
-      couleur: "Rouge",
-    },
-  ];
+  // Variables inutilisées supprimées pour éviter les warnings
+
+  // Afficher le skeleton pendant le chargement initial
+  if (isInitialLoad) {
+    return <TableSkeleton rows={5} columns={7} showSearch={true} showFilters={true} />;
+  }
+
   return (
     <>
       <RefreshIndicator isVisible={loading} />
@@ -702,6 +453,18 @@ const TableVehicules = () => {
                   </div>
                   <div className="col-span-12 lg:col-span-8">
                     <div className="flex lg:justify-end gap-2">
+                      <RefreshButton 
+                        onRefresh={async () => {
+                          try {
+                            await refetch();
+                          } catch (error) {
+                            console.error("Erreur lors du rafraîchissement:", error);
+                          }
+                        }}
+                        size="sm"
+                        variant="outline"
+                        className="border-borderInput hover:bg-gray-50"
+                      />
                       {renderAppurerButton("ident")}
                       <div className="block-selects flex border border-borderInput rounded-lg">
                         <Select value={filterMarque} onValueChange={(v) => setFilterMarque(v)}>
@@ -711,7 +474,7 @@ const TableVehicules = () => {
                           <SelectContent>
                             <SelectGroup>
                               <SelectLabel>Marque</SelectLabel>
-                              {marquesOptions.map((m) => (
+                              {filterOptions.marquesOptions.map((m) => (
                                 <SelectItem key={m} value={m}>{m}</SelectItem>
                               ))}
                             </SelectGroup>
@@ -724,7 +487,7 @@ const TableVehicules = () => {
                           <SelectContent>
                             <SelectGroup>
                               <SelectLabel>Modèle</SelectLabel>
-                              {modelesOptions.map((m) => (
+                              {filterOptions.modelesOptions.map((m) => (
                                 <SelectItem key={m} value={m}>{m}</SelectItem>
                               ))}
                             </SelectGroup>
@@ -737,7 +500,7 @@ const TableVehicules = () => {
                           <SelectContent>
                             <SelectGroup>
                               <SelectLabel>Carrosserie</SelectLabel>
-                              {carrosseriesOptions.map((c) => (
+                              {filterOptions.carrosseriesOptions.map((c) => (
                                 <SelectItem key={c} value={c}>{c}</SelectItem>
                               ))}
                             </SelectGroup>
@@ -754,7 +517,7 @@ const TableVehicules = () => {
                         <th>
                           {renderCheckbox(
                             "ident",
-                            identItems.map((i) => i.id),
+                            filteredItems.map((_, i) => String(i)),
                             true
                           )}
                         </th>
@@ -771,74 +534,14 @@ const TableVehicules = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {identItemsFiltered.length === 0 ? (
+                      {filteredItems.length === 0 ? (
                         <tr>
                           <td colSpan={11} className="text-center text-colorMuted py-6">
                             Véhicule non trouvé
                           </td>
                         </tr>
                       ) : (
-                        identItemsFiltered.map((row) => (
-                          <tr key={row.id}>
-                            <td>{renderCheckbox("ident", row.id)}</td>
-                            <td>
-                              <span>{row.matricule}</span>
-                            </td>
-                            <td>
-                              <span>{row.chassis}</span>
-                            </td>
-                            <td>
-                              <span>{row.annee}</span>
-                            </td>
-                            <td>
-                              <span>{row.poids}</span>
-                            </td>
-                            <td>
-                              <span>{row.moteur}</span>
-                            </td>
-                            <td>
-                              <span>{row.marque}</span>
-                            </td>
-                            <td>
-                              <span>{row.modele}</span>
-                            </td>
-                            <td>
-                              <span>{row.carrosserie}</span>
-                            </td>
-                            <td>
-                              <span>{row.couleur}</span>
-                            </td>
-                            <td>
-                              <div className="flex items-center gap-3">
-                                <Button className="cursor-pointer shadow-none bg-transparent  text-[#5f61e6]  hover:bg-transparent hover:text-[#494be3] text-md h-auto p-0">
-                                  Déclarer
-                                </Button>
-                                <DropdownMenu>
-                                  <DropdownMenuTrigger className="cursor-pointer bg-bgGray text-colorTitle p-0 w-[28px] flex items-center justify-center rounded-lg h-[28px] hover:bg-[#07192b] hover:text-white">
-                                    <EllipsisVertical
-                                      size={18}
-                                    ></EllipsisVertical>
-                                  </DropdownMenuTrigger>
-                                  <DropdownMenuContent>
-                                    <DropdownMenuLabel className="text-colorMuted text-xs">
-                                      Actions
-                                    </DropdownMenuLabel>
-                                    <DropdownMenuSeparator />
-                                    <DropdownMenuItem className="text-sm text-colorTitle">
-                                      Afficher
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem className="text-sm text-colorTitle">
-                                      Modifier
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem className="text-sm text-colorTitle">
-                                      Supprimer
-                                    </DropdownMenuItem>
-                                  </DropdownMenuContent>
-                                </DropdownMenu>
-                              </div>
-                            </td>
-                          </tr>
-                        ))
+                        renderTableRows("ident")
                       )}
                     </tbody>
                   </table>
@@ -932,7 +635,7 @@ const TableVehicules = () => {
                         <th>
                           {renderCheckbox(
                             "decl",
-                            declItems.map((i) => i.id),
+                            filteredItems.map((_, i) => String(i)),
                             true
                           )}
                         </th>
@@ -949,67 +652,7 @@ const TableVehicules = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {declItems.map((row) => (
-                        <tr key={row.id}>
-                          <td>{renderCheckbox("decl", row.id)}</td>
-                          <td>
-                            <span>{row.matricule}</span>
-                          </td>
-                          <td>
-                            <span>{row.chassis}</span>
-                          </td>
-                          <td>
-                            <span>{row.annee}</span>
-                          </td>
-                          <td>
-                            <span>{row.poids}</span>
-                          </td>
-                          <td>
-                            <span>{row.moteur}</span>
-                          </td>
-                          <td>
-                            <span>{row.marque}</span>
-                          </td>
-                          <td>
-                            <span>{row.modele}</span>
-                          </td>
-                          <td>
-                            <span>{row.carrosserie}</span>
-                          </td>
-                          <td>
-                            <span>{row.couleur}</span>
-                          </td>
-                          <td>
-                            <div className="flex items-center gap-3">
-                              <Button className="cursor-pointer shadow-none bg-transparent  text-[#5f61e6]  hover:bg-transparent hover:text-[#494be3] text-md h-auto p-0">
-                                Déclarer
-                              </Button>
-                              <DropdownMenu>
-                                <DropdownMenuTrigger className="cursor-pointer bg-bgGray text-colorTitle p-0 w-[28px] flex items-center justify-center rounded-lg h-[28px] hover:bg-[#07192b] hover:text-white">
-                                  <EllipsisVertical
-                                    size={18}
-                                  ></EllipsisVertical>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent className="border-0 shadow-[var(--boxShadowCard)!important]">
-                                  <DropdownMenuLabel className="text-colorMuted text-xs opacity-70">
-                                    Actions
-                                  </DropdownMenuLabel>
-                                  <DropdownMenuSeparator />
-                                  <DropdownMenuItem className="text-sm text-colorMuted">
-                                    Afficher
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem className="text-sm text-colorMuted">
-                                    Modifier
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem className="text-sm text-colorMuted">
-                                    Supprimer
-                                  </DropdownMenuItem>
-                                </DropdownMenuContent>
-                              </DropdownMenu>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
+                      {renderTableRows("decl")}
                     </tbody>
                   </table>
                 </div>
@@ -1102,7 +745,7 @@ const TableVehicules = () => {
                         <th>
                           {renderCheckbox(
                             "pay",
-                            payItems.map((i) => i.id),
+                            filteredItems.map((_, i) => String(i)),
                             true
                           )}
                         </th>
@@ -1119,67 +762,7 @@ const TableVehicules = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {payItems.map((row) => (
-                        <tr key={row.id}>
-                          <td>{renderCheckbox("pay", row.id)}</td>
-                          <td>
-                            <span>{row.matricule}</span>
-                          </td>
-                          <td>
-                            <span>{row.chassis}</span>
-                          </td>
-                          <td>
-                            <span>{row.annee}</span>
-                          </td>
-                          <td>
-                            <span>{row.poids}</span>
-                          </td>
-                          <td>
-                            <span>{row.moteur}</span>
-                          </td>
-                          <td>
-                            <span>{row.marque}</span>
-                          </td>
-                          <td>
-                            <span>{row.modele}</span>
-                          </td>
-                          <td>
-                            <span>{row.carrosserie}</span>
-                          </td>
-                          <td>
-                            <span>{row.couleur}</span>
-                          </td>
-                          <td>
-                            <div className="flex items-center gap-3">
-                              <Button className="cursor-pointer shadow-none bg-transparent  text-[#5f61e6]  hover:bg-transparent hover:text-[#494be3] text-md h-auto p-0">
-                                Déclarer
-                              </Button>
-                              <DropdownMenu>
-                                <DropdownMenuTrigger className="cursor-pointer bg-bgGray text-colorTitle p-0 w-[28px] flex items-center justify-center rounded-lg h-[28px] hover:bg-[#07192b] hover:text-white">
-                                  <EllipsisVertical
-                                    size={18}
-                                  ></EllipsisVertical>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent className="border-0 shadow-[var(--boxShadowCard)!important]">
-                                  <DropdownMenuLabel className="text-colorMuted text-xs opacity-70">
-                                    Actions
-                                  </DropdownMenuLabel>
-                                  <DropdownMenuSeparator />
-                                  <DropdownMenuItem className="text-sm text-colorMuted">
-                                    Afficher
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem className="text-sm text-colorMuted">
-                                    Modifier
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem className="text-sm text-colorMuted">
-                                    Supprimer
-                                  </DropdownMenuItem>
-                                </DropdownMenuContent>
-                              </DropdownMenu>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
+                      {renderTableRows("pay")}
                     </tbody>
                   </table>
                 </div>
@@ -1272,7 +855,7 @@ const TableVehicules = () => {
                         <th>
                           {renderCheckbox(
                             "app",
-                            appItems.map((i) => i.id),
+                            filteredItems.map((_, i) => String(i)),
                             true
                           )}
                         </th>
@@ -1289,67 +872,7 @@ const TableVehicules = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {appItems.map((row) => (
-                        <tr key={row.id}>
-                          <td>{renderCheckbox("app", row.id)}</td>
-                          <td>
-                            <span>{row.matricule}</span>
-                          </td>
-                          <td>
-                            <span>{row.chassis}</span>
-                          </td>
-                          <td>
-                            <span>{row.annee}</span>
-                          </td>
-                          <td>
-                            <span>{row.poids}</span>
-                          </td>
-                          <td>
-                            <span>{row.moteur}</span>
-                          </td>
-                          <td>
-                            <span>{row.marque}</span>
-                          </td>
-                          <td>
-                            <span>{row.modele}</span>
-                          </td>
-                          <td>
-                            <span>{row.carrosserie}</span>
-                          </td>
-                          <td>
-                            <span>{row.couleur}</span>
-                          </td>
-                          <td>
-                            <div className="flex items-center gap-3">
-                              <Button className="cursor-pointer shadow-none bg-transparent  text-[#5f61e6]  hover:bg-transparent hover:text-[#494be3] text-md h-auto p-0">
-                                Déclarer
-                              </Button>
-                              <DropdownMenu>
-                                <DropdownMenuTrigger className="cursor-pointer bg-bgGray text-colorTitle p-0 w-[28px] flex items-center justify-center rounded-lg h-[28px] hover:bg-[#07192b] hover:text-white">
-                                  <EllipsisVertical
-                                    size={18}
-                                  ></EllipsisVertical>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent className="border-0 shadow-[var(--boxShadowCard)!important]">
-                                  <DropdownMenuLabel className="text-colorMuted text-xs opacity-70">
-                                    Actions
-                                  </DropdownMenuLabel>
-                                  <DropdownMenuSeparator />
-                                  <DropdownMenuItem className="text-sm text-colorMuted">
-                                    Afficher
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem className="text-sm text-colorMuted">
-                                    Modifier
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem className="text-sm text-colorMuted">
-                                    Supprimer
-                                  </DropdownMenuItem>
-                                </DropdownMenuContent>
-                              </DropdownMenu>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
+                      {renderTableRows("app")}
                     </tbody>
                   </table>
                 </div>
@@ -1442,7 +965,7 @@ const TableVehicules = () => {
                         <th>
                           {renderCheckbox(
                             "imp",
-                            impItems.map((i) => i.id),
+                            filteredItems.map((_, i) => String(i)),
                             true
                           )}
                         </th>
@@ -1459,67 +982,7 @@ const TableVehicules = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {impItems.map((row) => (
-                        <tr key={row.id}>
-                          <td>{renderCheckbox("imp", row.id)}</td>
-                          <td>
-                            <span>{row.matricule}</span>
-                          </td>
-                          <td>
-                            <span>{row.chassis}</span>
-                          </td>
-                          <td>
-                            <span>{row.annee}</span>
-                          </td>
-                          <td>
-                            <span>{row.poids}</span>
-                          </td>
-                          <td>
-                            <span>{row.moteur}</span>
-                          </td>
-                          <td>
-                            <span>{row.marque}</span>
-                          </td>
-                          <td>
-                            <span>{row.modele}</span>
-                          </td>
-                          <td>
-                            <span>{row.carrosserie}</span>
-                          </td>
-                          <td>
-                            <span>{row.couleur}</span>
-                          </td>
-                          <td>
-                            <div className="flex items-center gap-3">
-                              <Button className="cursor-pointer shadow-none bg-transparent  text-[#5f61e6]  hover:bg-transparent hover:text-[#494be3] text-md h-auto p-0">
-                                Déclarer
-                              </Button>
-                              <DropdownMenu>
-                                <DropdownMenuTrigger className="cursor-pointer bg-bgGray text-colorTitle p-0 w-[28px] flex items-center justify-center rounded-lg h-[28px] hover:bg-[#07192b] hover:text-white">
-                                  <EllipsisVertical
-                                    size={18}
-                                  ></EllipsisVertical>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent className="border-0 shadow-[var(--boxShadowCard)!important]">
-                                  <DropdownMenuLabel className="text-colorMuted text-xs opacity-70">
-                                    Actions
-                                  </DropdownMenuLabel>
-                                  <DropdownMenuSeparator />
-                                  <DropdownMenuItem className="text-sm text-colorMuted">
-                                    Afficher
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem className="text-sm text-colorMuted">
-                                    Modifier
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem className="text-sm text-colorMuted">
-                                    Supprimer
-                                  </DropdownMenuItem>
-                                </DropdownMenuContent>
-                              </DropdownMenu>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
+                      {renderTableRows("imp")}
                     </tbody>
                   </table>
                 </div>
@@ -1612,7 +1075,7 @@ const TableVehicules = () => {
                         <th>
                           {renderCheckbox(
                             "dd",
-                            ddItems.map((i) => i.id),
+                            filteredItems.map((_, i) => String(i)),
                             true
                           )}
                         </th>
@@ -1629,67 +1092,7 @@ const TableVehicules = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {ddItems.map((row) => (
-                        <tr key={row.id}>
-                          <td>{renderCheckbox("dd", row.id)}</td>
-                          <td>
-                            <span>{row.matricule}</span>
-                          </td>
-                          <td>
-                            <span>{row.chassis}</span>
-                          </td>
-                          <td>
-                            <span>{row.annee}</span>
-                          </td>
-                          <td>
-                            <span>{row.poids}</span>
-                          </td>
-                          <td>
-                            <span>{row.moteur}</span>
-                          </td>
-                          <td>
-                            <span>{row.marque}</span>
-                          </td>
-                          <td>
-                            <span>{row.modele}</span>
-                          </td>
-                          <td>
-                            <span>{row.carrosserie}</span>
-                          </td>
-                          <td>
-                            <span>{row.couleur}</span>
-                          </td>
-                          <td>
-                            <div className="flex items-center gap-3">
-                              <Button className="cursor-pointer shadow-none bg-transparent  text-[#5f61e6]  hover:bg-transparent hover:text-[#494be3] text-md h-auto p-0">
-                                Déclarer
-                              </Button>
-                              <DropdownMenu>
-                                <DropdownMenuTrigger className="cursor-pointer bg-bgGray text-colorTitle p-0 w-[28px] flex items-center justify-center rounded-lg h-[28px] hover:bg-[#07192b] hover:text-white">
-                                  <EllipsisVertical
-                                    size={18}
-                                  ></EllipsisVertical>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent className="border-0 shadow-[var(--boxShadowCard)!important]">
-                                  <DropdownMenuLabel className="text-colorMuted text-xs opacity-70">
-                                    Actions
-                                  </DropdownMenuLabel>
-                                  <DropdownMenuSeparator />
-                                  <DropdownMenuItem className="text-sm text-colorMuted">
-                                    Afficher
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem className="text-sm text-colorMuted">
-                                    Modifier
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem className="text-sm text-colorMuted">
-                                    Supprimer
-                                  </DropdownMenuItem>
-                                </DropdownMenuContent>
-                              </DropdownMenu>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
+                      {renderTableRows("dd")}
                     </tbody>
                   </table>
                 </div>
@@ -1782,7 +1185,7 @@ const TableVehicules = () => {
                         <th>
                           {renderCheckbox(
                             "dp",
-                            dpItems.map((i) => i.id),
+                            filteredItems.map((_, i) => String(i)),
                             true
                           )}
                         </th>
@@ -1799,67 +1202,7 @@ const TableVehicules = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {dpItems.map((row) => (
-                        <tr key={row.id}>
-                          <td>{renderCheckbox("dp", row.id)}</td>
-                          <td>
-                            <span>{row.matricule}</span>
-                          </td>
-                          <td>
-                            <span>{row.chassis}</span>
-                          </td>
-                          <td>
-                            <span>{row.annee}</span>
-                          </td>
-                          <td>
-                            <span>{row.poids}</span>
-                          </td>
-                          <td>
-                            <span>{row.moteur}</span>
-                          </td>
-                          <td>
-                            <span>{row.marque}</span>
-                          </td>
-                          <td>
-                            <span>{row.modele}</span>
-                          </td>
-                          <td>
-                            <span>{row.carrosserie}</span>
-                          </td>
-                          <td>
-                            <span>{row.couleur}</span>
-                          </td>
-                          <td>
-                            <div className="flex items-center gap-3">
-                              <Button className="cursor-pointer shadow-none bg-transparent  text-[#5f61e6]  hover:bg-transparent hover:text-[#494be3] text-md h-auto p-0">
-                                Déclarer
-                              </Button>
-                              <DropdownMenu>
-                                <DropdownMenuTrigger className="cursor-pointer bg-bgGray text-colorTitle p-0 w-[28px] flex items-center justify-center rounded-lg h-[28px] hover:bg-[#07192b] hover:text-white">
-                                  <EllipsisVertical
-                                    size={18}
-                                  ></EllipsisVertical>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent className="border-0 shadow-[var(--boxShadowCard)!important]">
-                                  <DropdownMenuLabel className="text-colorMuted text-xs opacity-70">
-                                    Actions
-                                  </DropdownMenuLabel>
-                                  <DropdownMenuSeparator />
-                                  <DropdownMenuItem className="text-sm text-colorMuted">
-                                    Afficher
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem className="text-sm text-colorMuted">
-                                    Modifier
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem className="text-sm text-colorMuted">
-                                    Supprimer
-                                  </DropdownMenuItem>
-                                </DropdownMenuContent>
-                              </DropdownMenu>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
+                      {renderTableRows("dp")}
                     </tbody>
                   </table>
                 </div>
@@ -1952,7 +1295,7 @@ const TableVehicules = () => {
                         <th>
                           {renderCheckbox(
                             "fpc",
-                            fpcItems.map((i) => i.id),
+                            filteredItems.map((_, i) => String(i)),
                             true
                           )}
                         </th>
@@ -1969,67 +1312,7 @@ const TableVehicules = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {fpcItems.map((row) => (
-                        <tr key={row.id}>
-                          <td>{renderCheckbox("fpc", row.id)}</td>
-                          <td>
-                            <span>{row.matricule}</span>
-                          </td>
-                          <td>
-                            <span>{row.chassis}</span>
-                          </td>
-                          <td>
-                            <span>{row.annee}</span>
-                          </td>
-                          <td>
-                            <span>{row.poids}</span>
-                          </td>
-                          <td>
-                            <span>{row.moteur}</span>
-                          </td>
-                          <td>
-                            <span>{row.marque}</span>
-                          </td>
-                          <td>
-                            <span>{row.modele}</span>
-                          </td>
-                          <td>
-                            <span>{row.carrosserie}</span>
-                          </td>
-                          <td>
-                            <span>{row.couleur}</span>
-                          </td>
-                          <td>
-                            <div className="flex items-center gap-3">
-                              <Button className="cursor-pointer shadow-none bg-transparent  text-[#5f61e6]  hover:bg-transparent hover:text-[#494be3] text-md h-auto p-0">
-                                Déclarer
-                              </Button>
-                              <DropdownMenu>
-                                <DropdownMenuTrigger className="cursor-pointer bg-bgGray text-colorTitle p-0 w-[28px] flex items-center justify-center rounded-lg h-[28px] hover:bg-[#07192b] hover:text-white">
-                                  <EllipsisVertical
-                                    size={18}
-                                  ></EllipsisVertical>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent className="border-0 shadow-[var(--boxShadowCard)!important]">
-                                  <DropdownMenuLabel className="text-colorMuted text-xs opacity-70">
-                                    Actions
-                                  </DropdownMenuLabel>
-                                  <DropdownMenuSeparator />
-                                  <DropdownMenuItem className="text-sm text-colorMuted">
-                                    Afficher
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem className="text-sm text-colorMuted">
-                                    Modifier
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem className="text-sm text-colorMuted">
-                                    Supprimer
-                                  </DropdownMenuItem>
-                                </DropdownMenuContent>
-                              </DropdownMenu>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
+                      {renderTableRows("fpc")}
                     </tbody>
                   </table>
                 </div>
@@ -2122,7 +1405,7 @@ const TableVehicules = () => {
                         <th>
                           {renderCheckbox(
                             "amr",
-                            amrItems.map((i) => i.id),
+                            filteredItems.map((_, i) => String(i)),
                             true
                           )}
                         </th>
@@ -2139,67 +1422,7 @@ const TableVehicules = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {amrItems.map((row) => (
-                        <tr key={row.id}>
-                          <td>{renderCheckbox("amr", row.id)}</td>
-                          <td>
-                            <span>{row.matricule}</span>
-                          </td>
-                          <td>
-                            <span>{row.chassis}</span>
-                          </td>
-                          <td>
-                            <span>{row.annee}</span>
-                          </td>
-                          <td>
-                            <span>{row.poids}</span>
-                          </td>
-                          <td>
-                            <span>{row.moteur}</span>
-                          </td>
-                          <td>
-                            <span>{row.marque}</span>
-                          </td>
-                          <td>
-                            <span>{row.modele}</span>
-                          </td>
-                          <td>
-                            <span>{row.carrosserie}</span>
-                          </td>
-                          <td>
-                            <span>{row.couleur}</span>
-                          </td>
-                          <td>
-                            <div className="flex items-center gap-3">
-                              <Button className="cursor-pointer shadow-none bg-transparent  text-[#5f61e6]  hover:bg-transparent hover:text-[#494be3] text-md h-auto p-0">
-                                Déclarer
-                              </Button>
-                              <DropdownMenu>
-                                <DropdownMenuTrigger className="cursor-pointer bg-bgGray text-colorTitle p-0 w-[28px] flex items-center justify-center rounded-lg h-[28px] hover:bg-[#07192b] hover:text-white">
-                                  <EllipsisVertical
-                                    size={18}
-                                  ></EllipsisVertical>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent className="border-0 shadow-[var(--boxShadowCard)!important]">
-                                  <DropdownMenuLabel className="text-colorMuted text-xs opacity-70">
-                                    Actions
-                                  </DropdownMenuLabel>
-                                  <DropdownMenuSeparator />
-                                  <DropdownMenuItem className="text-sm text-colorMuted">
-                                    Afficher
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem className="text-sm text-colorMuted">
-                                    Modifier
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem className="text-sm text-colorMuted">
-                                    Supprimer
-                                  </DropdownMenuItem>
-                                </DropdownMenuContent>
-                              </DropdownMenu>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
+                      {renderTableRows("amr")}
                     </tbody>
                   </table>
                 </div>
@@ -2292,7 +1515,7 @@ const TableVehicules = () => {
                         <th>
                           {renderCheckbox(
                             "pour",
-                            pourItems.map((i) => i.id),
+                            filteredItems.map((_, i) => String(i)),
                             true
                           )}
                         </th>
@@ -2309,67 +1532,7 @@ const TableVehicules = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {pourItems.map((row) => (
-                        <tr key={row.id}>
-                          <td>{renderCheckbox("pour", row.id)}</td>
-                          <td>
-                            <span>{row.matricule}</span>
-                          </td>
-                          <td>
-                            <span>{row.chassis}</span>
-                          </td>
-                          <td>
-                            <span>{row.annee}</span>
-                          </td>
-                          <td>
-                            <span>{row.poids}</span>
-                          </td>
-                          <td>
-                            <span>{row.moteur}</span>
-                          </td>
-                          <td>
-                            <span>{row.marque}</span>
-                          </td>
-                          <td>
-                            <span>{row.modele}</span>
-                          </td>
-                          <td>
-                            <span>{row.carrosserie}</span>
-                          </td>
-                          <td>
-                            <span>{row.couleur}</span>
-                          </td>
-                          <td>
-                            <div className="flex items-center gap-3">
-                              <Button className="cursor-pointer shadow-none bg-transparent  text-[#5f61e6]  hover:bg-transparent hover:text-[#494be3] text-md h-auto p-0">
-                                Déclarer
-                              </Button>
-                              <DropdownMenu>
-                                <DropdownMenuTrigger className="cursor-pointer bg-bgGray text-colorTitle p-0 w-[28px] flex items-center justify-center rounded-lg h-[28px] hover:bg-[#07192b] hover:text-white">
-                                  <EllipsisVertical
-                                    size={18}
-                                  ></EllipsisVertical>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent className="border-0 shadow-[var(--boxShadowCard)!important]">
-                                  <DropdownMenuLabel className="text-colorMuted text-xs opacity-70">
-                                    Actions
-                                  </DropdownMenuLabel>
-                                  <DropdownMenuSeparator />
-                                  <DropdownMenuItem className="text-sm text-colorMuted">
-                                    Afficher
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem className="text-sm text-colorMuted">
-                                    Modifier
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem className="text-sm text-colorMuted">
-                                    Supprimer
-                                  </DropdownMenuItem>
-                                </DropdownMenuContent>
-                              </DropdownMenu>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
+                      {renderTableRows("pour")}
                     </tbody>
                   </table>
                 </div>
@@ -2462,7 +1625,7 @@ const TableVehicules = () => {
                         <th>
                           {renderCheckbox(
                             "cc",
-                            ccItems.map((i) => i.id),
+                            filteredItems.map((_, i) => String(i)),
                             true
                           )}
                         </th>
@@ -2479,67 +1642,7 @@ const TableVehicules = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {ccItems.map((row) => (
-                        <tr key={row.id}>
-                          <td>{renderCheckbox("cc", row.id)}</td>
-                          <td>
-                            <span>{row.matricule}</span>
-                          </td>
-                          <td>
-                            <span>{row.chassis}</span>
-                          </td>
-                          <td>
-                            <span>{row.annee}</span>
-                          </td>
-                          <td>
-                            <span>{row.poids}</span>
-                          </td>
-                          <td>
-                            <span>{row.moteur}</span>
-                          </td>
-                          <td>
-                            <span>{row.marque}</span>
-                          </td>
-                          <td>
-                            <span>{row.modele}</span>
-                          </td>
-                          <td>
-                            <span>{row.carrosserie}</span>
-                          </td>
-                          <td>
-                            <span>{row.couleur}</span>
-                          </td>
-                          <td>
-                            <div className="flex items-center gap-3">
-                              <Button className="cursor-pointer shadow-none bg-transparent  text-[#5f61e6]  hover:bg-transparent hover:text-[#494be3] text-md h-auto p-0">
-                                Déclarer
-                              </Button>
-                              <DropdownMenu>
-                                <DropdownMenuTrigger className="cursor-pointer bg-bgGray text-colorTitle p-0 w-[28px] flex items-center justify-center rounded-lg h-[28px] hover:bg-[#07192b] hover:text-white">
-                                  <EllipsisVertical
-                                    size={18}
-                                  ></EllipsisVertical>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent className="border-0 shadow-[var(--boxShadowCard)!important]">
-                                  <DropdownMenuLabel className="text-colorMuted text-xs opacity-70">
-                                    Actions
-                                  </DropdownMenuLabel>
-                                  <DropdownMenuSeparator />
-                                  <DropdownMenuItem className="text-sm text-colorMuted">
-                                    Afficher
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem className="text-sm text-colorMuted">
-                                    Modifier
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem className="text-sm text-colorMuted">
-                                    Supprimer
-                                  </DropdownMenuItem>
-                                </DropdownMenuContent>
-                              </DropdownMenu>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
+                      {renderTableRows("cc")}
                     </tbody>
                   </table>
                 </div>
@@ -2632,7 +1735,7 @@ const TableVehicules = () => {
                         <th>
                           {renderCheckbox(
                             "adt",
-                            adtItems.map((i) => i.id),
+                            filteredItems.map((_, i) => String(i)),
                             true
                           )}
                         </th>
@@ -2649,67 +1752,7 @@ const TableVehicules = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {adtItems.map((row) => (
-                        <tr key={row.id}>
-                          <td>{renderCheckbox("adt", row.id)}</td>
-                          <td>
-                            <span>{row.matricule}</span>
-                          </td>
-                          <td>
-                            <span>{row.chassis}</span>
-                          </td>
-                          <td>
-                            <span>{row.annee}</span>
-                          </td>
-                          <td>
-                            <span>{row.poids}</span>
-                          </td>
-                          <td>
-                            <span>{row.moteur}</span>
-                          </td>
-                          <td>
-                            <span>{row.marque}</span>
-                          </td>
-                          <td>
-                            <span>{row.modele}</span>
-                          </td>
-                          <td>
-                            <span>{row.carrosserie}</span>
-                          </td>
-                          <td>
-                            <span>{row.couleur}</span>
-                          </td>
-                          <td>
-                            <div className="flex items-center gap-3">
-                              <Button className="cursor-pointer shadow-none bg-transparent  text-[#5f61e6]  hover:bg-transparent hover:text-[#494be3] text-md h-auto p-0">
-                                Déclarer
-                              </Button>
-                              <DropdownMenu>
-                                <DropdownMenuTrigger className="cursor-pointer bg-bgGray text-colorTitle p-0 w-[28px] flex items-center justify-center rounded-lg h-[28px] hover:bg-[#07192b] hover:text-white">
-                                  <EllipsisVertical
-                                    size={18}
-                                  ></EllipsisVertical>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent className="border-0 shadow-[var(--boxShadowCard)!important]">
-                                  <DropdownMenuLabel className="text-colorMuted text-xs opacity-70">
-                                    Actions
-                                  </DropdownMenuLabel>
-                                  <DropdownMenuSeparator />
-                                  <DropdownMenuItem className="text-sm text-colorMuted">
-                                    Afficher
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem className="text-sm text-colorMuted">
-                                    Modifier
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem className="text-sm text-colorMuted">
-                                    Supprimer
-                                  </DropdownMenuItem>
-                                </DropdownMenuContent>
-                              </DropdownMenu>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
+                      {renderTableRows("adt")}
                     </tbody>
                   </table>
                 </div>
@@ -2802,7 +1845,7 @@ const TableVehicules = () => {
                         <th>
                           {renderCheckbox(
                             "con",
-                            conItems.map((i) => i.id),
+                            filteredItems.map((_, i) => String(i)),
                             true
                           )}
                         </th>
@@ -2819,67 +1862,7 @@ const TableVehicules = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {conItems.map((row) => (
-                        <tr key={row.id}>
-                          <td>{renderCheckbox("con", row.id)}</td>
-                          <td>
-                            <span>{row.matricule}</span>
-                          </td>
-                          <td>
-                            <span>{row.chassis}</span>
-                          </td>
-                          <td>
-                            <span>{row.annee}</span>
-                          </td>
-                          <td>
-                            <span>{row.poids}</span>
-                          </td>
-                          <td>
-                            <span>{row.moteur}</span>
-                          </td>
-                          <td>
-                            <span>{row.marque}</span>
-                          </td>
-                          <td>
-                            <span>{row.modele}</span>
-                          </td>
-                          <td>
-                            <span>{row.carrosserie}</span>
-                          </td>
-                          <td>
-                            <span>{row.couleur}</span>
-                          </td>
-                          <td>
-                            <div className="flex items-center gap-3">
-                              <Button className="cursor-pointer shadow-none bg-transparent  text-[#5f61e6]  hover:bg-transparent hover:text-[#494be3] text-md h-auto p-0">
-                                Déclarer
-                              </Button>
-                              <DropdownMenu>
-                                <DropdownMenuTrigger className="cursor-pointer bg-bgGray text-colorTitle p-0 w-[28px] flex items-center justify-center rounded-lg h-[28px] hover:bg-[#07192b] hover:text-white">
-                                  <EllipsisVertical
-                                    size={18}
-                                  ></EllipsisVertical>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent className="border-0 shadow-[var(--boxShadowCard)!important]">
-                                  <DropdownMenuLabel className="text-colorMuted text-xs opacity-70">
-                                    Actions
-                                  </DropdownMenuLabel>
-                                  <DropdownMenuSeparator />
-                                  <DropdownMenuItem className="text-sm text-colorMuted">
-                                    Afficher
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem className="text-sm text-colorMuted">
-                                    Modifier
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem className="text-sm text-colorMuted">
-                                    Supprimer
-                                  </DropdownMenuItem>
-                                </DropdownMenuContent>
-                              </DropdownMenu>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
+                      {renderTableRows("con")}
                     </tbody>
                   </table>
                 </div>
@@ -2972,7 +1955,7 @@ const TableVehicules = () => {
                         <th>
                           {renderCheckbox(
                             "recl",
-                            reclItems.map((i) => i.id),
+                            filteredItems.map((_, i) => String(i)),
                             true
                           )}
                         </th>
@@ -2989,67 +1972,7 @@ const TableVehicules = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {reclItems.map((row) => (
-                        <tr key={row.id}>
-                          <td>{renderCheckbox("recl", row.id)}</td>
-                          <td>
-                            <span>{row.matricule}</span>
-                          </td>
-                          <td>
-                            <span>{row.chassis}</span>
-                          </td>
-                          <td>
-                            <span>{row.annee}</span>
-                          </td>
-                          <td>
-                            <span>{row.poids}</span>
-                          </td>
-                          <td>
-                            <span>{row.moteur}</span>
-                          </td>
-                          <td>
-                            <span>{row.marque}</span>
-                          </td>
-                          <td>
-                            <span>{row.modele}</span>
-                          </td>
-                          <td>
-                            <span>{row.carrosserie}</span>
-                          </td>
-                          <td>
-                            <span>{row.couleur}</span>
-                          </td>
-                          <td>
-                            <div className="flex items-center gap-3">
-                              <Button className="cursor-pointer shadow-none bg-transparent  text-[#5f61e6]  hover:bg-transparent hover:text-[#494be3] text-md h-auto p-0">
-                                Déclarer
-                              </Button>
-                              <DropdownMenu>
-                                <DropdownMenuTrigger className="cursor-pointer bg-bgGray text-colorTitle p-0 w-[28px] flex items-center justify-center rounded-lg h-[28px] hover:bg-[#07192b] hover:text-white">
-                                  <EllipsisVertical
-                                    size={18}
-                                  ></EllipsisVertical>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent className="border-0 shadow-[var(--boxShadowCard)!important]">
-                                  <DropdownMenuLabel className="text-colorMuted text-xs opacity-70">
-                                    Actions
-                                  </DropdownMenuLabel>
-                                  <DropdownMenuSeparator />
-                                  <DropdownMenuItem className="text-sm text-colorMuted">
-                                    Afficher
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem className="text-sm text-colorMuted">
-                                    Modifier
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem className="text-sm text-colorMuted">
-                                    Supprimer
-                                  </DropdownMenuItem>
-                                </DropdownMenuContent>
-                              </DropdownMenu>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
+                      {renderTableRows("recl")}
                     </tbody>
                   </table>
                 </div>

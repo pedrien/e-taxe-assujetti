@@ -25,6 +25,8 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LoadingIndicator } from "@/components/ui/loading-indicator";
+import { RefreshButton } from "@/components/ui/refresh-button";
+import { TableSkeleton } from "@/components/ui/table-skeleton";
 
 // Types
 interface ImmovableItem {
@@ -160,35 +162,36 @@ const TableImmobiliers = () => {
 
   // Récupération des données réelles
   const { profileId } = useNextAuth();
-  const { immovables, loading } = useTaxpayerImmovables(profileId);
+  const { immovables, loading, refetch, isInitialLoad } = useTaxpayerImmovables(profileId);
 
-  // Données pour l'onglet Identifiés (données réelles)
-  const identItems: ImmovableItem[] = useMemo(() => 
-    immovables.map((immovable, index) => ({
-      id: immovable.taxId ?? String(index),
-      nia: immovable.taxId ?? "",
-      denomination: immovable.headLine ?? "",
-      nature: immovable.nature ?? "",
-      usage: immovable.usage ?? "",
-      rang: immovable.range ?? "",
-      sb: immovable.area,
+  // Fonction utilitaire pour mapper les données d'immobilier
+  const mapImmovableData = (immovable: unknown, index: number): ImmovableItem => {
+    const imm = immovable as Record<string, unknown>;
+    return {
+      id: (imm.taxId as string) ?? String(index),
+      nia: (imm.taxId as string) ?? "",
+      denomination: (imm.headLine as string) ?? "",
+      nature: (imm.nature as string) ?? "",
+      usage: (imm.usage as string) ?? "",
+      rang: (imm.range as string) ?? "",
+      sb: (imm.area as string) ?? "",
       snb: "-", // D.non-batie non calculée pour l'instant
       dateDeclaration: "-", // Date de déclaration non disponible pour l'instant
       datePaiement: "-", // Date de paiement non disponible pour l'instant
       montant: "-", // Montant non disponible pour l'instant
-    })), [immovables]
-  );
+    };
+  };
 
-  // Options de filtres (uniques, triées)
+  // Options de filtres (calculées une seule fois)
   const filterOptions = useMemo(() => {
     const natures = new Set<string>();
     const usages = new Set<string>();
     const rangs = new Set<string>();
     
-    identItems.forEach((item) => {
-      if (item.nature) natures.add(item.nature);
-      if (item.usage) usages.add(item.usage);
-      if (item.rang) rangs.add(item.rang);
+    immovables.forEach((immovable) => {
+      if (immovable.nature) natures.add(immovable.nature);
+      if (immovable.usage) usages.add(immovable.usage);
+      if (immovable.range) rangs.add(immovable.range);
     });
 
     return {
@@ -196,26 +199,94 @@ const TableImmobiliers = () => {
       usages: Array.from(usages).sort((a, b) => a.localeCompare(b)),
       rangs: Array.from(rangs).sort((a, b) => a.localeCompare(b)),
     };
-  }, [identItems]);
+  }, [immovables]);
 
-  // Liste filtrée (Identifiés)
-  const identItemsFiltered = useMemo(() => {
+  // Liste filtrée (optimisée)
+  const filteredItems = useMemo(() => {
+    if (!immovables.length) return [];
+    
     const { search, nature, usage, rang } = filters;
     const searchQuery = search.trim().toLowerCase();
+    const isNatureFiltered = nature !== undefined;
+    const isUsageFiltered = usage !== undefined;
+    const isRangFiltered = rang !== undefined;
+    const hasSearchTerm = searchQuery.length > 0;
 
-    return identItems.filter((item) => {
+    return immovables.filter((immovable) => {
       // Filtres par sélection
-      if (nature && item.nature !== nature) return false;
-      if (usage && item.usage !== usage) return false;
-      if (rang && item.rang !== rang) return false;
+      if (isNatureFiltered && immovable.nature !== nature) return false;
+      if (isUsageFiltered && immovable.usage !== usage) return false;
+      if (isRangFiltered && immovable.range !== rang) return false;
 
       // Recherche textuelle
-      if (!searchQuery) return true;
+      if (hasSearchTerm) {
+        const searchText = `${immovable.taxId || ''} ${immovable.headLine || ''} ${immovable.nature || ''} ${immovable.usage || ''} ${immovable.range || ''}`.toLowerCase();
+        if (!searchText.includes(searchQuery)) return false;
+      }
       
-      const searchText = `${item.nia} ${item.denomination} ${item.nature} ${item.usage} ${item.rang}`.toLowerCase();
-      return searchText.includes(searchQuery);
+      return true;
     });
-  }, [identItems, filters]);
+  }, [immovables, filters]);
+
+  // Fonction utilitaire pour rendre les lignes de tableau
+  const renderTableRows = (tabKey: string) => {
+    return filteredItems.map((immovable, index) => {
+      const row = mapImmovableData(immovable, index);
+      return (
+        <tr key={row.id}>
+          <td>{renderCheckbox(tabKey, row.id)}</td>
+          <td>
+            <span>{row.nia}</span>
+          </td>
+          <td>
+            <span>{row.denomination}</span>
+          </td>
+          <td>
+            <span>{row.nature}</span>
+          </td>
+          <td>
+            <span>{row.usage}</span>
+          </td>
+          <td>
+            <span>{row.rang}</span>
+          </td>
+          <td>
+            <span>{row.sb}</span>
+          </td>
+          <td>
+            <span>{row.snb}</span>
+          </td>
+          <td>
+            <div className="flex items-center gap-3">
+              <Button className="cursor-pointer shadow-none bg-transparent  text-[#5f61e6]  hover:bg-transparent hover:text-[#494be3] text-md h-auto p-0">
+                Déclarer
+              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger className="cursor-pointer bg-bgGray text-colorTitle p-0 w-[28px] flex items-center justify-center rounded-lg h-[28px] hover:bg-[#07192b] hover:text-white">
+                  <EllipsisVertical size={18}></EllipsisVertical>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="border-0 shadow-[var(--boxShadowCard)!important]">
+                  <DropdownMenuLabel className="text-colorMuted text-xs opacity-70">
+                    Actions
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem className="text-sm text-colorMuted">
+                    Afficher
+                  </DropdownMenuItem>
+                  <DropdownMenuItem className="text-sm text-colorMuted">
+                    Modifier
+                  </DropdownMenuItem>
+                  <DropdownMenuItem className="text-sm text-colorMuted">
+                    Supprimer
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          </td>
+        </tr>
+      );
+    });
+  };
 
   // Affichage d'un loader pendant le chargement initial
   if (loading) {
@@ -225,6 +296,11 @@ const TableImmobiliers = () => {
   // Utiliser uniquement les vraies données de l'API
   const declItems: ImmovableItem[] = [];
   const payItems: ImmovableItem[] = [];
+
+  // Afficher le skeleton pendant le chargement initial
+  if (isInitialLoad) {
+    return <TableSkeleton rows={5} columns={6} showSearch={true} showFilters={true} />;
+  }
 
   return (
     <div className="grid grid-cols-1">
@@ -243,7 +319,7 @@ const TableImmobiliers = () => {
                 >
                   <div className="flex items-center justify-between w-full">
                     Identifiés
-                    <span className="text-xs">{identItemsFiltered.length}</span>
+                    <span className="text-xs">{filteredItems.length}</span>
                   </div>
                 </TabsTrigger>
                 <TabsTrigger
@@ -397,6 +473,18 @@ const TableImmobiliers = () => {
                   </div>
                   <div className="col-span-12 lg:col-span-7">
                     <div className="flex lg:justify-end gap-2">
+                      <RefreshButton 
+                        onRefresh={async () => {
+                          try {
+                            await refetch();
+                          } catch (error) {
+                            console.error("Erreur lors du rafraîchissement:", error);
+                          }
+                        }}
+                        size="sm"
+                        variant="outline"
+                        className="border-borderInput hover:bg-gray-50"
+                      />
                       {renderAppurerButton("ident")}
                       <div className="block-selects flex border border-borderInput rounded-lg">
                         <Select 
@@ -473,7 +561,7 @@ const TableImmobiliers = () => {
                         <th>
                           {renderCheckbox(
                             "ident",
-                            identItemsFiltered.map((i) => i.id),
+                            filteredItems.map((_, i) => String(i)),
                             true
                           )}
                         </th>
@@ -488,68 +576,14 @@ const TableImmobiliers = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {identItemsFiltered.length === 0 ? (
+                      {filteredItems.length === 0 ? (
                         <tr>
                           <td colSpan={9} className="text-center text-colorMuted py-6">
                             Aucun immobilier trouvé
                           </td>
                         </tr>
                       ) : (
-                        identItemsFiltered.map((row) => (
-                        <tr key={row.id}>
-                          <td>{renderCheckbox("ident", row.id)}</td>
-                          <td>
-                            <span>{row.nia}</span>
-                          </td>
-                          <td>
-                            <span>{row.denomination}</span>
-                          </td>
-                          <td>
-                            <span>{row.nature}</span>
-                          </td>
-                          <td>
-                            <span>{row.usage}</span>
-                          </td>
-                          <td>
-                            <span>{row.rang}</span>
-                          </td>
-                          <td>
-                            <span>{row.sb}</span>
-                          </td>
-                          <td>
-                            <span>{row.snb}</span>
-                          </td>
-                          <td>
-                            <div className="flex items-center gap-3">
-                              <Button className="cursor-pointer shadow-none bg-transparent  text-[#5f61e6]  hover:bg-transparent hover:text-[#494be3] text-md h-auto p-0">
-                                Déclarer
-                              </Button>
-                              <DropdownMenu>
-                                <DropdownMenuTrigger className="cursor-pointer bg-bgGray text-colorTitle p-0 w-[28px] flex items-center justify-center rounded-lg h-[28px] hover:bg-[#07192b] hover:text-white">
-                                  <EllipsisVertical
-                                    size={18}
-                                  ></EllipsisVertical>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent>
-                                  <DropdownMenuLabel className="text-colorMuted text-xs">
-                                    Actions
-                                  </DropdownMenuLabel>
-                                  <DropdownMenuSeparator />
-                                  <DropdownMenuItem className="text-sm text-colorTitle">
-                                    Afficher
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem className="text-sm text-colorTitle">
-                                    Modifier
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem className="text-sm text-colorTitle">
-                                    Supprimer
-                                  </DropdownMenuItem>
-                                </DropdownMenuContent>
-                              </DropdownMenu>
-                            </div>
-                          </td>
-                        </tr>
-                        ))
+                        renderTableRows("ident")
                       )}
                     </tbody>
                   </table>

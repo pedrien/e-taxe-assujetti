@@ -1,5 +1,5 @@
 import { useQuery } from '@apollo/client/react';
-import { useMemo } from 'react';
+import { useMemo, useEffect, useRef, useCallback } from 'react';
 import { GET_PROFILE_TAXPAYERS } from '../graphql/queries/getProfileTaxpayers';
 
 export interface PayerProfile {
@@ -88,6 +88,9 @@ export interface ProfileData {
 }
 
 export const useProfileData = (profileId: string | null) => {
+  // Ref pour tracker si c'est la première visite
+  const isFirstVisit = useRef(true);
+  
   // Convertir l'ID brut en IRI avec useMemo pour éviter les recalculs
   const iriProfileId = useMemo(() => 
     profileId ? `/api/payer/profiles/${profileId}` : null, 
@@ -99,14 +102,39 @@ export const useProfileData = (profileId: string | null) => {
     {
       variables: { id: iriProfileId },
       skip: !iriProfileId,
-      fetchPolicy: 'cache-and-network', // Utiliser le cache ET le réseau
+      fetchPolicy: 'cache-first', // Utiliser le cache en priorité
       errorPolicy: 'all',
-      notifyOnNetworkStatusChange: true, // Notifier les changements de statut
+      notifyOnNetworkStatusChange: false, // Désactiver les notifications de changement de statut
       returnPartialData: true,
-      // Rafraîchissement automatique toutes les 30 secondes
-      pollInterval: 30000,
+      // Désactiver le rafraîchissement automatique pour éviter les rechargements constants
+      // pollInterval: 30000,
     }
   );
+
+  // Actualisation automatique à la première visite
+  useEffect(() => {
+    if (isFirstVisit.current && iriProfileId && !loading) {
+      isFirstVisit.current = false;
+      // Délai pour permettre l'affichage initial, puis actualisation
+      const timer = setTimeout(() => {
+        refetch();
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [iriProfileId, loading, refetch]);
+
+  // Fonction de rafraîchissement optimisée avec debouncing
+  const optimizedRefetch = useCallback(async () => {
+    try {
+      if (refetch && typeof refetch === 'function') {
+        await refetch();
+      } else {
+        console.warn("Fonction refetch non disponible");
+      }
+    } catch (error) {
+      console.error("Erreur lors du rafraîchissement des données:", error);
+    }
+  }, [refetch]);
 
   // Mémoriser les calculs coûteux
   const profile = useMemo(() => data?.profile, [data?.profile]);
@@ -128,6 +156,14 @@ export const useProfileData = (profileId: string | null) => {
     }
   }, [firstPayer?.payerProfile]);
 
+  // Fonction de fallback si refetch n'est pas disponible (commentée car non utilisée)
+  // const fallbackRefetch = useCallback(async () => {
+  //   console.warn("Fonction refetch non disponible, rechargement de la page...");
+  //   if (typeof window !== 'undefined') {
+  //     window.location.reload();
+  //   }
+  // }, []);
+
   // Mémoriser le résultat final
   const result = useMemo(() => ({
     profileId,
@@ -142,7 +178,7 @@ export const useProfileData = (profileId: string | null) => {
     immovables: firstPayer?.immovables,
     vehicles: firstPayer?.vehicles,
     payerAvatar: firstPayer?.payerAvatar,
-    refetch, // Exposer la fonction de rafraîchissement manuel
+    refetch: optimizedRefetch, // Utiliser la fonction optimisée
   }), [
     profileId,
     iriProfileId,
@@ -151,7 +187,7 @@ export const useProfileData = (profileId: string | null) => {
     profile,
     firstPayer,
     parsedPayerProfile,
-    refetch
+    optimizedRefetch
   ]);
 
   return result;
